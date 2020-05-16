@@ -37,7 +37,7 @@ namespace TF47_Api
                 options.AddDefaultPolicy(
                     builder =>
                     {
-                        builder.WithOrigins("http://gadget.taskforce47.com:4200",
+                        builder.WithOrigins("https://gadget.taskforce47.com:4200",
                                 "http://gadget.taskforce47.com",
                                 "https://gadget.taskforce47.com")
                             .AllowAnyHeader()
