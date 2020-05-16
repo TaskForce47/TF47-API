@@ -19,9 +19,9 @@ namespace TF47_Api.Controllers
     public class WhitelistController : ControllerBase
     {
         private readonly Tf47DatabaseContext _database;
-        private readonly Logger<WhitelistController> _logger;
+        private readonly ILogger<WhitelistController> _logger;
 
-        public WhitelistController(Tf47DatabaseContext database, Logger<WhitelistController> logger)
+        public WhitelistController(Tf47DatabaseContext database, ILogger<WhitelistController> logger)
         {
             _database = database;
             _logger = logger;
