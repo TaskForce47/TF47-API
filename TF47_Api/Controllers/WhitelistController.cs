@@ -101,9 +101,8 @@ namespace TF47_Api.Controllers
         [Authorize(Roles = "Moderator, Admin")]
         [HttpGet("getWhitelistAllUser")]
         public async Task<IActionResult> GetWhitelistAllUsers()
-        {
-
-            var allWhitelists = _database.Tf47ServerWhitelists.Where(x => x.Id > 0);
+        { 
+            var allWhitelists = _database.Tf47ServerWhitelists.Where(x => x.Id > 0).AsNoTracking();
             var demoWhitelists = new List<Whitelist>();
             foreach (var whitelist in allWhitelists)
             {
@@ -116,7 +115,7 @@ namespace TF47_Api.Controllers
             }
 
             //get all users to init the list with UserWhitelistModel DTO Object
-            var allUsers = _database.Tf47ServerPlayers.Where(user => user.Id > 0); //get all users
+            var allUsers = _database.Tf47ServerPlayers.Where(user => user.Id > 0).AsNoTracking(); //get all users
             var result = new List<UserWhitelist>();
             foreach (var user in allUsers)
             {
