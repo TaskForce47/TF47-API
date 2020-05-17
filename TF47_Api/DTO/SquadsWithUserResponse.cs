@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.Json.Serialization;
-namespace TF47_Api.Database
-{
-    public partial class Tf47GadgetSquad
-    {
-        public Tf47GadgetSquad()
-        {
-            Tf47GadgetSquadUser = new HashSet<Tf47GadgetSquadUser>();
-        }
+using System.Linq;
+using System.Threading.Tasks;
 
+namespace TF47_Api.DTO
+{
+    public class SquadsWithUserResponse
+    {
         public uint Id { get; set; }
         public string SquadNick { get; set; }
         public string SquadName { get; set; }
@@ -18,7 +15,6 @@ namespace TF47_Api.Database
         public string SquadPicture { get; set; }
         public string SquadTitle { get; set; }
 
-        [JsonIgnore]
-        public virtual ICollection<Tf47GadgetSquadUser> Tf47GadgetSquadUser { get; set; }
+        public List<SquadUser> SquadUsers { get; set; }
     }
 }
