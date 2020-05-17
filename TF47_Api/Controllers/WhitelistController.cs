@@ -134,7 +134,7 @@ namespace TF47_Api.Controllers
             }
 
             var allCurrentWhitelistedUser =
-                _database.Tf47ServerPlayerWhitelisting.Where(whitelist => whitelist.WhitelistId > 0);
+                _database.Tf47ServerPlayerWhitelisting.Where(whitelist => whitelist.WhitelistId > 0).AsNoTracking();
 
             //iterate over all current existing whitelists and enable those for the corresponding whitelist object of the player
             foreach (var playerWhitelisted in allCurrentWhitelistedUser)
