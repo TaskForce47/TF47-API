@@ -57,101 +57,62 @@ namespace TF47_Api.Controllers
         {
             if (!ModelState.IsValid) return BadRequest("model state is not correct!");
 
-            var allWhitelists = _database.Tf47ServerWhitelists.Where(x => x.Id > 0);
-            var demoWhitelists = new List<Whitelist>();
-            var player = _database.Tf47ServerPlayers.FirstOrDefault(x => x.Id == playerIdRequest.PlayerId);
-            if (player == null) return BadRequest("cannot find player");
-
-            foreach (var whitelist in allWhitelists)
+            var response = new List<UserWhitelistResponse>();
+            var availableWhitelist = await _database.Tf47ServerWhitelists.Where(x => x.Id > 0).Select(x => new Whitelist
             {
-                demoWhitelists.Add(new Whitelist
-                {
-                    Enabled = false,
-                    WhitelistName = whitelist.Description,
-                    Id = whitelist.Id
-                });
-            }
+                Id = x.Id,
+                Enabled = false,
+                WhitelistName = x.Description
+            }).ToListAsync();
 
-            var result = new UserWhitelist
+            var player = await _database.Tf47ServerPlayers.Include(x => x.Tf47ServerPlayerWhitelisting).FirstOrDefaultAsync(x => x.Id == playerIdRequest.PlayerId);
+            if (player == null) return BadRequest("player id does not exist!");
+            var userWhitelistResponse = new UserWhitelistResponse
             {
-                PlayerId = player.Id,
+                Id = player.Id,
                 PlayerName = player.PlayerName,
                 PlayerUid = player.PlayerUid,
-                Whitelists = demoWhitelists
+                Whitelists = availableWhitelist.ConvertAll(x => x.Clone()).ToList()
             };
-
-            var playerWhitelist =
-                _database.Tf47ServerPlayerWhitelisting.Where(whitelist => whitelist.PlayerId == player.Id);
-
-            foreach (var activeWhitelist in playerWhitelist)
-            {
-                foreach (var whitelist in result.Whitelists)
-                {
-                    if (whitelist.Id == activeWhitelist.WhitelistId)
-                    {
-                        whitelist.Enabled = true;
-                        break;
-                    }
-                }
+            foreach (var enabledWhitelist in player.Tf47ServerPlayerWhitelisting)
+            { 
+                userWhitelistResponse.Whitelists.First(x => x.Id == enabledWhitelist.WhitelistId).Enabled = true;
             }
 
-            return Ok(await playerWhitelist.ToArrayAsync());
+            response.Add(userWhitelistResponse);
+            return Ok(response);
         }
 
         [Authorize(Roles = "Moderator, Admin")]
         [HttpGet("getWhitelistAllUser")]
         public async Task<IActionResult> GetWhitelistAllUsers()
-        { 
-            var allWhitelists = _database.Tf47ServerWhitelists.Where(x => x.Id > 0).AsNoTracking();
-            var demoWhitelists = new List<Whitelist>();
-            foreach (var whitelist in allWhitelists)
+        {
+            var response = new List<UserWhitelistResponse>();
+            var availableWhitelist = await _database.Tf47ServerWhitelists.Where(x => x.Id > 0).Select(x => new Whitelist
             {
-                demoWhitelists.Add(new Whitelist
-                {
-                    Enabled = false,
-                    WhitelistName = whitelist.Description,
-                    Id = whitelist.Id
-                });
-            }
+                Id = x.Id,
+                Enabled = false,
+                WhitelistName = x.Description
+            }).ToListAsync();
 
-            //get all users to init the list with UserWhitelistModel DTO Object
-            var allUsers = _database.Tf47ServerPlayers.Where(user => user.Id > 0).AsNoTracking(); //get all users
-            var result = new List<UserWhitelist>();
-            foreach (var user in allUsers)
+            var playerList = _database.Tf47ServerPlayers.Include(x => x.Tf47ServerPlayerWhitelisting).Where(x => x.Id > 0);
+            foreach (var player in playerList)
             {
-                result.Add(new UserWhitelist
+                var userWhitelistResponse = new UserWhitelistResponse
                 {
-                    PlayerId = user.Id,
-                    PlayerName = user.PlayerName,
-                    PlayerUid = user.PlayerUid,
-                    Whitelists = demoWhitelists.ConvertAll(whitelist => new Whitelist
-                    {
-                        Enabled = whitelist.Enabled,
-                        WhitelistName = whitelist.WhitelistName,
-                        Id = whitelist.Id
-                    })
-                });
-            }
-
-            var allCurrentWhitelistedUser =
-                _database.Tf47ServerPlayerWhitelisting.Where(whitelist => whitelist.WhitelistId > 0).AsNoTracking();
-
-            //iterate over all current existing whitelists and enable those for the corresponding whitelist object of the player
-            foreach (var playerWhitelisted in allCurrentWhitelistedUser)
-            {
-                var player =
-                    result.FirstOrDefault(currentPlayer => currentPlayer.PlayerId == playerWhitelisted.PlayerId);
-                if (player == null) continue;
-                foreach (var whitelist in player.Whitelists)
+                    Id = player.Id,
+                    PlayerName = player.PlayerName,
+                    PlayerUid = player.PlayerUid,
+                    Whitelists = availableWhitelist.ConvertAll(x => x.Clone()).ToList()
+                };
+                foreach (var enabledWhitelist in player.Tf47ServerPlayerWhitelisting)
                 {
-                    if (whitelist.Id == playerWhitelisted.Id)
-                    {
-                        whitelist.Enabled = true;
-                        break;
-                    }
+                    userWhitelistResponse.Whitelists.First(x => x.Id == enabledWhitelist.WhitelistId).Enabled = true;
                 }
+                response.Add(userWhitelistResponse);
             }
-            return Ok(result);
+
+            return Ok(response);
         }
 
         [Authorize(Roles = "Moderator, Admin")]
