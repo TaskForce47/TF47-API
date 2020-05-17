@@ -29,7 +29,7 @@ namespace TF47_Api.Services
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(CustomClaimTypes.ForumId, user.Uid.ToString()),
-                user.Banned ? new Claim(CustomClaimTypes.Banned, "true") : new Claim(CustomClaimTypes.Banned, "false")
+                //user.Banned ? new Claim(CustomClaimTypes.Banned, "true") : new Claim(CustomClaimTypes.Banned, "false")
             };
 
 
