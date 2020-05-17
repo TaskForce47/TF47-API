@@ -53,7 +53,7 @@ namespace TF47_Api.Controllers
 
         [Authorize(Roles = "Moderator, Admin")]
         [HttpGet("getWhitelistUser")]
-        public async Task<IActionResult> GetUserWhitelist([FromBody] PlayerIdRequest playerIdRequest)
+        public async Task<IActionResult> GetUserWhitelist([FromForm] PlayerIdRequest playerIdRequest)
         {
             if (!ModelState.IsValid) return BadRequest("model state is not correct!");
 
@@ -98,7 +98,7 @@ namespace TF47_Api.Controllers
             return Ok(await playerWhitelist.ToArrayAsync());
         }
 
-        [Authorize(Roles = "Moderator, Administrator")]
+        [Authorize(Roles = "Moderator, Admin")]
         [HttpGet("getWhitelistAllUser")]
         public async Task<IActionResult> GetWhitelistAllUsers()
         {
@@ -164,7 +164,7 @@ namespace TF47_Api.Controllers
             {
                 if (playerWhitelistRequest.Enabled)
                 {
-                    var whitelist = _database.Tf47ServerPlayerWhitelisting.FirstOrDefaultAsync(x =>
+                    var whitelist = await _database.Tf47ServerPlayerWhitelisting.FirstOrDefaultAsync(x =>
                         x.PlayerId == playerWhitelistRequest.PlayerId && x.WhitelistId == playerWhitelistRequest.WhitelistId);
                     if (whitelist == null)
                     {
@@ -174,6 +174,8 @@ namespace TF47_Api.Controllers
                             WhitelistId = playerWhitelistRequest.WhitelistId
                         });
                     }
+                    else
+                        _logger.LogInformation($"Already whitlelisted {playerWhitelistRequest.PlayerId}");
                 }
                 else
                 {
@@ -183,6 +185,8 @@ namespace TF47_Api.Controllers
                     { 
                         _database.Tf47ServerPlayerWhitelisting.Remove(whitelist);
                     }
+                    else
+                        _logger.LogInformation($"No whitelist found {playerWhitelistRequest.PlayerId}!");    
                 }
             }
 
