@@ -13,7 +13,7 @@ namespace TF47_Api.Services
     {
         private readonly ILogger<AuthenticationProviderService> _logger;
         private readonly IServiceProvider _serverProvider;
-        private Dictionary<string, AuthenticationUserData> _users;
+        private readonly Dictionary<string, AuthenticationUserData> _users;
 
         public AuthenticationProviderService(ILogger<AuthenticationProviderService> logger,IServiceProvider serverProvider)
         {
