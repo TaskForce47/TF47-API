@@ -82,8 +82,10 @@ namespace TF47_Api
             app.UseHttpsRedirection();
             app.UseCustomCookieAuthentication();
 
-            app.UseRouting();
+            app.UseStaticFiles();
+
             app.UseCors();
+            app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
