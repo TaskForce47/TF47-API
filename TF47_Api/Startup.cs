@@ -34,14 +34,16 @@ namespace TF47_Api
         {
             services.AddCors(options =>
             {
-                options.AddDefaultPolicy(
+                options.AddPolicy("Policy",
                     builder =>
                     {
+                        /*
                         builder.WithOrigins("https://gadget.taskforce47.com:4200",
                                 "http://gadget.taskforce47.com",
                                 "https://gadget.taskforce47.com",
                                 "http://api.taskforce47.com",
-                                "https://api.taskforce47.com")
+                                "https://api.taskforce47.com")*/
+                        builder.AllowAnyOrigin()
                             .AllowAnyHeader()
                             .AllowAnyMethod()
                             .AllowCredentials();
@@ -81,8 +83,8 @@ namespace TF47_Api
 
             app.UseSwagger();
             app.UseSwaggerUI(options => { options.SwaggerEndpoint("/swagger/v1/swagger.json", "TF47 API V1"); });
-            app.UseCorsMiddleware();
-            //app.UseCors();
+            //app.UseCorsMiddleware();
+            app.UseCors("Policy");
             //app.UseHttpsRedirection();
             app.UseCustomCookieAuthentication();
 
