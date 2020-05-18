@@ -81,8 +81,8 @@ namespace TF47_Api
 
             app.UseSwagger();
             app.UseSwaggerUI(options => { options.SwaggerEndpoint("/swagger/v1/swagger.json", "TF47 API V1"); });
-            //app.UseCorsMiddleware();
-            app.UseCors();
+            app.UseCorsMiddleware();
+            //app.UseCors();
             //app.UseHttpsRedirection();
             app.UseCustomCookieAuthentication();
 
