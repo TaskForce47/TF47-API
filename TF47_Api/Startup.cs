@@ -37,15 +37,13 @@ namespace TF47_Api
                 options.AddPolicy("Policy",
                     builder =>
                     {
-                        /*
                         builder.WithOrigins("https://gadget.taskforce47.com:4200",
                                 "http://gadget.taskforce47.com",
                                 "https://gadget.taskforce47.com",
                                 "http://api.taskforce47.com",
-                                "https://api.taskforce47.com")*/
-                        builder.AllowAnyOrigin()
+                                "https://api.taskforce47.com")
+                            .WithMethods("PUT", "DELETE", "GET")
                             .AllowAnyHeader()
-                            .AllowAnyMethod()
                             .AllowCredentials();
                     });
             });
