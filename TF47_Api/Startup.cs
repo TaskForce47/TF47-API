@@ -39,12 +39,10 @@ namespace TF47_Api
                     builder =>
                     {
                         builder.WithOrigins("https://gadget.taskforce47.com:4200",
-                                "http://gadget.taskforce47.com",
-                                "https://gadget.taskforce47.com",
-                                "http://api.taskforce47.com",
-                                "https://api.taskforce47.com")
+                                "http://*.taskforce47.com",
+                                "https://*.taskforce47.com")
+                            .SetPreflightMaxAge(TimeSpan.FromSeconds(2520))
                             .WithMethods("PUT", "DELETE", "GET")
-                            .WithHeaders(HeaderNames.ContentType, "x-custom-header")
                             .AllowAnyHeader()
                             .AllowCredentials();
                     });
@@ -80,7 +78,7 @@ namespace TF47_Api
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseCors("Policy");
+            
             app.UseSwagger();
             app.UseSwaggerUI(options => { options.SwaggerEndpoint("/swagger/v1/swagger.json", "TF47 API V1"); });
             //app.UseCorsMiddleware();
@@ -91,6 +89,8 @@ namespace TF47_Api
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseCors("Policy");
 
             app.UseAuthentication();
             app.UseAuthorization();
