@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using TF47_Api.Database;
 using TF47_Api.Middleware;
@@ -43,6 +44,7 @@ namespace TF47_Api
                                 "http://api.taskforce47.com",
                                 "https://api.taskforce47.com")
                             .WithMethods("PUT", "DELETE", "GET")
+                            .WithHeaders(HeaderNames.ContentType, "x-custom-header")
                             .AllowAnyHeader()
                             .AllowCredentials();
                     });
@@ -78,11 +80,11 @@ namespace TF47_Api
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseCors("Policy");
             app.UseSwagger();
             app.UseSwaggerUI(options => { options.SwaggerEndpoint("/swagger/v1/swagger.json", "TF47 API V1"); });
             //app.UseCorsMiddleware();
-            app.UseCors("Policy");
+            
             //app.UseHttpsRedirection();
             app.UseCustomCookieAuthentication();
 
