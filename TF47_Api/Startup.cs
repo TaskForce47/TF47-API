@@ -49,6 +49,8 @@ namespace TF47_Api
                             .AllowAnyMethod()
                             .AllowAnyHeader()
                             .AllowCredentials()
+                            .WithMethods("GET", "OPTIONS") /* assuming your endpoint only supports GET */
+                            .WithHeaders("Origin", "Authorization") /* headers apart of safe-list ones that you use */
                             .WithExposedHeaders("x-custom-header");
                     });
             });
