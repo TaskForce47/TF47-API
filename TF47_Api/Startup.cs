@@ -39,10 +39,17 @@ namespace TF47_Api
                 options.AddPolicy("Policy",
                     builder =>
                     {
-                        builder.WithOrigins("api.taskforce47.com", "https://api.taskforce47.com", "http://api.taskforce47.com")
+                        builder.WithOrigins(
+                                "api.taskforce47.com", 
+                                "https://api.taskforce47.com", 
+                                "https://api.taskforce47.com",
+                                "http://gadget.taskforce47.com",
+                                "https://gadget.taskforce47.com",
+                                "https://test.taskforce47.com")
                             .AllowAnyMethod()
                             .AllowAnyHeader()
-                            .AllowCredentials();
+                            .AllowCredentials()
+                            .WithExposedHeaders("x-custom-header");
                     });
             });
             services.AddControllers();
