@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -38,11 +39,8 @@ namespace TF47_Api
                 options.AddPolicy("Policy",
                     builder =>
                     {
-                        builder.WithOrigins("https://gadget.taskforce47.com:4200",
-                                "http://*.taskforce47.com",
-                                "https://*.taskforce47.com")
-                            .SetPreflightMaxAge(TimeSpan.FromSeconds(2520))
-                            .WithMethods("PUT", "DELETE", "GET")
+                        builder.WithOrigins("api.taskforce47.com", "https://api.taskforce47.com", "http://api.taskforce47.com")
+                            .AllowAnyMethod()
                             .AllowAnyHeader()
                             .AllowCredentials();
                     });
@@ -78,7 +76,10 @@ namespace TF47_Api
             {
                 app.UseDeveloperExceptionPage();
             }
-            
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
             app.UseSwagger();
             app.UseSwaggerUI(options => { options.SwaggerEndpoint("/swagger/v1/swagger.json", "TF47 API V1"); });
             //app.UseCorsMiddleware();
@@ -89,7 +90,7 @@ namespace TF47_Api
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            
             app.UseCors("Policy");
 
             app.UseAuthentication();
