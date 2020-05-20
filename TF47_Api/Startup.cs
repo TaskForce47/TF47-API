@@ -34,26 +34,24 @@ namespace TF47_Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            /*
             services.AddCors(options =>
             {
                 options.AddPolicy("Policy",
                     builder =>
                     {
                         builder.WithOrigins(
-                                "api.taskforce47.com", 
-                                "https://api.taskforce47.com", 
-                                "https://api.taskforce47.com",
-                                "http://gadget.taskforce47.com",
-                                "https://gadget.taskforce47.com",
-                                "https://test.taskforce47.com")
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .AllowCredentials()
-                            .WithMethods("GET", "OPTIONS") /* assuming your endpoint only supports GET */
-                            .WithHeaders("Origin", "Authorization") /* headers apart of safe-list ones that you use */
-                            .WithExposedHeaders("x-custom-header");
+                            "api.taskforce47.com",
+                            "https://api.taskforce47.com",
+                            "https://api.taskforce47.com",
+                            "http://gadget.taskforce47.com",
+                            "https://gadget.taskforce47.com",
+                            "https://test.taskforce47.com");
+                        builder.AllowAnyMethod();
+                        builder.AllowAnyHeader();
+                        builder.AllowCredentials();
                     });
-            });
+            });*/
             services.AddControllers();
             services.AddAuthentication(options =>
             {
@@ -100,7 +98,20 @@ namespace TF47_Api
 
             app.UseRouting();
             
-            app.UseCors("Policy");
+            app.UseCors(builder =>
+            {
+                builder.WithOrigins(
+                    "api.taskforce47.com",
+                    "gadget.taskforce47.com",
+                    "https://api.taskforce47.com",
+                    "https://api.taskforce47.com",
+                    "http://gadget.taskforce47.com",
+                    "https://gadget.taskforce47.com",
+                    "https://test.taskforce47.com");
+                builder.AllowAnyMethod();
+                builder.AllowAnyHeader();
+                builder.AllowCredentials();
+            });
 
             app.UseAuthentication();
             app.UseAuthorization();
