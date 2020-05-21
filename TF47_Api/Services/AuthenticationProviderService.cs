@@ -22,6 +22,19 @@ namespace TF47_Api.Services
             _users = new Dictionary<string, AuthenticationUserData>();
         }
 
+        public ClaimsPrincipal GetClaimsPrincipal(string cookie)
+        {
+            if (_users.ContainsKey(cookie))
+            {
+                var userData = _users[cookie];
+                if (userData.ExpirationDate > DateTime.Now)
+                {
+                    return userData.ClaimsPrincipal;
+                }
+            }
+            return null;
+        }
+
         public async Task<ClaimsPrincipal> AuthenticateUserAsync(string cookie)
         {
             if (_users.ContainsKey(cookie))

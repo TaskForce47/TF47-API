@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using TF47_Api.Database;
 using TF47_Api.DTO;
 using TF47_Api.Models;
+using TF47_Api.Services;
 
 namespace TF47_Api.Controllers
 {
@@ -21,11 +22,24 @@ namespace TF47_Api.Controllers
     {
         private readonly Tf47DatabaseContext _database;
         private readonly ILogger<UserController> _logger;
+        private readonly AuthenticationProviderService _authenticationProviderService;
 
-        public UserController(Tf47DatabaseContext database, ILogger<UserController> logger)
+        public UserController(Tf47DatabaseContext database, ILogger<UserController> logger, AuthenticationProviderService authenticationProviderService)
         {
             _database = database;
             _logger = logger;
+            _authenticationProviderService = authenticationProviderService;
+        }
+
+        [AllowAnonymous]
+        [HttpPost("authenticate")]
+        public async Task<IActionResult> Authenticate()
+        {
+            var cookie = HttpContext.Request.Cookies["express.sid"];
+            var user = await _authenticationProviderService.AuthenticateUserAsync(cookie);
+            if (user == null) return StatusCode(403, "could not authorized");
+
+            return Ok();
         }
 
         [HttpGet("getRoles")]

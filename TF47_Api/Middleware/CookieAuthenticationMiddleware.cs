@@ -22,30 +22,36 @@ namespace TF47_Api.Middleware
 
         public async Task Invoke(HttpContext httpContext)
         {
-            if (httpContext.Request.Cookies.ContainsKey("express.sid"))
+            if (httpContext.Request.Path.Value == "/api/user/authenticate") 
+                await _next(httpContext);
+            else
             {
-                var cookie = httpContext.Request.Cookies["express.sid"];
-                var user = await _authenticationProvider.AuthenticateUserAsync(cookie);
-                if (user == null)
+                if (httpContext.Request.Cookies.ContainsKey("express.sid"))
                 {
-                    _logger.LogInformation($"{httpContext.Connection.LocalIpAddress} no forum data found!");
+                    var cookie = httpContext.Request.Cookies["express.sid"];
+                    var user = _authenticationProvider.GetClaimsPrincipal(cookie);
+                    if (user == null)
+                    {
+                        _logger.LogInformation($"{httpContext.Connection.LocalIpAddress} not logged in!");
+                        httpContext.Response.Clear();
+                        httpContext.Response.StatusCode = 403;
+                        await httpContext.Response.WriteAsync("not logged in!");
+                        return;
+                    }
+
+                    httpContext.User = user;
+                }
+                else
+                {
+                    _logger.LogInformation($"{httpContext.Connection.LocalIpAddress} no foum cookie found!");
                     httpContext.Response.Clear();
                     httpContext.Response.StatusCode = 403;
-                    await httpContext.Response.WriteAsync("not authorized");
+                    await httpContext.Response.WriteAsync("no cookie found");
                     return;
                 }
 
-                httpContext.User = user;
+                await _next(httpContext);
             }
-            else
-            {
-                _logger.LogInformation($"{httpContext.Connection.LocalIpAddress} no cookie found!");
-                httpContext.Response.Clear();
-                httpContext.Response.StatusCode = 403;
-                await httpContext.Response.WriteAsync("no cookie found");
-                return;
-            }
-            await _next(httpContext);
         }
     }
 
