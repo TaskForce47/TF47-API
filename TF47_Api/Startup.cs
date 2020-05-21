@@ -93,6 +93,7 @@ namespace TF47_Api
             app.UseCustomCookieAuthentication();
 
             app.UseStaticFiles();
+            app.UseCorsMiddleware();
             app.UseCors("Policy");
 
             app.UseRouting();

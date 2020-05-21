@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -16,18 +17,25 @@ namespace TF47_Api.Middleware
 
         public async Task Invoke(HttpContext context)
         {
-            if (context.Request.Headers["Host"] == "api.taskforce47.com")
+            var origin = context.Request.Headers["origin"];
+            if (origin.Contains("api.taskforce47.com"))
             {
-                context.Response.Headers.Add("Access-Control-Allow-Origin", context.Request.Headers["Host"]);
+                context.Response.Headers.Add("Access-Control-Allow-Origin", "https://api.taskforce47.com");
             }
 
+            if (origin.Contains("gadget.taskforce47.com"))
+            {
+                context.Response.Headers.Add("Access-Control-Allow-Origin", "https://gadget.taskforce47.com");
+            }
+            context.Response.StatusCode = 200;
             context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
             context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Accept-Encoding, Content-Length, Content-MD5, Date, X-Api-Version, X-File-Name");
-            context.Response.Headers.Add("Access-Control-Allow-Methods", "POST,GET,PUT,PATCH,DELETE,OPTIONS");
+            context.Response.Headers.Add("Access-Control-Allow-Methods", "POST,GET,PUT,DELETE,OPTIONS");
             if (context.Request.Method == "OPTIONS")
             {
                 context.Response.StatusCode = (int)HttpStatusCode.OK;
                 await context.Response.WriteAsync(string.Empty);
+                return;
             }
 
             await _next(context);
