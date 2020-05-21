@@ -24,7 +24,7 @@ namespace TF47_Api.Middleware
             _logger.LogInformation(context.Request.Method);
             _logger.LogInformation(origin);
             
-            context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+            context.Response.Headers.Add("Access-Control-Allow-Origin", "https://gadget.taskforce47.com");
             
             context.Response.StatusCode = 200;
             context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
