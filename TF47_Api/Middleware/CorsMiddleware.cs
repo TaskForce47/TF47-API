@@ -23,15 +23,9 @@ namespace TF47_Api.Middleware
             var origin = context.Request.Headers["origin"];
             _logger.LogInformation(context.Request.Method);
             _logger.LogInformation(origin);
-            if (origin.Contains("api.taskforce47.com"))
-            {
-                context.Response.Headers.Add("Access-Control-Allow-Origin", "https://api.taskforce47.com");
-            }
-
-            if (origin.Contains("gadget.taskforce47.com"))
-            {
-                context.Response.Headers.Add("Access-Control-Allow-Origin", "https://gadget.taskforce47.com");
-            }
+            
+            context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+            
             context.Response.StatusCode = 200;
             context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
             context.Response.Headers.Add("Access-Control-Allow-Headers", "Content-Type, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Accept-Encoding, Content-Length, Content-MD5, Date, X-Api-Version, X-File-Name");
