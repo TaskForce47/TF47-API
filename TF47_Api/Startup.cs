@@ -33,7 +33,7 @@ namespace TF47_Api
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {
+        {/*
             services.AddCors(options =>
             {
                 options.AddPolicy("Policy",
@@ -49,7 +49,7 @@ namespace TF47_Api
                         .AllowAnyHeader()
                         .AllowCredentials()
                         .Build());
-            });
+            });*/
             services.AddControllers();
             services.AddAuthentication(options =>
             {
@@ -85,6 +85,7 @@ namespace TF47_Api
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
+            app.UseCorsMiddleware();
             app.UseSwagger();
             app.UseSwaggerUI(options => { options.SwaggerEndpoint("/swagger/v1/swagger.json", "TF47 API V1"); });
             //app.UseCorsMiddleware();
@@ -93,8 +94,8 @@ namespace TF47_Api
             app.UseCustomCookieAuthentication();
 
             app.UseStaticFiles();
-            app.UseCorsMiddleware();
-            app.UseCors("Policy");
+           
+            //app.UseCors("Policy");
 
             app.UseRouting();
 
