@@ -3,21 +3,26 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace TF47_Api.Middleware
 {
     public class CorsMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly ILogger<CorsMiddleware> _logger;
 
-        public CorsMiddleware(RequestDelegate next)
+        public CorsMiddleware(RequestDelegate next, ILogger<CorsMiddleware> logger)
         {
             _next = next;
+            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
         {
             var origin = context.Request.Headers["origin"];
+            _logger.LogInformation(context.Request.Method);
+            _logger.LogInformation(origin);
             if (origin.Contains("api.taskforce47.com"))
             {
                 context.Response.Headers.Add("Access-Control-Allow-Origin", "https://api.taskforce47.com");
