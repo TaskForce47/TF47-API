@@ -63,6 +63,7 @@ namespace TF47_Api
             services.AddScoped<ForumDataProviderService>();
             services.AddScoped<ClaimProviderService>();
             services.AddSingleton<AuthenticationProviderService>();
+            services.AddSingleton<SquadXmlService>();
 
             services.AddSwaggerGen(options =>
             {
