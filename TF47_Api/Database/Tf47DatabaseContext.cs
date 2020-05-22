@@ -106,11 +106,8 @@ namespace TF47_Api.Database
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.SquadPicture)
-                    .HasColumnName("squad_picture")
-                    .HasColumnType("varchar(64)")
-                    .HasCharSet("utf8mb4")
-                    .HasCollation("utf8mb4_0900_ai_ci");
+                entity.Property(e => e.SquadHasPicture)
+                    .HasColumnName("squad_has_picture");
 
                 entity.Property(e => e.SquadTitle)
                     .HasColumnName("squad_title")

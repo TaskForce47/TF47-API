@@ -15,7 +15,7 @@ namespace TF47_Api.Database
         public string SquadName { get; set; }
         public string SquadEmail { get; set; }
         public string SquadWeb { get; set; }
-        public string SquadPicture { get; set; }
+        public bool SquadHasPicture { get; set; }
         public string SquadTitle { get; set; }
 
         [JsonIgnore]
