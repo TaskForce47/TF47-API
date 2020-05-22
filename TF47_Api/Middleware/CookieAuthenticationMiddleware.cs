@@ -10,7 +10,7 @@ namespace TF47_Api.Middleware
     public class CookieAuthenticationMiddleware
     {
         private readonly RequestDelegate _next;
-        private ILogger<CookieAuthenticationMiddleware> _logger;
+        private readonly ILogger<CookieAuthenticationMiddleware> _logger;
         private readonly AuthenticationProviderService _authenticationProvider;
 
         public CookieAuthenticationMiddleware(RequestDelegate next, ILogger<CookieAuthenticationMiddleware> logger, AuthenticationProviderService authenticationProvider)
