@@ -98,6 +98,8 @@ namespace TF47_Api.Controllers
                _logger.LogError($"Failed inserting new squad! {e.Message}");
                return StatusCode(500, "something went wrong while trying to insert new squad.");
             }
+
+            await _squadXmlService.RegenerateSquadXmls();
             return Ok();
         }
 
@@ -114,6 +116,7 @@ namespace TF47_Api.Controllers
             await _squadXmlService.CreatePicture(data, squad);
             squad.SquadHasPicture = true;
             await _database.SaveChangesAsync();
+            await _squadXmlService.GenerateSquadXml(squad.Id);
             return Ok();
         }
 
@@ -139,6 +142,40 @@ namespace TF47_Api.Controllers
 
             var uri = HttpContext.Response.Headers["Access-Control-Allow-Origin"].ToString();
             return Ok($"{uri}/squadxml/{squad.SquadNick}/squad.xml");
+        }
+
+        [Authorize(Roles = "Admin, Moderator")]
+        [HttpPost("rebuildSquadXml")]
+        public async Task<IActionResult> RebuildSquadXml([FromForm] SquadIdRequest request)
+        {
+            var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == request.SquadId);
+            if (squad == null) return BadRequest("squad id not found");
+            try
+            {
+                await _squadXmlService.GenerateSquadXml(squad.Id);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, "something went wrong while rebuilding the squad xml");
+            }
+
+            return Ok();
+        }
+
+        [Authorize(Roles = "Admin, Moderator")]
+        [HttpPost("rebuildAllSquadXmls")]
+        public async Task<IActionResult> RebuildAllSquadXmls()
+        {
+            try
+            {
+                await _squadXmlService.RegenerateSquadXmls();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "something went wrong while rebuilding the squad xml");
+            }
+
+            return Ok();
         }
     }
 }
