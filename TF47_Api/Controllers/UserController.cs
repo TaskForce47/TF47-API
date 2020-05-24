@@ -32,7 +32,7 @@ namespace TF47_Api.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("authenticate")]
+        [HttpGet("authenticate")]
         public async Task<IActionResult> Authenticate()
         {
             var cookie = HttpContext.Request.Cookies["express.sid"];
