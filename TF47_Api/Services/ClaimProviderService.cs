@@ -53,7 +53,10 @@ namespace TF47_Api.Services
             {
                 claims.Add(new Claim(ClaimTypes.Role, "Sponsor"));
             }
-            claims.Add(new Claim(CustomClaimTypes.ProfilePicture, user.Picture));
+
+            claims.Add(string.IsNullOrEmpty(user.Picture)
+                ? new Claim(CustomClaimTypes.ProfilePicture, "")
+                : new Claim(CustomClaimTypes.ProfilePicture, user.Picture));
 
             var identity = new ClaimsIdentity(claims, "CustomAuthentication");
 
