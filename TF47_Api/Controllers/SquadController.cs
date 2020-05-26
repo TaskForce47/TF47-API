@@ -77,7 +77,7 @@ namespace TF47_Api.Controllers
 
         [Authorize(Roles = "Moderator, Admin")]
         [HttpPut("createSquad")]
-        public async Task<IActionResult> CreateSquad([FromForm] CreateSquadRequest createSquadRequest)
+        public async Task<IActionResult> CreateSquad([FromBody] CreateSquadRequest createSquadRequest)
         {
             if (!ModelState.IsValid) return BadRequest();
 
@@ -105,7 +105,7 @@ namespace TF47_Api.Controllers
 
         [Authorize(Roles = "Admin, Moderator")]
         [HttpPost("uploadSquadPicture")]
-        public async Task<IActionResult> UploadSquadPicture(IFormFile data, [FromForm] SquadIdRequest request)
+        public async Task<IActionResult> UploadSquadPicture(IFormFile data, [FromBody] SquadIdRequest request)
         {
             var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == request.SquadId);
             if (squad == null) return BadRequest("cannot find squad");
@@ -122,7 +122,7 @@ namespace TF47_Api.Controllers
 
         [Authorize(Roles = "Admin, Moderator")]
         [HttpDelete("deleteSquad")]
-        public async Task<IActionResult> DeleteSquad([FromForm] SquadIdRequest request)
+        public async Task<IActionResult> DeleteSquad([FromBody] SquadIdRequest request)
         {
             var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == request.SquadId);
             if (squad == null) return BadRequest("squad id not found");
@@ -135,7 +135,7 @@ namespace TF47_Api.Controllers
         }
 
         [HttpGet("getSquadXml")]
-        public async Task<IActionResult> GetSquadXmlUrl([FromForm] SquadIdRequest request)
+        public async Task<IActionResult> GetSquadXmlUrl([FromBody] SquadIdRequest request)
         {
             var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == request.SquadId);
             if (squad == null) return BadRequest("squad id not found");

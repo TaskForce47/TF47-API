@@ -53,7 +53,7 @@ namespace TF47_Api.Controllers
 
         [Authorize(Roles = "Moderator, Admin")]
         [HttpGet("getWhitelistUser")]
-        public async Task<IActionResult> GetUserWhitelist([FromForm] PlayerIdRequest playerIdRequest)
+        public async Task<IActionResult> GetUserWhitelist([FromBody] PlayerIdRequest playerIdRequest)
         {
             if (!ModelState.IsValid) return BadRequest("model state is not correct!");
 
