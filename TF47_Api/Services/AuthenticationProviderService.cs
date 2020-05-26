@@ -22,19 +22,6 @@ namespace TF47_Api.Services
             _users = new Dictionary<string, AuthenticationUserData>();
         }
 
-        public ClaimsPrincipal GetClaimsPrincipal(string cookie)
-        {
-            if (_users.ContainsKey(cookie))
-            {
-                var userData = _users[cookie];
-                if (userData.ExpirationDate > DateTime.Now)
-                {
-                    return userData.ClaimsPrincipal;
-                }
-            }
-            return null;
-        }
-
         public async Task<ClaimsPrincipal> AuthenticateUserAsync(string cookie)
         {
             if (_users.ContainsKey(cookie))
@@ -43,13 +30,14 @@ namespace TF47_Api.Services
                 if (userData.ExpirationDate < DateTime.Now)
                 {
                     var user = await GetClaimsPrincipalAsync(cookie);
-                    if (user == null)
+                    _users.Remove(cookie);
+                    if (user == null) return null;
+                    _users.Add(cookie, new AuthenticationUserData
                     {
-                        _users.Remove(cookie);
-                        return null;
-                    }
-                    userData.ClaimsPrincipal = await GetClaimsPrincipalAsync(cookie);
-                    userData.ExpirationDate = DateTime.Now.AddHours(2);
+                        ClaimsPrincipal = user,
+                        ExpirationDate = DateTime.Now.AddHours(2)
+                    });
+                    return user;
                 }
                 return userData.ClaimsPrincipal;
             }
@@ -63,11 +51,10 @@ namespace TF47_Api.Services
                 }
                 var data = new AuthenticationUserData
                 {
-                    ClaimsPrincipal = await GetClaimsPrincipalAsync(cookie),
+                    ClaimsPrincipal = user,
                     ExpirationDate = DateTime.Now + TimeSpan.FromHours(2)
                 };
                 _users.Add(cookie, data);
-
                 return data.ClaimsPrincipal;
             }
         }

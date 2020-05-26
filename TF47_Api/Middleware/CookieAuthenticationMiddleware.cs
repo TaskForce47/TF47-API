@@ -29,7 +29,7 @@ namespace TF47_Api.Middleware
                 if (httpContext.Request.Cookies.ContainsKey("express.sid"))
                 {
                     var cookie = httpContext.Request.Cookies["express.sid"];
-                    var user = _authenticationProvider.GetClaimsPrincipal(cookie);
+                    var user = await _authenticationProvider.AuthenticateUserAsync(cookie);
                     if (user == null)
                     {
                         _logger.LogInformation($"{httpContext.Connection.LocalIpAddress} not logged in!");
