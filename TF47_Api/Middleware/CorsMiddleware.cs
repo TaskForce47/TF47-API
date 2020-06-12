@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace TF47_Api.Middleware
@@ -11,23 +12,35 @@ namespace TF47_Api.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<CorsMiddleware> _logger;
+        private readonly string[] _allowedOrigins;
 
-        public CorsMiddleware(RequestDelegate next, ILogger<CorsMiddleware> logger)
+        public CorsMiddleware(RequestDelegate next, ILogger<CorsMiddleware> logger, IConfiguration configuration)
         {
             _next = next;
             _logger = logger;
+            _allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
+        }
+
+        private bool IsAllowedUrl(string path)
+        {
+            foreach (var allowedUrl in _allowedOrigins)
+            {
+                if (allowedUrl.Contains(path)) return true;
+            }
+
+            return false;
         }
 
         public async Task Invoke(HttpContext context)
         {
             var origin = context.Request.Headers["origin"];
-            _logger.LogInformation(context.Request.Method);
-            _logger.LogInformation($"{origin} {context.Request.Path.Value}");
-
-            context.Response.Headers.Add("Access-Control-Allow-Origin",
-                context.Request.Headers["origin"] == "https://gadget.taskforce47.com:8080"
-                    ? "https://gadget.taskforce47.com:8080"
-                    : "https://gadget.taskforce47.com");
+            if(IsAllowedUrl(origin))
+                context.Response.Headers.Add("Access-Control-Allow-Origin", origin);
+            else
+            {
+                context.Response.Headers.Add("Access-Control-Allow-Origin", "");
+                _logger.LogInformation($"Unknown CORS origin {origin}, please check appsettings.json");
+            }
 
             context.Response.StatusCode = 200;
             context.Response.Headers.Add("Access-Control-Allow-Credentials", "true");

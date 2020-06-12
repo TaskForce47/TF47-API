@@ -1,7 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using TF47_Api.Services;
 
@@ -12,17 +15,29 @@ namespace TF47_Api.Middleware
         private readonly RequestDelegate _next;
         private readonly ILogger<CookieAuthenticationMiddleware> _logger;
         private readonly AuthenticationProviderService _authenticationProvider;
+        private readonly string[] _allowedUrls;
 
-        public CookieAuthenticationMiddleware(RequestDelegate next, ILogger<CookieAuthenticationMiddleware> logger, AuthenticationProviderService authenticationProvider)
+        public CookieAuthenticationMiddleware(RequestDelegate next, ILogger<CookieAuthenticationMiddleware> logger, AuthenticationProviderService authenticationProvider, IConfiguration configuration)
         {
             _next = next;
             _logger = logger;
             _authenticationProvider = authenticationProvider;
+            _allowedUrls = configuration.GetSection("CookieBypassPaths").Get<string[]>();
+        }
+
+        private bool IsAllowedUrl(string path)
+        {
+            foreach (var allowedUrl in _allowedUrls)
+            {
+                if (allowedUrl.Contains(path)) return true;
+            }
+
+            return false;
         }
 
         public async Task Invoke(HttpContext httpContext)
         {
-            if (httpContext.Request.Path.Value == "/api/user/authenticate") 
+            if (IsAllowedUrl(httpContext.Request.Path.Value)) 
                 await _next(httpContext);
             else
             {
