@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using TF47_Api.Database;
 using TF47_Api.DTO;
@@ -24,12 +25,14 @@ namespace TF47_Api.Controllers
         private readonly Tf47DatabaseContext _database;
         private readonly ILogger<SquadController> _logger;
         private readonly SquadXmlService _squadXmlService;
+        private readonly IConfiguration _configuration;
 
-        public SquadController(Tf47DatabaseContext database, ILogger<SquadController> logger, SquadXmlService squadXmlService)
+        public SquadController(Tf47DatabaseContext database, ILogger<SquadController> logger, SquadXmlService squadXmlService, IConfiguration configuration)
         {
             _database = database;
             _logger = logger;
             _squadXmlService = squadXmlService;
+            _configuration = configuration;
         }
 
         [HttpGet("getSquads")]
@@ -140,7 +143,7 @@ namespace TF47_Api.Controllers
             var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == request.SquadId);
             if (squad == null) return BadRequest("squad id not found");
 
-            var uri = HttpContext.Response.Headers["Access-Control-Allow-Origin"].ToString();
+            var uri = _configuration["ApiListeningUrl"];
             return Ok($"{uri}/squadxml/{squad.SquadNick}/squad.xml");
         }
 
@@ -176,6 +179,57 @@ namespace TF47_Api.Controllers
             }
 
             return Ok();
+        }
+
+        [Authorize(Roles = "Admin, Moderator")]
+        [HttpPut("addSquadMember")]
+        public async Task<IActionResult> AddSquadMember([FromBody] AddSquadMemberRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+
+            var gadgetUser = await _database.Tf47GadgetUser.FirstOrDefaultAsync(x => x.Id == request.SquadId);
+            if (gadgetUser == null) return BadRequest("user does not exist");
+            var squadUser = await _database.Tf47GadgetSquadUser.FirstOrDefaultAsync(x =>
+                x.UserId == request.GadgetUserId && x.SquadId == request.SquadId);
+            if (squadUser != null) return BadRequest("user already is a member of this squad");
+
+            try
+            {
+                await _database.Tf47GadgetSquadUser.AddAsync(new Tf47GadgetSquadUser
+                {
+                    SquadId = request.SquadId,
+                    UserId = request.GadgetUserId,
+                });
+                await _database.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Error while trying to add new squad member: {e.Message}");
+                return StatusCode(500, "something went wrong while trying to insert a new squad member");
+            }
+
+            return Ok();
+        }
+
+        [HttpGet("squadMemberCount")]
+        public async Task<IActionResult> GetSquadMemberCount([FromBody] SquadMemberCountRequest request)
+        {
+            if (ModelState.IsValid) return BadRequest();
+            try
+            {
+                var userCount = await _database.Tf47GadgetSquadUser.Where(x => x.SquadId == request.SquadId)
+                    .SumAsync(x => x.Id);
+                return Ok(new
+                {
+                    SquadId = request.SquadId,
+                    SquadMemberCount = userCount
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Something went wrong fetching squad member count: {ex.Message}\nRequest squadid {request.SquadId}");
+                return StatusCode(500, "something went wrong fetching squad member count");
+            }
         }
     }
 }
