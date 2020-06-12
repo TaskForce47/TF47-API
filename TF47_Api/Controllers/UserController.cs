@@ -76,7 +76,7 @@ namespace TF47_Api.Controllers
         }
 
         [HttpPut("setUserPlayerUid")]
-        public async Task<IActionResult> SetPlayerUid([FromForm] PlayerUidRequest request)
+        public async Task<IActionResult> SetPlayerUid([FromBody] PlayerUidRequest request)
         {
             if (!ModelState.IsValid) return BadRequest("bad request");
 
