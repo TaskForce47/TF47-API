@@ -66,7 +66,7 @@ namespace TF47_Api.Services
 
             var data = new List<string>();
             data.Add("<?xml version=\"1.0\"?>");
-            data.Add("<!DOCTYPE squad SYSTEM \"squad.dtd\"");
+            data.Add("<!DOCTYPE squad SYSTEM \"squad.dtd\">");
             data.Add($"<squad nick=\"{squad.SquadNick}\">");
             data.Add($"\t<name>{squad.SquadName}</name>");
             data.Add($"\t<email>{squad.SquadEmail}</email>");
@@ -91,6 +91,7 @@ namespace TF47_Api.Services
             if (File.Exists(squadXmlPath))
                 File.Delete(squadXmlPath);
             await File.WriteAllLinesAsync(squadXmlPath, data.ToArray(), Encoding.UTF8);
+            File.Copy(Path.Combine(_path, "squad.dtd"), Path.Combine(_path, squad.SquadNick, "squad.dtd"), true);
             _logger.LogInformation($"Create squad.xml file for unit {squad.SquadName}.");
         }
 
