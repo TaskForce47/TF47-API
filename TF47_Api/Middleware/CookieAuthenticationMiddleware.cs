@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -44,17 +45,33 @@ namespace TF47_Api.Middleware
                 if (httpContext.Request.Cookies.ContainsKey("express.sid"))
                 {
                     var cookie = httpContext.Request.Cookies["express.sid"];
-                    var user = await _authenticationProvider.AuthenticateUserAsync(cookie);
-                    if (user == null)
+                    var (authenticationStatus, claimsPrincipal) = await _authenticationProvider.IsUserAuthenticatedAsync(cookie);
+                    switch (authenticationStatus)
                     {
-                        _logger.LogInformation($"{httpContext.Connection.LocalIpAddress} not logged in!");
-                        httpContext.Response.Clear();
-                        httpContext.Response.StatusCode = 403;
-                        await httpContext.Response.WriteAsync("not logged in!");
-                        return;
+                        case AuthenticationProviderService.AuthenticationStatus.BadRequest:
+                        {
+                            httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                            await httpContext.Response.WriteAsync($"no cookie found in request.");
+                                return;
+                        }
+                        case AuthenticationProviderService.AuthenticationStatus.Expired:
+                        {
+                            httpContext.Response.StatusCode = (int) HttpStatusCode.BadRequest;
+                            await httpContext.Response.WriteAsync("session is expired.");
+                            return;
+                        }
+                        case AuthenticationProviderService.AuthenticationStatus.LoggedOut:
+                        {
+                            httpContext.Response.StatusCode = (int)HttpStatusCode.Redirect;
+                            httpContext.Response.Redirect("/api/user/authenticate");
+                            return;
+                        }
+                        case AuthenticationProviderService.AuthenticationStatus.LoggedIn:
+                        {
+                            break;
+                        }
                     }
-
-                    httpContext.User = user;
+                    httpContext.User = claimsPrincipal;
                 }
                 else
                 {

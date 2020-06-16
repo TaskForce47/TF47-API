@@ -22,6 +22,19 @@ namespace TF47_Api.Services
             _users = new Dictionary<string, AuthenticationUserData>();
         }
 
+        public async Task<(AuthenticationStatus,ClaimsPrincipal)> IsUserAuthenticatedAsync(string cookie)
+        {
+            return await Task.Run(() =>
+            {
+                if (string.IsNullOrEmpty(cookie)) return (AuthenticationStatus.BadRequest, null);
+                if (!_users.ContainsKey(cookie)) return (AuthenticationStatus.LoggedOut, null);
+                var userData = _users[cookie];
+                return userData.ExpirationDate < DateTime.Now
+                    ? (AuthenticationStatus.Expired, null)
+                    : (AuthenticationStatus.LoggedIn, userData.ClaimsPrincipal);
+            });
+        }
+
         public async Task<ClaimsPrincipal> AuthenticateUserAsync(string cookie)
         {
             if (_users.ContainsKey(cookie))
@@ -70,6 +83,14 @@ namespace TF47_Api.Services
                 return await claimProviderService.GetClaimsPrincipalAsync(user);
             else
                 return null;
+        }
+
+        public enum AuthenticationStatus 
+        {
+            LoggedIn,
+            Expired,
+            LoggedOut,
+            BadRequest
         }
     }
 }
