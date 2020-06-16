@@ -45,37 +45,31 @@ namespace TF47_Api.Controllers
         [HttpGet("getSquadsWithUsers")]
         public async Task<IActionResult> GetSquadsWithUsers()
         {
-            var response = new List<SquadsWithUserResponse>();
-            var squads = _database.Tf47GadgetSquad.Where(x => x.Id > 0);
-            foreach (var squad in squads)
+            return await Task.Run(() =>
             {
-                var squadResponse = new SquadsWithUserResponse
-                {
-                    Id = squad.Id,
-                    SquadEmail = squad.SquadEmail,
-                    SquadName = squad.SquadName,
-                    SquadNick = squad.SquadNick,
-                    SquadHasPicture = squad.SquadHasPicture,
-                    SquadTitle = squad.SquadTitle,
-                    SquadWeb = squad.SquadWeb,
-                    SquadUsers = new List<SquadUser>()
-                };
-                var squadUsers = _database.Tf47GadgetSquadUser.Where(x => x.SquadId == squad.Id);
-                foreach (var user in squadUsers)
-                {
-                    squadResponse.SquadUsers.Add(new SquadUser
-                    {
-                        UserId = user.UserId,
-                        UserSquadEmail = user.UserSquadEmail,
-                        UserSquadIcq = user.UserSquadIcq,
-                        UserSquadName = user.UserSquadName,
-                        UserSquadNick = user.UserSquadNick,
-                        UserSquadRemark = user.UserSquadRemark
-                    });
-                }
-            }
-
-            return Ok(response.ToArray());
+                var response = _database.Tf47GadgetSquad.Include(x => x.Tf47GadgetSquadUser).ThenInclude(y => y.User)
+                    .Select(
+                        x => new SquadsWithUserResponse
+                        {
+                            Id = x.Id,
+                            SquadEmail = x.SquadEmail,
+                            SquadHasPicture = x.SquadHasPicture,
+                            SquadName = x.SquadName,
+                            SquadNick = x.SquadNick,
+                            SquadTitle = x.SquadTitle,
+                            SquadWeb = x.SquadWeb,
+                            SquadUsers = x.Tf47GadgetSquadUser.Select(z => new SquadUser
+                            {
+                                UserId = z.UserId,
+                                UserSquadEmail = z.UserSquadEmail,
+                                UserSquadIcq = z.UserSquadIcq,
+                                UserSquadName = z.UserSquadName,
+                                UserSquadNick = z.UserSquadNick,
+                                UserSquadRemark = z.UserSquadRemark
+                            }).ToList()
+                        });
+                return Ok(response);
+            });
         }
 
         [Authorize(Roles = "Moderator, Admin")]
