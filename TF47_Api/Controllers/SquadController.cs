@@ -184,7 +184,7 @@ namespace TF47_Api.Controllers
         {
             if (!ModelState.IsValid) return BadRequest();
 
-            var gadgetUser = await _database.Tf47GadgetUser.FirstOrDefaultAsync(x => x.Id == request.SquadId);
+            var gadgetUser = await _database.Tf47GadgetUser.FirstOrDefaultAsync(x => x.Id == request.GadgetUserId);
             if (gadgetUser == null) return BadRequest("user does not exist");
             var squadUser = await _database.Tf47GadgetSquadUser.FirstOrDefaultAsync(x =>
                 x.UserId == request.GadgetUserId && x.SquadId == request.SquadId);
