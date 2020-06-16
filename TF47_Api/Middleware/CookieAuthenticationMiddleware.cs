@@ -30,7 +30,7 @@ namespace TF47_Api.Middleware
         {
             foreach (var allowedUrl in _allowedUrls)
             {
-                if (allowedUrl.Contains(path)) return true;
+                if (path.Contains(allowedUrl) || path == allowedUrl) return true;
             }
 
             return false;
