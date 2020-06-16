@@ -36,7 +36,7 @@ namespace TF47_Api.Controllers
         public async Task<IActionResult> Authenticate()
         {
             var cookie = HttpContext.Request.Cookies["express.sid"];
-            if (string.IsNullOrEmpty(cookie)) return BadRequest("not cookie found");
+            if (string.IsNullOrEmpty(cookie)) return BadRequest("no cookie found");
             var user = await _authenticationProviderService.AuthenticateUserAsync(cookie);
             if (user == null) return StatusCode(403, "could not authorize");
 
