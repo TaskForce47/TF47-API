@@ -75,7 +75,7 @@ namespace TF47_Api.Middleware
                 }
                 else
                 {
-                    _logger.LogInformation($"{httpContext.Connection.LocalIpAddress} no foum cookie found!");
+                    _logger.LogInformation($"{httpContext.Connection.LocalIpAddress} no forum cookie found!");
                     httpContext.Response.Clear();
                     httpContext.Response.StatusCode = 403;
                     await httpContext.Response.WriteAsync("no cookie found");
