@@ -35,7 +35,7 @@ namespace TF47_Api.Services
                     return JsonConvert.DeserializeObject<ForumUser>(response.Content);
                     
                 }
-                _logger.LogError($"Something went wrong! Forum answered user request with {response.StatusCode}");
+                _logger.LogError($"Something went wrong! Forum answered api/me request with statuscode:{response.StatusCode} and content:{response.Content}");
                 return null;
             }
             catch (Exception ex)
