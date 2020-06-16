@@ -33,23 +33,7 @@ namespace TF47_Api
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {/*
-            services.AddCors(options =>
-            {
-                options.AddPolicy("Policy",
-                    builder => builder.WithOrigins(
-                            "api.taskforce47.com",
-                            "gadget.taskforce47.com",
-                            "https://api.taskforce47.com",
-                            "https://api.taskforce47.com",
-                            "http://gadget.taskforce47.com",
-                            "https://gadget.taskforce47.com",
-                            "https://test.taskforce47.com")
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .AllowCredentials()
-                        .Build());
-            });*/
+        {
             services.AddControllers();
             services.AddAuthentication(options =>
             {
