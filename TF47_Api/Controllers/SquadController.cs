@@ -141,12 +141,12 @@ namespace TF47_Api.Controllers
             if (squad == null) return BadRequest("squad id not found");
 
             var uri = _configuration["ApiListeningUrl"];
-            return Ok($"{uri}/squadxml/{squad.SquadNick}/squad.xml");
+            return Ok($"{uri}squadxml/{squad.SquadNick}/squad.xml");
         }
 
         [Authorize(Roles = "Admin, Moderator")]
         [HttpPost("rebuildSquadXml")]
-        public async Task<IActionResult> RebuildSquadXml([FromForm] SquadIdRequest request)
+        public async Task<IActionResult> RebuildSquadXml([FromBody] SquadIdRequest request)
         {
             var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == request.SquadId);
             if (squad == null) return BadRequest("squad id not found");
