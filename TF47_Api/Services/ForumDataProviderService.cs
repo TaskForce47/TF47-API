@@ -35,7 +35,7 @@ namespace TF47_Api.Services
                     return JsonConvert.DeserializeObject<ForumUser>(response.Content);
                     
                 }
-                _logger.LogError($"Something went wrong! Forum answered api/me request with statuscode:{response.StatusCode} and content:{response.Content}");
+                _logger.LogError($"Something went wrong! Forum answered api/me request with status code:{response.StatusCode} and content:{response.Content}\nRequest Info BaseUrl:{client.BaseUrl} Cookie:{client.CookieContainer.GetCookies(new Uri(".taskforce47.com")).First().Value}");
                 return null;
             }
             catch (Exception ex)
