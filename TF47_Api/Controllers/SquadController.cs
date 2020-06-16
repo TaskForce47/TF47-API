@@ -38,8 +38,11 @@ namespace TF47_Api.Controllers
         [HttpGet("getSquads")]
         public async Task<IActionResult> GetSquads()
         {
-            var squads = _database.Tf47GadgetSquad.Where(x => x.Id > 0);
-            return Ok(await squads.ToArrayAsync());
+            return await Task.Run(() =>
+            {
+                var squads = _database.Tf47GadgetSquad.Where(x => x.Id > 0);
+                return Ok(squads);
+            });
         }
 
         [HttpGet("getSquadsWithUsers")]
@@ -193,6 +196,11 @@ namespace TF47_Api.Controllers
                 {
                     SquadId = request.SquadId,
                     UserId = request.GadgetUserId,
+                    UserSquadIcq = "n/a",
+                    UserSquadName = gadgetUser.ForumName,
+                    UserSquadEmail = "taskforce47@web.de",
+                    UserSquadNick = "n/a",
+                    UserSquadRemark = "Teamplay kann man nicht scripten."
                 });
                 await _database.SaveChangesAsync();
             }
