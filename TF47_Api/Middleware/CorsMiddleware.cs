@@ -34,6 +34,7 @@ namespace TF47_Api.Middleware
         public async Task Invoke(HttpContext context)
         {
             var origin = context.Request.Headers["origin"];
+            if (string.IsNullOrEmpty(origin)) origin = "";
             if(IsAllowedUrl(origin))
                 context.Response.Headers.Add("Access-Control-Allow-Origin", origin);
             else
