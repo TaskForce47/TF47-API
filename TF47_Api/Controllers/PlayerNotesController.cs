@@ -59,6 +59,7 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Moderator, Admin")]
+        [HttpGet("GetNotesById")]
         public async Task<IActionResult> GetNotesByUserId([FromBody] PlayerIdRequest request)
         {
             if (!ModelState.IsValid) return BadRequest();
@@ -89,6 +90,7 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Moderator, Admin")]
+        [HttpPut("AddNote")]
         public async Task<IActionResult> AddNote([FromBody] AddNoteRequest request)
         {
             if (!ModelState.IsValid) return BadRequest();
@@ -117,6 +119,7 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Moderator, Admin")]
+        [HttpDelete("DeleteNote")]
         public async Task<IActionResult> DeleteNote([FromBody] DeleteNodeRequest request)
         {
             if (!ModelState.IsValid) return BadRequest();
@@ -139,6 +142,7 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Moderator, Admin")]
+        [HttpPut("UpdateNote")]
         public async Task<IActionResult> UpdateNote([FromBody] UpdateNoteRequest request)
         {
             if (!ModelState.IsValid) return BadRequest();
