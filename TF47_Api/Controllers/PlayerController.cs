@@ -26,6 +26,7 @@ namespace TF47_Api.Controllers
             _database = database;
         }
 
+        [HttpGet("GetAllPlayers")]
         public async Task<IActionResult> GetAllPlayers()
         {
             return await Task.Run(() =>
@@ -40,11 +41,13 @@ namespace TF47_Api.Controllers
             });
         }
 
+        [HttpGet("GetAllPlayerDetails")]
         public async Task<IActionResult> GetPlayerDetails()
         {
             return NotFound("not implemented yet!");
         }
 
+        [HttpGet("GetPlayerDetailsLoggedIn")]
         public async Task<IActionResult> GetPlayerDetailsLoggedIn()
         {
             return NotFound("not implemented yet!");
