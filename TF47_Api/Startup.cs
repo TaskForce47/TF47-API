@@ -46,6 +46,7 @@ namespace TF47_Api
                     "server=server.taskforce47.com;port=3306;user=dragon;password=bambus123xx#;database=tf47_database_2"));
             services.AddScoped<ForumDataProviderService>();
             services.AddScoped<ClaimProviderService>();
+            services.AddTransient<GadgetUserProviderService>();
             services.AddSingleton<AuthenticationProviderService>();
             services.AddSingleton<SquadXmlService>();
 
