@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,10 +42,32 @@ namespace TF47_Api.Controllers
             });
         }
 
-        [HttpGet("GetAllPlayerDetails")]
-        public async Task<IActionResult> GetPlayerDetails()
+        [HttpGet("{id}/details")]
+        public async Task<IActionResult> GetPlayerDetails(uint id)
         {
-            return NotFound("not implemented yet!");
+            var serverPlayer = await _database.Tf47ServerPlayers.FirstOrDefaultAsync(x => x.Id == id);
+            if (serverPlayer == null) return BadRequest("user not found!");
+
+            var gadgetUser =
+                await _database.Tf47GadgetUser.FirstOrDefaultAsync(x => x.PlayerUid == serverPlayer.PlayerUid);
+
+            var response = new UserDetailResponse
+            {
+                Player = new ServerPlayer
+                {
+                    Id = serverPlayer.Id,
+                    Name = serverPlayer.PlayerName,
+                    Uid = serverPlayer.PlayerUid
+                },
+                User = new GadgetUser
+                {
+                    Id = gadgetUser.Id,
+                    AvatarUrl = gadgetUser.ForumAvatarPath,
+                    ForumName = gadgetUser.ForumName,
+                    Roles = GetRolesFromGadgetUser(gadgetUser)
+                }
+            };
+            return Ok(response);
         }
 
         [HttpGet("GetPlayerDetailsLoggedIn")]
@@ -85,6 +108,35 @@ namespace TF47_Api.Controllers
         public class ServerPlayerRequest
         {
             public uint Id { get; set; }
+        }
+
+        public class GadgetUser
+        {
+            public uint? Id { get; set; }
+            public string? ForumName { get; set; }
+            public string? AvatarUrl { get; set; }
+
+            public IEnumerable<string>? Roles { get; set; } 
+        }
+
+        public class UserDetailResponse
+        {
+            public ServerPlayer Player { get; set; }
+            public GadgetUser User { get; set; }
+        }
+
+        private IEnumerable<string> GetRolesFromGadgetUser(Tf47GadgetUser user)
+        {
+            var roles = new List<string>();
+            if (user.ForumIsAdmin != null && user.ForumIsAdmin.Value)
+                roles.Add("Admin");
+            if(user.ForumIsModerator != null && user.ForumIsModerator.Value)
+                roles.Add("Moderator");
+            if(user.ForumIsTf != null && user.ForumIsTf.Value)
+                roles.Add("TF47");
+            if(user.ForumIsSponsor != null && user.ForumIsSponsor.Value)
+                roles.Add("Sponsor");
+            return roles;
         }
     }
 }
