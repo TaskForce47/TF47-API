@@ -1,125 +1,86 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- Transformation XSLT-->
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<?xml version="1.0" encoding="utf-8"?>
+<!-- xsl template for "squad.xml" as used in armed assault, see http://community.bistudio.com/wiki/squad.xml -->
+<xsl:stylesheet
+	version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-  <!-- Modèles Implicites source: http://www.grappa.univ-lille3.fr/~jousse/enseignement/XML_XSLT/xslt.html -->
   <xsl:template match="text()">
     <xsl:value-of select="."/>
   </xsl:template>
+
   <xsl:template match="*">
     <xsl:apply-templates/>
   </xsl:template>
+
   <xsl:template match="/">
-
-    <!--	Fichier XSL
-		Template pour le squad.xml d'ArmA2 réalisé par KissDavid le 11.07.09
-		edit for www.taskforce47.de / www.armasim.de by symrex
--->
-
-    <!-- HTML -->
     <html>
       <head>
+        <base href="../../squadxml/" />
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1.0" />
         <title>
-          <xsl:value-of select="/squad/@nick"/>
+          <xsl:value-of select="/squad/name"/> Squad-XML
         </title>
-        <link rel="stylesheet" type="text/css" href="/squadxml/squad.css" title="CSS" />
-        <link rel="shortcut icon" href="/squadxml/favicon.ico" type="image/x-icon" />
+        <link rel="stylesheet" type="text/css" href="squad.css"/>
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Oswald|Source+Sans+Pro|Material+Icons"/>
+        <link rel="shortcut icon" href="favicon.ico" />
       </head>
-
       <body>
-        <div id="cadre">
-          <!-- Menu -->
-          <div id="menu">
-
-            <img id="logo" alt="Squad Logo">
-              <xsl:attribute name="src">
-                <xsl:value-of select="concat(substring-before(/squad/picture,'.paa'),'.jpg')"/>
-              </xsl:attribute>
-            </img>
-
-
+        <header>
+          <a>
+            <xsl:attribute name="href">
+              <xsl:value-of select="/squad/web"/>
+            </xsl:attribute>
+            <img src="tf47_logo.png" />
             <h3>
               <xsl:value-of select="/squad/name"/>
             </h3>
-            <div id="inhalt">
-              <p>
-                <em>Tag : </em>[<xsl:value-of select="/squad/@nick"/>]
-              </p>
-              <p>
-                <em>Email : </em>
-                <xsl:value-of select="/squad/email"/>
-              </p>
-              <p>
-                <em>Web Site : </em>
-                <a>
+          </a>
+        </header>
+        <main class="members">
+          <xsl:for-each select="/squad/member">
+            <div class="member">
+              <span class="member__nick" >
+                <xsl:value-of select="@nick"/>
+              </span>
+              <div class="member__contact">
+                <xsl:if test="email != ''">
+                  <a>
+                    <xsl:attribute name="href">
+                      mailto:<xsl:value-of select="email"/>
+                    </xsl:attribute>
+                    <xsl:attribute name="title">
+                      <xsl:value-of select="email"/>
+                    </xsl:attribute>
+
+                    <i class="material-icons">mail_outline</i>
+                  </a>
+                </xsl:if>
+                <a target="_blank">
                   <xsl:attribute name="href">
-                    <xsl:value-of select="concat('http://',/squad/web)"/>
+                    https://steamcommunity.com/profiles/<xsl:value-of select="@id"/>
                   </xsl:attribute>
-                  <xsl:value-of select="/squad/web"/>
+                  <img>
+                    <xsl:attribute name="src">steam.svg</xsl:attribute>
+                  </img>
                 </a>
-              </p>
-              <p>
-                <em>Title : </em>
-                <xsl:value-of select="/squad/title"/>
-              </p>
+              </div>
             </div>
-            <!--<pe><em>Member: </em><xsl:value-of select="/squad/count"/></pe> -->
-          </div>
-
-          <!-- Liste des membres -->
-          <div id="liste">
-            <table class="fiche">
-              <tr>
-                <th>Members</th>
-                <th>Remark</th>
-                <th>Names</th>
-                <th>E-Mail</th>
-                <th>Contact</th>
-              </tr>
-              <xsl:for-each select="/squad/member">
-                <tr>
-                  <!-- Alternance des couleurs (Nombre pair/ impair)-->
-                  <xsl:attribute name="class">
-                    <xsl:choose>
-                      <xsl:when test="position() mod 2 = 0">impair</xsl:when>
-                      <xsl:otherwise>pair</xsl:otherwise>
-                    </xsl:choose>
-                  </xsl:attribute>
-                  <td class="nick" >
-                    <xsl:value-of select="@nick"/>
-                  </td>
-                  <td class="remark" >
-                    <xsl:value-of select="remark"/>
-                  </td>
-                  <td class="name" >
-                    <xsl:value-of select="name"/>
-                  </td>
-                  <td class="email">
-                    <xsl:value-of select="email"/>
-                  </td>
-                  <td class="icq">
-                    <xsl:value-of select="icq"/>
-                  </td>
-                </tr>
-              </xsl:for-each>
-            </table>
-          </div>
-
-          <!-- Liste des membres -->
-          <div id="footer">
-            <p id="copyright">
-              © The ArmA 3 Wallpaper are the property of Bohemia Interactive (http://www.bistudio.com/) - Available in the website ARMA 3<br/>
-              Template for the "squad.xml" of ArmA 3 - Realized by KissDavid - 2013
-              edit by symrex<br/>
-              Buy the Game here: <a href="http://store.bistudio.com" target="_blank" title="Store.bistudio.com">STORE.BISTUDIO.COM</a>
-            </p>
-          </div>
-
-        </div>
+          </xsl:for-each>
+        </main>
+        <footer>
+          <address>
+            <xsl:if test="/squad/email != ''">
+              Contact:
+              <a>
+                <xsl:attribute name="href">
+                  <xsl:value-of select="/squad/email"/>
+                </xsl:attribute>
+                <xsl:value-of select="/squad/email"/>
+              </a>
+            </xsl:if>
+          </address>
+        </footer>
       </body>
     </html>
-    <!-- Fin HTML -->
-
   </xsl:template>
-
 </xsl:stylesheet>

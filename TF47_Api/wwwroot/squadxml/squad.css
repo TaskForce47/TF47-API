@@ -1,124 +1,95 @@
-﻿/*	--------------------------------------------------------------------
-	Fichier CSS
-	Template pour le squad.xml d'ArmA 3 réalisé par KissDavid le 09.03.13 
------------------------------------------------------------------------- */
-
-html {
-    background-color: #CCCCCC;
-    background-image: url(tf47_background.jpg);
+﻿html, body {
+    margin: 0px;
+    padding: 0px;
+    background-color: #F0EEEC;
+    font-family: 'Source Sans Pro', sans-serif;
+    height: 100%;
 }
 
 body {
-    background-color: #COCOCO;
-    margin: 100px auto;
-    width: 760px;
-    font-family: Arial;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
 }
 
-#cadre {
-    box-shadow: 0px 0px 15px green;
-    background-color: black;
-}
-
-#menu {
-    height: 300px;
-    border: 1px solid black;
-    color: white;
-    background: #2b312e url(tf47_logo.png) no-repeat 98% 98%;
-}
-
-#inhalt {
-    color: white;
-    margin: 80px 10px;
-    position: relative;
-}
-
-
-#logo {
-    width: 250px;
-    float: left;
-    margin: 60px 10px;
-}
-
-#menu h3 {
-    position: absolute;
-    text-align: center;
-    margin: 20px 170px;
-    font-size: 18px;
-    font-variant: small-caps;
-    text-decoration: overline underline;
-}
-
-#menu em {
-    color: #A6CC91;
-    font-style: normal;
-    font-variant: small-caps;
-}
-
-#footer {
-    font-style: normal;
-}
-
-#copyright {
-    text-align: center;
-    color: grey;
-    font-size: 8px;
-}
-
-.fiche {
-    border: 1px solid black;
-    border-top: none;
-    border-spacing: 0px;
-    color: black;
-    font-size: 12px;
-    width: 760px;
-}
-
-th {
-    font-size: 13px;
-    background-color: #B4AF91;
-    font-variant: small-caps;
-    border-bottom: 1px solid black;
-}
-
-tr.pair {
-    background-color: #FCFAE1;
-}
-
-tr.impair {
-    background-color: #EFECCA;
-}
-
-.nick, .id, .name, .email, .icq {
-    width: 20%;
-    text-align: center;
-}
-
-.nick {
-    font-variant: small-caps;
-}
-
-.remark {
-    font-size: 10px;
-    text-align: left;
-}
-
-.id {
-    color: #84815B;
-}
-
-a:link, a:visited, a:hover, a:active, a:focus {
+a {
     text-decoration: none;
 }
 
-a:hover {
-    color: #B4AF91;
+header {
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-a:link, a:visited {
-    color: #787746
+header > a {
+    display: flex;
+    align-items: center;
+    justify-items: flex-start;
 }
 
-strong {
-    font-weight: bold;
+header > a > img {
+    height: 30px;
+    margin-right: 8px;
+}
+
+header > a > h3 {
+    color: #333;
+    font-family: Oswald;
+    text-transform: uppercase;
+    font-weight: 600;
+    line-height: 1em;
+    opacity: .5;
+    font-size: 16px;
+}
+
+.members {
+    justify-self: center;
+    width: 600px;
+    max-width: 100vw;
+    margin-top: 24px;
+}
+
+.member {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    grid-column-gap: 16px;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    transition: background-color .1s linear;
+}
+
+.member:hover {
+    background-color: rgba(214,212,211,.5);
+}
+
+.member:hover .member__avatar {
+    filter: saturate(1);
+    opacity: 1;
+}
+
+.member__avatar {
+    max-width: 40px;
+    max-height: 40px;
+    border-radius: 50%;
+    opacity: .5;
+    filter: saturate(.2);
+    transition: all .1s linear;
+}
+
+.member__contact > a > * {
+    width: 24px;
+    height: 24px;
+    font-size: 24px;
+    filter: saturate(0);
+    color: #2f80ed;
+    transition: filter .1s linear;
+}
+
+.member__contact > a:hover > * {
+    filter: saturate(1);
+}
+
+.member__contact > a:not(:last-child) {
+    margin-right: 8px;
 }
