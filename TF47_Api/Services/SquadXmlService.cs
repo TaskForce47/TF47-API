@@ -23,6 +23,7 @@ namespace TF47_Api.Services
         private readonly IServiceProvider _serviceProvider;
         //private readonly Tf47DatabaseContext _database;
         private readonly string _path;
+        private readonly string _amakePath;
 
         public SquadXmlService(ILogger<SquadXmlService> logger, IServiceProvider serviceProvider)
         {
@@ -30,6 +31,8 @@ namespace TF47_Api.Services
             _serviceProvider = serviceProvider;
             //_database = database;
             _path = Path.Combine(Environment.CurrentDirectory, "wwwroot/squadxml").Replace("\\", "/");
+            _amakePath = Path.Combine(Environment.CurrentDirectory, "Files/armake").Replace("\\", "/");
+
             if (Directory.Exists(_path))
                 _logger.LogInformation($"wwwroot squadxml path found successful");
             else
@@ -182,7 +185,7 @@ namespace TF47_Api.Services
             {
                 try
                 {
-                    var process = Process.Start("armake", $"img2paa -f {picturePath} {paaPath}");
+                    var process = Process.Start(_amakePath, $"img2paa -f {picturePath} {paaPath}");
                     process.WaitForExit(60 * 1000);
                     if (File.Exists(paaPath)) return true;
                 }
