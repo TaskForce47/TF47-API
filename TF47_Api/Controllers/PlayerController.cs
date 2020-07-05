@@ -1,5 +1,4 @@
-﻿#nullable enable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -112,11 +111,11 @@ namespace TF47_Api.Controllers
 
         public class GadgetUser
         {
-            public uint? Id { get; set; }
-            public string? ForumName { get; set; }
-            public string? AvatarUrl { get; set; }
+            public uint Id { get; set; }
+            public string ForumName { get; set; }
+            public string AvatarUrl { get; set; }
 
-            public IEnumerable<string>? Roles { get; set; } 
+            public IEnumerable<string> Roles { get; set; } 
         }
 
         public class UserDetailResponse
