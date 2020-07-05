@@ -173,7 +173,11 @@ namespace TF47_Api.Controllers
             if (squad == null) return BadRequest("squad id not found");
 
             var uri = _configuration["ApiListeningUrl"];
-            return Ok($"{uri}squadxml/{squad.SquadNick}/squad.xml");
+            var xmlUrl = $"{uri}squadxml/{squad.SquadNick}/squad.xml";
+            return Ok(new
+            {
+                SquadLink = xmlUrl
+            });
         }
 
         [Authorize(Roles = "Admin, Moderator")]
@@ -249,7 +253,6 @@ namespace TF47_Api.Controllers
         [HttpGet("{id}/squadMemberCount")]
         public async Task<IActionResult> GetSquadMemberCount(uint id)
         {
-            if (ModelState.IsValid) return BadRequest();
             try
             {
                 var userCount = await _database.Tf47GadgetSquadUser.Where(x => x.SquadId == id)
