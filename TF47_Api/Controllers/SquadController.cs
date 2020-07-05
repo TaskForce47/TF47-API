@@ -264,6 +264,7 @@ namespace TF47_Api.Controllers
             try
             {
                 _database.Tf47GadgetSquadUser.Remove(user);
+                await _database.SaveChangesAsync();
             }
             catch (Exception ex)
             {
