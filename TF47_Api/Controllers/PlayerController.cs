@@ -61,10 +61,13 @@ namespace TF47_Api.Controllers
             };
             if (gadgetUser != null)
             {
-                response.GadgetUser.Id = gadgetUser.Id;
-                response.GadgetUser.Roles = GetRolesFromGadgetUser(gadgetUser);
-                response.GadgetUser.AvatarUrl = gadgetUser.ForumAvatarPath;
-                response.GadgetUser.ForumName = gadgetUser.ForumName;
+                response.GadgetUser = new GadgetUser
+                {
+                    Id = gadgetUser.Id,
+                    Roles = GetRolesFromGadgetUser(gadgetUser),
+                    AvatarUrl = gadgetUser.ForumAvatarPath,
+                    ForumName = gadgetUser.ForumName
+                };
             }
             return Ok(response);
         }
