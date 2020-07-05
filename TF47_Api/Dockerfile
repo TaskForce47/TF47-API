@@ -21,7 +21,7 @@ COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "TF47_Api.dll"]
 
 RUN apt-get update
-RUN apt-get install software-properties-common
+RUN apt-get install -y software-properties-common
 RUN add-apt-repository ppa:koffeinflummi/armake
 RUN apt-get update
-RUN apt-get install armake
+RUN apt-get install -y armake
