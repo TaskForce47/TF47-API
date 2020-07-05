@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -69,6 +70,38 @@ namespace TF47_Api.Controllers
             return Ok(response);
         }
 
+        [HttpGet("{id}/getNotes")]
+        public async Task<IActionResult> GetPlayerNotes(uint id)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+
+
+            var temp = await _database.Tf47ServerPlayers
+                .Include(x => x.Tf47GadgetUserNotes)
+                .ThenInclude(x => x.Author)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (temp == null) return BadRequest("player does not exist!");
+
+            var result = new PlayerNoteResponse
+            {
+                PlayerId = temp.Id,
+                PlayerName = temp.PlayerName,
+                Notes = temp.Tf47GadgetUserNotes.Select(x => new PlayerNote
+                {
+                    NodeId = x.Id,
+                    AuthorId = x.AuthorId,
+                    AuthorName = x.Author.ForumName,
+                    TimeWritten = x.TimeWritten,
+                    Note = x.PlayerNote,
+                    Type = x.Type,
+                    IsModified = x.IsModified,
+                    LastTimeModified = x.LastTimeModified
+                }).ToList()
+            };
+            return Ok(result);
+        }
+
         [HttpGet("GetPlayerDetailsLoggedIn")]
         public async Task<IActionResult> GetPlayerDetailsLoggedIn()
         {
@@ -76,12 +109,12 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Admin, Moderator")]
-        [HttpDelete("DeletePlayer")]
-        public async Task<IActionResult> DeletePlayer([FromBody] ServerPlayerRequest request)
+        [HttpDelete("{id}/delete")]
+        public async Task<IActionResult> DeletePlayer(uint id)
         {
             if (!ModelState.IsValid) return BadRequest();
-            var user = await _database.Tf47ServerPlayers.FirstOrDefaultAsync(x => x.Id == request.Id);
-            if (user == null) return BadRequest("user does not exist");
+            var user = await _database.Tf47ServerPlayers.FirstOrDefaultAsync(x => x.Id == id);
+            if (user == null) return BadRequest("user not found!");
             try
             {
                 _database.Tf47ServerPlayers.Remove(user);
@@ -105,10 +138,6 @@ namespace TF47_Api.Controllers
             public GadgetUser GadgetUser { get; set; }
         }
 
-        public class ServerPlayerRequest
-        {
-            public uint Id { get; set; }
-        }
 
         public class GadgetUser
         {
@@ -117,6 +146,26 @@ namespace TF47_Api.Controllers
             public string AvatarUrl { get; set; }
 
             public IEnumerable<string> Roles { get; set; } 
+        }
+
+        public class PlayerNoteResponse
+        {
+            public uint PlayerId { get; set; }
+            public string PlayerName { get; set; }
+
+            public List<PlayerNote> Notes { get; set; }
+        }
+
+        public class PlayerNote
+        {
+            public uint NodeId { get; set; }
+            public uint AuthorId { get; set; }
+            public string AuthorName { get; set; }
+            public DateTime TimeWritten { get; set; }
+            public string Note { get; set; }
+            public string Type { get; set; }
+            public bool IsModified { get; set; }
+            public DateTime? LastTimeModified { get; set; }
         }
 
         private IEnumerable<string> GetRolesFromGadgetUser(Tf47GadgetUser user)

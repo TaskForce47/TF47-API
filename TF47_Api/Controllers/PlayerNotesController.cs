@@ -31,64 +31,6 @@ namespace TF47_Api.Controllers
             _gadgetUserProviderService = gadgetUserProviderService;
         }
         
-        [Authorize(Roles = "Admin, Moderator")]
-        [HttpGet("GetAllPlayerNotes")]
-        public async Task<IActionResult> GetAllPlayerNotes()
-        {
-            return await Task.Run(() =>
-            {
-                var result = _database.Tf47ServerPlayers
-                    .Include(x => x.Tf47GadgetUserNotes)
-                    .ThenInclude(x => x.Author)
-                    .Where(x => x.Id > 0).Select(x => new PlayerNoteResponse
-                    {
-                        PlayerId = x.Id,
-                        PlayerName = x.PlayerName,
-                        Notes = x.Tf47GadgetUserNotes.Select(x => new PlayerNote
-                        {
-                            NodeId = x.Id,
-                            AuthorId = x.AuthorId,
-                            AuthorName = x.Author.ForumName,
-                            TimeWritten = x.TimeWritten,
-                            Note = x.PlayerNote,
-                            Type = x.Type
-                        }).ToList()
-                    });
-                return Ok(result);
-            });
-        }
-
-        [Authorize(Roles = "Moderator, Admin")]
-        [HttpGet("GetNotesById")]
-        public async Task<IActionResult> GetNotesByUserId([FromBody] PlayerIdRequest request)
-        {
-            if (!ModelState.IsValid) return BadRequest();
-
-
-            var temp = await _database.Tf47ServerPlayers
-                .Include(x => x.Tf47GadgetUserNotes)
-                .ThenInclude(x => x.Author)
-                .FirstOrDefaultAsync(x => x.Id == request.PlayerId);
-
-            if (temp == null) return BadRequest("player does not exist!");
-
-            var result = new PlayerNoteResponse
-            {
-                PlayerId = temp.Id,
-                PlayerName = temp.PlayerName,
-                Notes = temp.Tf47GadgetUserNotes.Select(x => new PlayerNote
-                {
-                    NodeId = x.Id,
-                    AuthorId = x.AuthorId,
-                    AuthorName = x.Author.ForumName,
-                    TimeWritten = x.TimeWritten,
-                    Note = x.PlayerNote,
-                    Type = x.Type
-                }).ToList()
-            };
-            return Ok(result);
-        }
-
         [Authorize(Roles = "Moderator, Admin")]
         [HttpPut("AddNote")]
         public async Task<IActionResult> AddNote([FromBody] AddNoteRequest request)
@@ -112,19 +54,21 @@ namespace TF47_Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Cannot store new note! {ex.Message}");
+                var error = $"Cannot store new note!";
+                _logger.LogError($"{error}: {ex.Message}");
+                return new ServerError(error);
             }
 
             return Ok();
         }
 
         [Authorize(Roles = "Moderator, Admin")]
-        [HttpDelete("DeleteNote")]
-        public async Task<IActionResult> DeleteNote([FromBody] DeleteNodeRequest request)
+        [HttpDelete("{id}/delete")]
+        public async Task<IActionResult> DeleteNote(uint id)
         {
             if (!ModelState.IsValid) return BadRequest();
 
-            var note = await _database.Tf47GadgetUserNotes.FirstOrDefaultAsync(x => x.Id == request.NodeId);
+            var note = await _database.Tf47GadgetUserNotes.FirstOrDefaultAsync(x => x.Id == id);
             if (note == null) return NotFound("note cannot be found!");
             try
             {
@@ -142,12 +86,12 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Moderator, Admin")]
-        [HttpPut("UpdateNote")]
-        public async Task<IActionResult> UpdateNote([FromBody] UpdateNoteRequest request)
+        [HttpPut("{id}/update")]
+        public async Task<IActionResult> UpdateNote(uint id, [FromBody] UpdateNoteRequest request)
         {
             if (!ModelState.IsValid) return BadRequest();
 
-            var note = await _database.Tf47GadgetUserNotes.FirstOrDefaultAsync(x => x.Id == request.NodeId);
+            var note = await _database.Tf47GadgetUserNotes.FirstOrDefaultAsync(x => x.Id == id);
             if (note == null) return NotFound("Note not found!");
 
             var currentUser = await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
@@ -156,29 +100,23 @@ namespace TF47_Api.Controllers
             if (note.AuthorId != currentUser.Id) return BadRequest("you cannot edit someone else notes!");
 
             note.PlayerNote = request.Note;
-            note.PlayerNote += $"\nLast time edited: {DateTime.Now.ToShortDateString()}";
+            note.LastTimeModified = DateTime.Now;
+            note.IsModified = true;
             note.Type = request.Type;
 
+            try
+            {
+                _database.Update(note);
+                await _database.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                var error = $"Error while trying to update node {note.Id}";
+                _logger.LogError($"{error}: {ex.Message}");
+                return new ServerError(error);
+            }
+
             return Ok();
-        }
-
-
-        public class PlayerNoteResponse
-        {
-            public uint PlayerId { get; set; }
-            public string PlayerName { get; set; }
-
-            public List<PlayerNote> Notes { get; set; }
-        }
-
-        public class PlayerNote
-        {
-            public uint NodeId { get; set; }
-            public uint AuthorId { get; set; }
-            public string AuthorName { get; set; }
-            public DateTime TimeWritten { get; set; }
-            public string Note { get; set; }
-            public string Type { get; set; }
         }
 
         public class AddNoteRequest
@@ -190,15 +128,9 @@ namespace TF47_Api.Controllers
 
         public class UpdateNoteRequest
         {
-            public uint NodeId { get; set; }
             public string Note { get; set; }
             public uint PlayerId { get; set; }
             public string Type { get; set; }
-        }
-
-        public class DeleteNodeRequest
-        {
-            public uint NodeId { get; set; }
         }
     }
 }
