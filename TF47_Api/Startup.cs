@@ -79,7 +79,10 @@ namespace TF47_Api
             //app.UseHttpsRedirection();
             app.UseCustomCookieAuthentication();
 
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ServeUnknownFileTypes = true
+            });
            
             //app.UseCors("Policy");
 
