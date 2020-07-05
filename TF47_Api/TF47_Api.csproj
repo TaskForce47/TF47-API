@@ -34,6 +34,9 @@
     <Content Update="wwwroot\squadxml\squad.xsl">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="wwwroot\squadxml\steam.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="wwwroot\squadxml\tf47_logo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

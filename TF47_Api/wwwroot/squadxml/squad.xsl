@@ -39,6 +39,7 @@
         <main class="members">
           <xsl:for-each select="/squad/member">
             <div class="member">
+              <img class="member__avatar" src="tf47_logo.png" />
               <span class="member__nick" >
                 <xsl:value-of select="@nick"/>
               </span>
