@@ -58,15 +58,15 @@ namespace TF47_Api.Controllers
                     Id = serverPlayer.Id,
                     Name = serverPlayer.PlayerName,
                     Uid = serverPlayer.PlayerUid
-                },
-                User = new GadgetUser
-                {
-                    Id = gadgetUser.Id,
-                    AvatarUrl = gadgetUser.ForumAvatarPath,
-                    ForumName = gadgetUser.ForumName,
-                    Roles = GetRolesFromGadgetUser(gadgetUser)
                 }
             };
+            if (gadgetUser != null)
+            {
+                response.User.Id = gadgetUser.Id;
+                response.User.Roles = GetRolesFromGadgetUser(gadgetUser);
+                response.User.AvatarUrl = gadgetUser.ForumAvatarPath;
+                response.User.ForumName = gadgetUser.ForumName;
+            }
             return Ok(response);
         }
 
