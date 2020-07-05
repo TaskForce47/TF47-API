@@ -26,7 +26,7 @@ namespace TF47_Api.Services
             var forumIdClaim = context.User.Claims.First(x => x.Type == CustomClaimTypes.ForumId).Value;
             if (string.IsNullOrEmpty(forumIdClaim)) return null;
 
-            var currentUser = await _database.Tf47GadgetUser.FirstOrDefaultAsync(x => x.Id == uint.Parse(forumIdClaim));
+            var currentUser = await _database.Tf47GadgetUser.FirstOrDefaultAsync(x => x.ForumId == uint.Parse(forumIdClaim));
             if (currentUser == null)
             {
                 _logger.LogWarning($"This should not be null, claim: {forumIdClaim}");
