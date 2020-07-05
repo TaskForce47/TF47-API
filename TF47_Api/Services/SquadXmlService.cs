@@ -176,6 +176,13 @@ namespace TF47_Api.Services
         {
             var picturePath = Path.Combine(_path, squad.SquadNick, "logo.png").Replace("\\","/");
             var paaPath = Path.Combine(_path, squad.SquadNick, "logo.paa").Replace("\\", "/");
+
+            if (File.Exists(picturePath))
+                File.Delete(picturePath);
+
+            if(File.Exists(paaPath))
+                File.Delete(paaPath);
+
             await using var stream = new FileStream(picturePath, FileMode.CreateNew);
             await data.CopyToAsync(stream);
 
