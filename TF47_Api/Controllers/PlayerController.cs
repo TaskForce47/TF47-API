@@ -50,14 +50,11 @@ namespace TF47_Api.Controllers
             var gadgetUser =
                 await _database.Tf47GadgetUser.FirstOrDefaultAsync(x => x.PlayerUid == serverPlayer.PlayerUid);
 
-            var response = new UserDetailResponse
+            var response = new ServerPlayer
             {
-                ServerPlayer = new ServerPlayer
-                {
-                    Id = serverPlayer.Id,
-                    Name = serverPlayer.PlayerName,
-                    Uid = serverPlayer.PlayerUid
-                }
+                Id = serverPlayer.Id,
+                Name = serverPlayer.PlayerName,
+                Uid = serverPlayer.PlayerUid
             };
             if (gadgetUser != null)
             {
@@ -105,6 +102,7 @@ namespace TF47_Api.Controllers
             public uint Id { get; set; }
             public string Name { get; set; }
             public string Uid { get; set; }
+            public GadgetUser GadgetUser { get; set; }
         }
 
         public class ServerPlayerRequest
@@ -119,12 +117,6 @@ namespace TF47_Api.Controllers
             public string AvatarUrl { get; set; }
 
             public IEnumerable<string> Roles { get; set; } 
-        }
-
-        public class UserDetailResponse
-        {
-            public ServerPlayer ServerPlayer { get; set; }
-            public GadgetUser GadgetUser { get; set; }
         }
 
         private IEnumerable<string> GetRolesFromGadgetUser(Tf47GadgetUser user)
