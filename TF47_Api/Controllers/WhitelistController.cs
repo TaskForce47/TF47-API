@@ -45,27 +45,29 @@ namespace TF47_Api.Controllers
             if (string.IsNullOrEmpty(playerUid)) return BadRequest("missing playeruid!");
 
             var serverPlayer = await _database.Tf47ServerPlayers.FirstOrDefaultAsync(x => x.PlayerUid == playerUid);
-            var result = await GetUserWhitelist(new PlayerIdRequest {PlayerId = serverPlayer.Id});
+            var result = await GetUserWhitelist(serverPlayer.Id);
 
             return Ok(result);
 
         }
 
         [Authorize(Roles = "Moderator, Admin")]
-        [HttpGet("getWhitelistUser")]
-        public async Task<IActionResult> GetUserWhitelist([FromBody] PlayerIdRequest playerIdRequest)
+        [HttpGet("{id}/getWhitelist")]
+        public async Task<IActionResult> GetUserWhitelist(uint id)
         {
-            if (!ModelState.IsValid) return BadRequest("model state is not correct!");
-
             var response = new List<UserWhitelistResponse>();
-            var availableWhitelist = await _database.Tf47ServerWhitelists.Where(x => x.Id > 0).Select(x => new Whitelist
+            var availableWhitelist = await _database.Tf47ServerWhitelists
+                .Where(x => x.Id > 0)
+                .Select(x => new Whitelist
             {
                 Id = x.Id,
                 Enabled = false,
                 WhitelistName = x.Description
             }).ToListAsync();
 
-            var player = await _database.Tf47ServerPlayers.Include(x => x.Tf47ServerPlayerWhitelisting).FirstOrDefaultAsync(x => x.Id == playerIdRequest.PlayerId);
+            var player = await _database.Tf47ServerPlayers
+                .Include(x => x.Tf47ServerPlayerWhitelisting)
+                .FirstOrDefaultAsync(x => x.Id == id);
             if (player == null) return BadRequest("player id does not exist!");
             var userWhitelistResponse = new UserWhitelistResponse
             {
