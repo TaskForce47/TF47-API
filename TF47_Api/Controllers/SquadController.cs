@@ -263,7 +263,7 @@ namespace TF47_Api.Controllers
 
             try
             {
-                _database.Remove(user);
+                _database.Tf47GadgetSquadUser.Remove(user);
             }
             catch (Exception ex)
             {
