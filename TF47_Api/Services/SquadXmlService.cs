@@ -25,7 +25,7 @@ namespace TF47_Api.Services
             _logger = logger;
             _serviceProvider = serviceProvider;
             //_database = database;
-            _path = Path.Combine(Environment.CurrentDirectory, @"wwwroot\squadxml");
+            _path = Path.Combine(Environment.CurrentDirectory, "wwwroot/squadxml").Replace("\\", "/");
             if (Directory.Exists(_path))
                 _logger.LogInformation($"wwwroot squadxml path found successful");
             else
@@ -103,8 +103,8 @@ namespace TF47_Api.Services
             }
             data.Add("</squad>");
 
-            var squadXmlPath = Path.Combine(_path, squad.SquadNick, "squad.xml");
-            var squadDtdPath = Path.Combine(_path, squad.SquadNick, "squad.dtd");
+            var squadXmlPath = Path.Combine(_path, squad.SquadNick, "squad.xml").Replace("\\", "/");
+            var squadDtdPath = Path.Combine(_path, squad.SquadNick, "squad.dtd").Replace("\\", "/");
 
             if (File.Exists(squadXmlPath))
                 File.Delete(squadXmlPath);
@@ -167,6 +167,7 @@ namespace TF47_Api.Services
 
         public async Task CreatePicture(IFormFile data, Tf47GadgetSquad squad)
         {
+            
             var picturePath = Path.Combine(_path, squad.SquadNick, "logo.paa");
             await using var stream = new FileStream(picturePath, FileMode.CreateNew);
             await data.CopyToAsync(stream);
