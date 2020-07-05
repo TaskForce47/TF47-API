@@ -104,9 +104,15 @@ namespace TF47_Api.Services
             data.Add("</squad>");
 
             var squadXmlPath = Path.Combine(_path, squad.SquadNick, "squad.xml");
+            var squadDtdPath = Path.Combine(_path, squad.SquadNick, "squad.dtd");
+
             if (File.Exists(squadXmlPath))
                 File.Delete(squadXmlPath);
+            if (File.Exists(squadDtdPath))
+                File.Delete(squadDtdPath);
+
             await File.WriteAllLinesAsync(squadXmlPath, data.ToArray(), Encoding.UTF8);
+
             string[] dtd =
             {
                 "<!ELEMENT squad (name, email, web?, picture?, title?, member+)>",
@@ -125,8 +131,7 @@ namespace TF47_Api.Services
                 "<!ELEMENT picture (#PCDATA)>",
                 "<!ELEMENT title (#PCDATA)>"
             };
-
-            await File.WriteAllLinesAsync(Path.Combine(_path, squad.SquadNick, "squad.dtd"), dtd, CancellationToken.None);
+            await File.WriteAllLinesAsync(squadDtdPath, dtd, CancellationToken.None);
             _logger.LogInformation($"Create squad.xml file for unit {squad.SquadName}.");
         }
 
