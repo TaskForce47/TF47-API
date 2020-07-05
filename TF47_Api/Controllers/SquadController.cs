@@ -36,16 +36,6 @@ namespace TF47_Api.Controllers
         }
 
         [HttpGet("getSquads")]
-        public async Task<IActionResult> GetSquads()
-        {
-            return await Task.Run(() =>
-            {
-                var squads = _database.Tf47GadgetSquad.Where(x => x.Id > 0);
-                return Ok(squads);
-            });
-        }
-
-        [HttpGet("getSquadsWithUsers")]
         public async Task<IActionResult> GetSquadsWithUsers()
         {
             return await Task.Run(() =>
@@ -72,6 +62,39 @@ namespace TF47_Api.Controllers
                             }).ToList()
                         });
                 return Ok(response);
+            });
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetSquad(uint id)
+        {
+            return await Task.Run(() =>
+            {
+                var response = _database.Tf47GadgetSquad
+                    .Include(x => x.Tf47GadgetSquadUser)
+                    .ThenInclude(y => y.User)
+                    .Where(x => x.Id == id)
+                    .Select(
+                        x => new SquadsWithUserResponse
+                        {
+                            Id = x.Id,
+                            SquadEmail = x.SquadEmail,
+                            SquadHasPicture = x.SquadHasPicture,
+                            SquadName = x.SquadName,
+                            SquadNick = x.SquadNick,
+                            SquadTitle = x.SquadTitle,
+                            SquadWeb = x.SquadWeb,
+                            SquadUsers = x.Tf47GadgetSquadUser.Select(z => new SquadUser
+                            {
+                                UserId = z.UserId,
+                                UserSquadEmail = z.UserSquadEmail,
+                                UserSquadIcq = z.UserSquadIcq,
+                                UserSquadName = z.UserSquadName,
+                                UserSquadNick = z.UserSquadNick,
+                                UserSquadRemark = z.UserSquadRemark
+                            }).ToList()
+                        });
+                return Ok(response.First(x => x.Id > 0));
             });
         }
 
@@ -130,7 +153,7 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Admin, Moderator")]
-        [HttpDelete("{id}/deleteSquad")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSquad(uint id)
         {
             var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == id);
