@@ -137,6 +137,23 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Admin, Moderator")]
+        [HttpPost("{id}/update")]
+        public async Task<IActionResult> UpdateSquad(uint id, [FromBody] UpdateSquadRequest updateSquadRequest)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+            var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == id);
+            if (squad == null) return BadRequest("Squad does not exist!");
+
+            squad.SquadEmail = updateSquadRequest.Email;
+            squad.SquadTitle = updateSquadRequest.SquadTitle;
+            squad.SquadWeb = updateSquadRequest.Homepage;
+            squad.SquadNick = updateSquadRequest.SquadNick;
+
+            await _database.SaveChangesAsync();
+            return Ok();
+        }
+
+        [Authorize(Roles = "Admin, Moderator")]
         [HttpPost("{id}/uploadSquadPicture")]
         public async Task<IActionResult> UploadSquadPicture(uint id, IFormFile data)
         {
@@ -340,6 +357,14 @@ namespace TF47_Api.Controllers
                 return new ServerError("something went wrong fetching squad member count");
             }
         }
+    }
+
+    public class UpdateSquadRequest
+    {
+        public string SquadNick { get; set; }
+        public string SquadTitle { get; set; }
+        public string Email { get; set; }
+        public string Homepage { get; set; }
     }
 
     public class UpdateSquadMemberDetails
