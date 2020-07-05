@@ -53,7 +53,7 @@ namespace TF47_Api.Controllers
 
             var response = new UserDetailResponse
             {
-                Player = new ServerPlayer
+                ServerPlayer = new ServerPlayer
                 {
                     Id = serverPlayer.Id,
                     Name = serverPlayer.PlayerName,
@@ -62,10 +62,10 @@ namespace TF47_Api.Controllers
             };
             if (gadgetUser != null)
             {
-                response.User.Id = gadgetUser.Id;
-                response.User.Roles = GetRolesFromGadgetUser(gadgetUser);
-                response.User.AvatarUrl = gadgetUser.ForumAvatarPath;
-                response.User.ForumName = gadgetUser.ForumName;
+                response.GadgetUser.Id = gadgetUser.Id;
+                response.GadgetUser.Roles = GetRolesFromGadgetUser(gadgetUser);
+                response.GadgetUser.AvatarUrl = gadgetUser.ForumAvatarPath;
+                response.GadgetUser.ForumName = gadgetUser.ForumName;
             }
             return Ok(response);
         }
@@ -121,8 +121,8 @@ namespace TF47_Api.Controllers
 
         public class UserDetailResponse
         {
-            public ServerPlayer Player { get; set; }
-            public GadgetUser User { get; set; }
+            public ServerPlayer ServerPlayer { get; set; }
+            public GadgetUser GadgetUser { get; set; }
         }
 
         private IEnumerable<string> GetRolesFromGadgetUser(Tf47GadgetUser user)
