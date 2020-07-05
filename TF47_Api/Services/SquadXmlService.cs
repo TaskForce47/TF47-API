@@ -101,7 +101,13 @@ namespace TF47_Api.Services
             data.Add($"\t<title>{squad.SquadTitle}</title>");
             foreach (var tf47GadgetSquadUser in squad.Tf47GadgetSquadUser)
             {
-                data.Add($"\t<member id=\"{tf47GadgetSquadUser.User.PlayerUid}\" nick=\"{tf47GadgetSquadUser.UserSquadNick}\">");
+                var player =
+                    await database.Tf47ServerPlayers.FirstOrDefaultAsync(x =>
+                        x.PlayerUid == tf47GadgetSquadUser.User.PlayerUid);
+
+                data.Add(player == null
+                    ? $"\t<member id=\"\" nick=\"{"N/A"}\">"
+                    : $"\t<member id=\"{tf47GadgetSquadUser.User.PlayerUid}\" nick=\"{player.PlayerName}\">");
                 data.Add($"\t\t<name>{tf47GadgetSquadUser.UserSquadName}</name>");
                 data.Add($"\t\t<email>{tf47GadgetSquadUser.UserSquadEmail}</email>");
                 //data.Add($"\t\t<icq>{tf47GadgetSquadUser.UserSquadIcq}</icq>");
