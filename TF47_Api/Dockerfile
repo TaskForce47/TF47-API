@@ -26,3 +26,5 @@ RUN apt-get update \
         libgdiplus \
         libx11-dev \
      && rm -rf /var/lib/apt/lists/*
+
+RUN ["chmod", "+x", "/app/Files/armake"]
