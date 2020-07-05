@@ -110,7 +110,7 @@ namespace TF47_Api.Services
                     : $"\t<member id=\"{tf47GadgetSquadUser.User.PlayerUid}\" nick=\"{player.PlayerName}\">");
                 data.Add($"\t\t<name>{tf47GadgetSquadUser.UserSquadName}</name>");
                 data.Add($"\t\t<email>{tf47GadgetSquadUser.UserSquadEmail}</email>");
-                //data.Add($"\t\t<icq>{tf47GadgetSquadUser.UserSquadIcq}</icq>");
+                data.Add($"\t\t<icq>N/A</icq>");
                 data.Add($"\t\t<remark>{tf47GadgetSquadUser.UserSquadRemark}</remark>");
                 data.Add($"\t</member>");
             }
