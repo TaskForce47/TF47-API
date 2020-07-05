@@ -113,10 +113,10 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Admin, Moderator")]
-        [HttpPost("uploadSquadPicture")]
-        public async Task<IActionResult> UploadSquadPicture(IFormFile data, [FromBody] SquadIdRequest request)
+        [HttpPost("{id}/uploadSquadPicture")]
+        public async Task<IActionResult> UploadSquadPicture(uint id, IFormFile data)
         {
-            var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == request.SquadId);
+            var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == id);
             if (squad == null) return BadRequest("cannot find squad");
             _squadXmlService.DeletePicture(squad);
 
@@ -130,10 +130,10 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Admin, Moderator")]
-        [HttpDelete("deleteSquad")]
-        public async Task<IActionResult> DeleteSquad([FromBody] SquadIdRequest request)
+        [HttpDelete("{id}/deleteSquad")]
+        public async Task<IActionResult> DeleteSquad(uint id)
         {
-            var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == request.SquadId);
+            var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == id);
             if (squad == null) return BadRequest("squad id not found");
             _squadXmlService.DeleteSquadXml(squad);
 
@@ -143,10 +143,10 @@ namespace TF47_Api.Controllers
             return Ok();
         }
 
-        [HttpGet("getSquadXml")]
-        public async Task<IActionResult> GetSquadXmlUrl([FromBody] SquadIdRequest request)
+        [HttpGet("{id}/getSquadXml")]
+        public async Task<IActionResult> GetSquadXmlUrl(uint id)
         {
-            var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == request.SquadId);
+            var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == id);
             if (squad == null) return BadRequest("squad id not found");
 
             var uri = _configuration["ApiListeningUrl"];
@@ -154,10 +154,10 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Admin, Moderator")]
-        [HttpPost("rebuildSquadXml")]
-        public async Task<IActionResult> RebuildSquadXml([FromBody] SquadIdRequest request)
+        [HttpPost("{id}/rebuild")]
+        public async Task<IActionResult> RebuildSquadXml(ulong id)
         {
-            var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == request.SquadId);
+            var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == id);
             if (squad == null) return BadRequest("squad id not found");
             try
             {
@@ -172,8 +172,8 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Admin, Moderator")]
-        [HttpPost("rebuildAllSquadXmls")]
-        public async Task<IActionResult> RebuildAllSquadXmls()
+        [HttpPost("rebuildAllSquadXml")]
+        public async Task<IActionResult> RebuildAllSquadXml()
         {
             try
             {
@@ -181,6 +181,7 @@ namespace TF47_Api.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError($"Error while trying to regenerate all squadxmls: {ex.Message}");
                 return StatusCode(500, "something went wrong while rebuilding the squad xml");
             }
 
@@ -188,22 +189,22 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Admin, Moderator")]
-        [HttpPut("addSquadMember")]
-        public async Task<IActionResult> AddSquadMember([FromBody] AddSquadMemberRequest request)
+        [HttpPut("{id}/addSquadMember")]
+        public async Task<IActionResult> AddSquadMember(uint id, [FromBody] AddSquadMemberRequest request)
         {
             if (!ModelState.IsValid) return BadRequest();
 
             var gadgetUser = await _database.Tf47GadgetUser.FirstOrDefaultAsync(x => x.Id == request.GadgetUserId);
             if (gadgetUser == null) return BadRequest("user does not exist");
             var squadUser = await _database.Tf47GadgetSquadUser.FirstOrDefaultAsync(x =>
-                x.UserId == request.GadgetUserId && x.SquadId == request.SquadId);
+                x.UserId == request.GadgetUserId && x.SquadId == id);
             if (squadUser != null) return BadRequest("user already is a member of this squad");
 
             try
             {
                 await _database.Tf47GadgetSquadUser.AddAsync(new Tf47GadgetSquadUser
                 {
-                    SquadId = request.SquadId,
+                    SquadId = id,
                     UserId = request.GadgetUserId,
                     UserSquadIcq = "n/a",
                     UserSquadName = gadgetUser.ForumName,
@@ -222,23 +223,23 @@ namespace TF47_Api.Controllers
             return Ok();
         }
 
-        [HttpGet("squadMemberCount")]
-        public async Task<IActionResult> GetSquadMemberCount([FromBody] SquadMemberCountRequest request)
+        [HttpGet("{id}/squadMemberCount")]
+        public async Task<IActionResult> GetSquadMemberCount(uint id)
         {
             if (ModelState.IsValid) return BadRequest();
             try
             {
-                var userCount = await _database.Tf47GadgetSquadUser.Where(x => x.SquadId == request.SquadId)
+                var userCount = await _database.Tf47GadgetSquadUser.Where(x => x.SquadId == id)
                     .SumAsync(x => x.Id);
                 return Ok(new
                 {
-                    SquadId = request.SquadId,
+                    SquadId = id,
                     SquadMemberCount = userCount
                 });
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Something went wrong fetching squad member count: {ex.Message}\nRequest squadid {request.SquadId}");
+                _logger.LogError($"Something went wrong fetching squad member count: {ex.Message}\nRequest squadid {id}");
                 return StatusCode(500, "something went wrong fetching squad member count");
             }
         }
