@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using TF47_Api.CustomStatusCodes;
 using TF47_Api.Database;
 using TF47_Api.DTO;
 using TF47_Api.Models;
@@ -144,6 +145,7 @@ namespace TF47_Api.Controllers
             _squadXmlService.DeletePicture(squad);
 
             if (data.Length < 1) return BadRequest("data corrupted");
+            if (data.ContentType != "image/png") return BadRequest("only png images are allowed!");
 
             await _squadXmlService.CreatePicture(data, squad);
             squad.SquadHasPicture = true;
@@ -250,6 +252,74 @@ namespace TF47_Api.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Admin, Moderator")]
+        [HttpDelete("{id}/removeSquadMember")]
+        public async Task<IActionResult> RemoveSquadMember(uint id, [FromBody] DeleteSquadMemberRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+            var user = await _database.Tf47GadgetSquadUser.Include(x => x.User).FirstOrDefaultAsync(x =>
+                x.SquadId == id && x.UserId == request.GadgetUserId);
+            if (user == null) return BadRequest("user cannot be found!");
+
+            try
+            {
+                _database.Remove(user);
+            }
+            catch (Exception ex)
+            {
+                var error = $"Error while trying to remove user {user.User.ForumName} from squad {user.UserSquadNick}";
+                _logger.LogError("{error}: {ex.Message}");
+                return new CustomStatusCodes.ServerError(error);
+            }
+
+            try
+            {
+                if (user.SquadId != null) await _squadXmlService.GenerateSquadXml(user.SquadId.Value);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Warning cannot regenerate squadxml {user.UserSquadNick}");
+            }
+            return Ok();
+        }
+
+        [Authorize(Roles = "Admin, Moderator")]
+        [HttpPost("{id}/updateSquadMemberDetails")]
+        public async Task<IActionResult> UpdateSquadMemberDetails(uint id, [FromBody] UpdateSquadMemberDetails request)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+            var user = await _database.Tf47GadgetSquadUser
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x =>
+                x.SquadId == id && x.UserId == request.GadgetUserId);
+            if (user == null) return BadRequest("user does not exist!");
+
+            user.UserSquadEmail = request.Email;
+            user.UserSquadRemark = request.Remark;
+
+            try
+            {
+                _database.Update(user);
+            }
+            catch (Exception ex)
+            {
+                var error = $"something went wrong while trying to update {user.User.ForumName} squad xml information!";
+                _logger.LogError($"{error}: {ex.Message}");
+                return new ServerError(error);
+            }
+
+            try
+            {
+                if (user.SquadId != null) await _squadXmlService.GenerateSquadXml(user.SquadId.Value);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Warning cannot regenerate squadxml {user.UserSquadNick}");
+            }
+
+            return Ok();
+        }
+
         [HttpGet("{id}/squadMemberCount")]
         public async Task<IActionResult> GetSquadMemberCount(uint id)
         {
@@ -266,8 +336,20 @@ namespace TF47_Api.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Something went wrong fetching squad member count: {ex.Message}\nRequest squadid {id}");
-                return StatusCode(500, "something went wrong fetching squad member count");
+                return new ServerError("something went wrong fetching squad member count");
             }
         }
+    }
+
+    public class UpdateSquadMemberDetails
+    {
+        public uint GadgetUserId { get; set; }
+        public string Email { get; set; }
+        public string Remark { get; set; }
+    }
+
+    public class DeleteSquadMemberRequest
+    {
+        public uint GadgetUserId { get; set; }
     }
 }
