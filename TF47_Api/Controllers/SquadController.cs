@@ -164,10 +164,17 @@ namespace TF47_Api.Controllers
             if (data.Length < 1) return BadRequest("data corrupted");
             if (data.ContentType != "image/png") return BadRequest("only png images are allowed!");
 
-            await _squadXmlService.CreatePicture(data, squad);
-            squad.SquadHasPicture = true;
-            await _database.SaveChangesAsync();
-            await _squadXmlService.GenerateSquadXml(squad.Id);
+            var successful = await _squadXmlService.CreatePicture(data, squad);
+            if (successful)
+            {
+                squad.SquadHasPicture = true;
+                await _database.SaveChangesAsync();
+                await _squadXmlService.GenerateSquadXml(squad.Id);
+            }
+            else
+            {
+                return new ServerError("Only png files with a equal height and width are allowed!");
+            }
             return Ok();
         }
 

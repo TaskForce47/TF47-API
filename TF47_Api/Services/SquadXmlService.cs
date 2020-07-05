@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Mime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -165,12 +169,35 @@ namespace TF47_Api.Services
             }
         }
 
-        public async Task CreatePicture(IFormFile data, Tf47GadgetSquad squad)
+        public async Task<bool> CreatePicture(IFormFile data, Tf47GadgetSquad squad)
         {
-            
-            var picturePath = Path.Combine(_path, squad.SquadNick, "logo.paa");
+            var picturePath = Path.Combine(_path, squad.SquadNick, "logo.png").Replace("\\","/");
+            var paaPath = Path.Combine(_path, squad.SquadNick, "logo.paa").Replace("\\", "/");
             await using var stream = new FileStream(picturePath, FileMode.CreateNew);
             await data.CopyToAsync(stream);
+
+            _logger.LogInformation("Trying to convert image to paa");
+            using var image = Image.FromFile(picturePath);
+            if (image.Height == image.Width)
+            {
+                try
+                {
+                    var process = Process.Start("armake", $"img2paa -f {picturePath} {paaPath}");
+                    process.WaitForExit(60 * 1000);
+                    if (File.Exists(paaPath)) return true;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Failed converting image to paa: {ex.Message}");
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Image must have the same height and width!");
+                File.Delete(picturePath);
+            }
+
+            return false;
         }
     }
 }
