@@ -89,6 +89,7 @@ namespace TF47_Api.Services
 
             var data = new List<string>();
             data.Add("<?xml version=\"1.0\"?>");
+            data.Add("<?xml-stylesheet type=\"text/xsl\" href=\"squadxml/squad.xsl\" ?>");
             data.Add("<!DOCTYPE squad SYSTEM \"squad.dtd\">");
             data.Add($"<squad nick=\"{squad.SquadNick}\">");
             data.Add($"\t<name>{squad.SquadName}</name>");
