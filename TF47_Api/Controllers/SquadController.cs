@@ -99,7 +99,16 @@ namespace TF47_Api.Controllers
                return StatusCode(500, "something went wrong while trying to insert new squad.");
             }
 
-            await _squadXmlService.RegenerateSquadXmls();
+            try
+            {
+                await _squadXmlService.RegenerateSquadXmls();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to regenerate squadxml: {ex.Message}");
+                return new CustomStatusCodes.ServerError("Failed to regenerate squadxml!");
+            }
+            
             return Ok();
         }
 

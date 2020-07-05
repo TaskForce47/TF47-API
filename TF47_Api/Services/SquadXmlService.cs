@@ -26,7 +26,23 @@ namespace TF47_Api.Services
             _serviceProvider = serviceProvider;
             //_database = database;
             _path = Path.Combine(Environment.CurrentDirectory, @"wwwroot\squadxml");
-            if(! Directory.Exists(_path)) _logger.LogCritical("Cannot find squadxml folder in wwwroot");
+            if (Directory.Exists(_path))
+                _logger.LogInformation($"wwwroot squadxml path found successful");
+            else
+            {
+                _logger.LogWarning("wwwroot squadxml path not found, creating new one...");
+                try
+                {
+                    Directory.CreateDirectory(_path);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Cannot create squadxml path {ex.Message}");
+                    throw;
+                }
+
+                RegenerateSquadXmls().Wait();
+            }
         }
 
         public void DeletePicture(Tf47GadgetSquad squad)
@@ -91,7 +107,26 @@ namespace TF47_Api.Services
             if (File.Exists(squadXmlPath))
                 File.Delete(squadXmlPath);
             await File.WriteAllLinesAsync(squadXmlPath, data.ToArray(), Encoding.UTF8);
-            File.Copy(Path.Combine(_path, "squad.dtd"), Path.Combine(_path, squad.SquadNick, "squad.dtd"), true);
+            string[] dtd =
+            {
+                "<!ELEMENT squad (name, email, web?, picture?, title?, member+)>",
+                "<!ATTLIST squad nick CDATA #REQUIRED>",
+                "",
+                "<!ELEMENT member (name, email, icq?, remark?, picture?, steamid?)>",
+                "<!ATTLIST member id CDATA #REQUIRED nick CDATA #REQUIRED>",
+                "",
+                "<!ELEMENT name (#PCDATA)>",
+                "<!ELEMENT email (#PCDATA)>",
+                "<!ELEMENT icq (#PCDATA)>",
+                "<!ATTLIST icq href CDATA #IMPLIED>",
+                "<!ELEMENT steamid (#PCDATA)>",
+                "<!ELEMENT web (#PCDATA)>",
+                "<!ELEMENT remark (#PCDATA)>",
+                "<!ELEMENT picture (#PCDATA)>",
+                "<!ELEMENT title (#PCDATA)>"
+            };
+
+            await File.WriteAllLinesAsync(Path.Combine(_path, squad.SquadNick, "squad.dtd"), dtd, CancellationToken.None);
             _logger.LogInformation($"Create squad.xml file for unit {squad.SquadName}.");
         }
 
