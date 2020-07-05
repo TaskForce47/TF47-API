@@ -144,9 +144,9 @@ namespace TF47_Api.Controllers
             var squad = await _database.Tf47GadgetSquad.FirstOrDefaultAsync(x => x.Id == id);
             if (squad == null) return BadRequest("Squad does not exist!");
 
-            squad.SquadEmail = updateSquadRequest.Email;
+            squad.SquadEmail = updateSquadRequest.SquadEmail;
             squad.SquadTitle = updateSquadRequest.SquadTitle;
-            squad.SquadWeb = updateSquadRequest.Homepage;
+            squad.SquadWeb = updateSquadRequest.SquadWeb;
             squad.SquadNick = updateSquadRequest.SquadNick;
 
             await _database.SaveChangesAsync();
@@ -370,8 +370,8 @@ namespace TF47_Api.Controllers
     {
         public string SquadNick { get; set; }
         public string SquadTitle { get; set; }
-        public string Email { get; set; }
-        public string Homepage { get; set; }
+        public string SquadEmail { get; set; }
+        public string SquadWeb { get; set; }
     }
 
     public class UpdateSquadMemberDetails
