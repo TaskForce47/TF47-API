@@ -11,6 +11,9 @@ namespace TF47_Api.Database
         public uint AuthorId { get; set; }
         public DateTime TimeWritten { get; set; }
         public string Type { get; set; }
+        public bool IsModified { get; set; }
+        public DateTime? LastTimeModified { get; set; }
+
 
         public virtual Tf47GadgetUser Author { get; set; }
         public virtual Tf47ServerPlayers Player { get; set; }

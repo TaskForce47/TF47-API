@@ -384,6 +384,13 @@ namespace TF47_Api.Database
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
+                entity.Property(e => e.IsModified)
+                    .HasColumnName("modified");
+
+                entity.Property(e => e.LastTimeModified)
+                    .HasColumnName("modified_timestamp")
+                    .HasColumnType("datetime");
+
                 entity.HasOne(d => d.Author)
                     .WithMany(p => p.Tf47GadgetUserNotes)
                     .HasForeignKey(d => d.AuthorId)
