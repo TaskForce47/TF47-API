@@ -309,7 +309,7 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Admin, Moderator")]
-        [HttpPost("{id}/updateSquadMemberDetails")]
+        [HttpPost("{id}/updateSquadMember")]
         public async Task<IActionResult> UpdateSquadMemberDetails(uint id, [FromBody] UpdateSquadMemberDetails request)
         {
             if (!ModelState.IsValid) return BadRequest();
@@ -325,6 +325,7 @@ namespace TF47_Api.Controllers
             try
             {
                 _database.Update(user);
+                await _database.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -339,7 +340,7 @@ namespace TF47_Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"Warning cannot regenerate squadxml {user.UserSquadNick}");
+                _logger.LogWarning($"Warning cannot regenerate squadxml {user.UserSquadNick}: {ex.Message}");
             }
 
             return Ok();
