@@ -130,6 +130,77 @@ namespace TF47_Api.Controllers
             return Ok();
         }
 
+        [HttpGet("{id}/stats")]
+        public async Task<IActionResult> Stats(uint id)
+        {
+            var player = await _database.Tf47ServerPlayers
+                .Include(x => x.Tf47ServerPlayerStats)
+                .Include(x => x.Tf47ServerPlayerStatsCreatedOnce)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            return Ok(new PlayerStats
+            {
+                Id = player.Id,
+                PlayerName = player.PlayerName,
+                PlayerUid = player.PlayerUid,
+                PlayerNameFirstConnect = player.Tf47ServerPlayerStatsCreatedOnce.PlayerNameConnected,
+                PlayerFirstTimeSeen = player.Tf47ServerPlayerStatsCreatedOnce.FirstConnectionTime,
+                LastTimeSeen = player.Tf47ServerPlayerStats.LastTimeSeen,
+                TimePlayedTotal = player.Tf47ServerPlayerStats.TimePlayedBase +
+                                  player.Tf47ServerPlayerStats.TimePlayedInf +
+                                  player.Tf47ServerPlayerStats.TimePlayedObjective +
+                                  player.Tf47ServerPlayerStats.TimePlayedVehHelo +
+                                  player.Tf47ServerPlayerStats.TimePlayedVehPlane +
+                                  player.Tf47ServerPlayerStats.TimePlayedVehSmall +
+                                  player.Tf47ServerPlayerStats.TimePlayedVehTracked,
+                TimePlayedBase = player.Tf47ServerPlayerStats.TimePlayedBase,
+                TimePlayedObjective = player.Tf47ServerPlayerStats.TimePlayedObjective,
+                TimePlayedInfantry = player.Tf47ServerPlayerStats.TimePlayedInf,
+                TimePlayedVehicleSmall = player.Tf47ServerPlayerStats.TimePlayedVehSmall,
+                TimePlayedVehicleTracked = player.Tf47ServerPlayerStats.TimePlayedVehTracked,
+                TimePlayedVehicleHelicopter = player.Tf47ServerPlayerStats.TimePlayedVehHelo,
+                TimePlayedVehiclePlane = player.Tf47ServerPlayerStats.TimePlayedVehPlane,
+                KillsInfantry = player.Tf47ServerPlayerStats.KillsInf,
+                KillsVehicleSmall = player.Tf47ServerPlayerStats.TimePlayedVehSmall,
+                KillsVehicleTracked = player.Tf47ServerPlayerStats.KillsVehTracked,
+                KillsVehicleHelicopter = player.Tf47ServerPlayerStats.KillsVehHelo,
+                KillsVehiclePlane = player.Tf47ServerPlayerStats.KillsVehPlane,
+                DeathsInfantry = player.Tf47ServerPlayerStats.DeathsInf,
+                DeathsVehicleSmall = player.Tf47ServerPlayerStats.DeathsVehSmall,
+                DeathsVehicleTracked = player.Tf47ServerPlayerStats.DeathsVehTracked,
+                DeathsVehicleHelicopter = player.Tf47ServerPlayerStats.DeathsVehHelo,
+                DeathsVehiclePlane = player.Tf47ServerPlayerStats.DeathsVehPlane
+            });
+        }
+
+        public class PlayerStats
+        {
+            public uint Id { get; set; }
+            public string PlayerName { get; set; }
+            public string PlayerUid { get; set; }
+            public string PlayerNameFirstConnect { get; set; }
+            public DateTime? PlayerFirstTimeSeen { get; set; }
+            public DateTime? LastTimeSeen { get; set; }
+            public uint? TimePlayedTotal { get; set; }
+            public uint? TimePlayedBase { get; set; }
+            public uint? TimePlayedObjective { get; set; }
+            public uint? TimePlayedInfantry { get; set; }
+            public uint? TimePlayedVehicleSmall { get; set; }
+            public uint? TimePlayedVehicleTracked { get; set; }
+            public uint? TimePlayedVehicleHelicopter { get; set; }
+            public uint? TimePlayedVehiclePlane { get; set; }
+            public uint? KillsInfantry { get; set; }
+            public uint? KillsVehicleSmall { get; set; } 
+            public uint? KillsVehicleTracked { get; set; }
+            public uint? KillsVehicleHelicopter { get; set; }
+            public uint? KillsVehiclePlane { get; set; }
+            public uint? DeathsInfantry { get; set; }
+            public uint? DeathsVehicleSmall { get; set; }
+            public uint? DeathsVehicleTracked { get; set; }
+            public uint? DeathsVehicleHelicopter { get; set; }
+            public uint? DeathsVehiclePlane { get; set; }
+        }
+
         public class ServerPlayer
         {
             public uint Id { get; set; }
