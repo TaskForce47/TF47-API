@@ -119,6 +119,26 @@ namespace TF47_Api.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Moderator, Admin")]
+        [HttpGet("getLatest")]
+        public async Task<IActionResult> GetLatest()
+        {
+            var latestNotes = _database.Tf47GadgetUserNotes
+                .Include(x => x.Player)
+                .Where(x => x.Id > 0)
+                .OrderByDescending(x => x.Id)
+                .Take(25)
+                .Select(x => new
+                {
+                    Id = x.Id,
+                    Note = x.PlayerNote,
+                    TimeWritten = x.TimeWritten,
+                    Author = x.Author.ForumName,
+                    Type = x.Type
+                });
+            return Ok(latestNotes);
+        }
+
         public class AddNoteRequest
         {
             public string Note { get; set; }
