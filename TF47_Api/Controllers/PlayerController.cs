@@ -138,6 +138,9 @@ namespace TF47_Api.Controllers
                 .Include(x => x.Tf47ServerPlayerStatsCreatedOnce)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
+            if (player == null) return BadRequest("player does not exist!");
+
+
             return Ok(new PlayerStats
             {
                 Id = player.Id,
