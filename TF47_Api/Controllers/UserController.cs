@@ -23,12 +23,14 @@ namespace TF47_Api.Controllers
         private readonly Tf47DatabaseContext _database;
         private readonly ILogger<UserController> _logger;
         private readonly AuthenticationProviderService _authenticationProviderService;
+        private readonly GadgetUserProviderService _gadgetUserProviderService;
 
-        public UserController(Tf47DatabaseContext database, ILogger<UserController> logger, AuthenticationProviderService authenticationProviderService)
+        public UserController(Tf47DatabaseContext database, ILogger<UserController> logger, AuthenticationProviderService authenticationProviderService, GadgetUserProviderService gadgetUserProviderService)
         {
             _database = database;
             _logger = logger;
             _authenticationProviderService = authenticationProviderService;
+            _gadgetUserProviderService = gadgetUserProviderService;
         }
 
         [AllowAnonymous]
@@ -80,14 +82,7 @@ namespace TF47_Api.Controllers
         {
             if (!ModelState.IsValid) return BadRequest("bad request");
 
-            var user = HttpContext.User;
-            var forumId = user.Claims.FirstOrDefault(x => x.Type == CustomClaimTypes.ForumId)?.Value;
-            var databaseUser =
-                await _database.Tf47GadgetUser.FirstOrDefaultAsync(x => x.ForumId == uint.Parse(forumId));
-            if (databaseUser == null)
-            {
-                return StatusCode(500, "Something went wrong. Cannot find user in database!");
-            }
+            var forumUser = await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
 
             var player = await _database.Tf47ServerPlayers.FirstOrDefaultAsync(x => x.PlayerUid == request.PlayerUid);
             if (player == null)
@@ -96,8 +91,8 @@ namespace TF47_Api.Controllers
             }
 
             _logger.LogInformation(
-                $"Setting player uid {request.PlayerUid} for gadget user {databaseUser.ForumName}, server name {player.PlayerName}!");
-            databaseUser.PlayerUid = request.PlayerUid;
+                $"Setting player uid {request.PlayerUid} for gadget user {forumUser.ForumName}, server name {player.PlayerName}!");
+            forumUser.PlayerUid = request.PlayerUid;
             await _database.SaveChangesAsync();
             return Ok();
         }
@@ -105,16 +100,9 @@ namespace TF47_Api.Controllers
         [HttpDelete("DeletePlayerUidCurrentSession")]
         public async Task<IActionResult> DeletePlayerUidCurrentSession()
         {
-            var user = HttpContext.User;
-            var forumId = user.Claims.FirstOrDefault(x => x.Type == CustomClaimTypes.ForumId)?.Value;
-            var databaseUser =
-                await _database.Tf47GadgetUser.FirstOrDefaultAsync(x => x.ForumId == uint.Parse(forumId));
-            if (databaseUser == null)
-            {
-                return StatusCode(500, "Something went wrong. Cannot find user in database!");
-            }
+            var forumUser = await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
 
-            databaseUser.PlayerUid = null;
+            forumUser.PlayerUid = null;
             await _database.SaveChangesAsync();
             return Ok();
         }
