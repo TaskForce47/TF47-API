@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using TF47_Api.CustomStatusCodes;
 using TF47_Api.Database;
 using TF47_Api.DTO;
 using TF47_Api.Models;
+using TF47_Api.Services;
 
 namespace TF47_Api.Controllers
 {
@@ -20,11 +22,13 @@ namespace TF47_Api.Controllers
     {
         private readonly Tf47DatabaseContext _database;
         private readonly ILogger<WhitelistController> _logger;
+        private readonly GadgetUserProviderService _gadgetUserProviderService;
 
-        public WhitelistController(Tf47DatabaseContext database, ILogger<WhitelistController> logger)
+        public WhitelistController(Tf47DatabaseContext database, ILogger<WhitelistController> logger, GadgetUserProviderService gadgetUserProviderService)
         {
             _database = database;
             _logger = logger;
+            _gadgetUserProviderService = gadgetUserProviderService;
         }
 
         [HttpGet("getAvailableWhitelist")]
@@ -122,33 +126,75 @@ namespace TF47_Api.Controllers
         public async Task<IActionResult> WhitelistUser([FromBody] PlayerWhitelistRequest[] request)
         {
             if (!ModelState.IsValid) return BadRequest();
-            foreach (var playerWhitelistRequest in request)
+
+            var requestUser = await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
+
+            var availableWhitelist = _database.Tf47ServerWhitelists.Where(x => x.Id > 0).ToArray();
+            var enableRequests = request.Where(x => x.Enabled);
+            var disableRequests = request.Where(x => x.Enabled == false);
+
+            foreach (var enableRequest in enableRequests)
             {
-                if (playerWhitelistRequest.Enabled)
+                var user = await _database.Tf47ServerPlayers
+                    .Include(x => x.Tf47ServerPlayerWhitelisting)
+                    .FirstOrDefaultAsync(x => x.Id == enableRequest.PlayerId);
+
+                if (user?.Tf47ServerPlayerWhitelisting.FirstOrDefault(
+                        x => x.WhitelistId == enableRequest.WhitelistId) != null)
                 {
-                    var whitelist = await _database.Tf47ServerPlayerWhitelisting.FirstOrDefaultAsync(x =>
-                        x.PlayerId == playerWhitelistRequest.PlayerId && x.WhitelistId == playerWhitelistRequest.WhitelistId);
-                    if (whitelist == null)
+                    await _database.Tf47ServerPlayerWhitelisting.AddAsync(new Tf47ServerPlayerWhitelisting
                     {
-                        await _database.Tf47ServerPlayerWhitelisting.AddAsync(new Tf47ServerPlayerWhitelisting
-                        {
-                            PlayerId = playerWhitelistRequest.PlayerId,
-                            WhitelistId = playerWhitelistRequest.WhitelistId
-                        });
-                    }
-                    else
-                        _logger.LogInformation($"Already whitlelisted {playerWhitelistRequest.PlayerId}");
+                        PlayerId = enableRequest.PlayerId,
+                        WhitelistId = enableRequest.WhitelistId
+                    });
+                    var action =
+                        $"{user.PlayerName} has been whitelisted for {availableWhitelist.First(x => x.Id == enableRequest.WhitelistId).Description} by {requestUser.ForumName}";
+                    await _database.Tf47GadgetActionLog.AddAsync(new Tf47GadgetActionLog
+                    {
+                        Action = action,
+                        ActionPerformed = DateTime.Now,
+                        UserId = requestUser.Id
+                    });
+                    await _database.Tf47GadgetUserNotes.AddAsync(new Tf47GadgetUserNotes
+                    {
+                        AuthorId = requestUser.Id,
+                        PlayerId = user.Id,
+                        PlayerNote = action,
+                        TimeWritten = DateTime.Now,
+                        Type = "Whitelist added"
+                    });
                 }
-                else
+            }
+
+            foreach (var disableRequest in disableRequests)
+            {
+                var user = await _database.Tf47ServerPlayers
+                    .Include(x => x.Tf47ServerPlayerWhitelisting)
+                    .FirstOrDefaultAsync(x => x.Id == disableRequest.PlayerId);
+
+                var whitelist = user.Tf47ServerPlayerWhitelisting.FirstOrDefault(
+                    x => x.WhitelistId == disableRequest.WhitelistId);
+
+                if(whitelist != null)
                 {
-                    var whitelist = await _database.Tf47ServerPlayerWhitelisting.FirstOrDefaultAsync(x =>
-                        x.PlayerId == playerWhitelistRequest.PlayerId && x.WhitelistId == playerWhitelistRequest.WhitelistId);
-                    if (whitelist != null)
-                    { 
-                        _database.Tf47ServerPlayerWhitelisting.Remove(whitelist);
-                    }
-                    else
-                        _logger.LogInformation($"No whitelist found {playerWhitelistRequest.PlayerId}!");    
+                    _database.Tf47ServerPlayerWhitelisting.Remove(whitelist);
+
+                    var action =
+                        $"{user.PlayerName} has been removed from the {availableWhitelist.First(x => x.Id == disableRequest.WhitelistId).Description} whitelist by {requestUser.ForumName}";
+                    await _database.Tf47GadgetActionLog.AddAsync(new Tf47GadgetActionLog
+                    {
+                        Action = action,
+                        ActionPerformed = DateTime.Now,
+                        UserId = requestUser.Id
+                    });
+                    await _database.Tf47GadgetUserNotes.AddAsync(new Tf47GadgetUserNotes
+                    {
+                        AuthorId = requestUser.Id,
+                        PlayerId = user.Id,
+                        PlayerNote = action,
+                        TimeWritten = DateTime.Now,
+                        Type = "Whitelist removed"
+                    });
                 }
             }
 
@@ -158,10 +204,10 @@ namespace TF47_Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error while trying to save whitelist changes!\n {ex.Message}");
-                return StatusCode(500, "Error while trying to save whitelist changes!");
+                var error = $"Something went wrong while trying to save whitelist updates: {ex.Message}";
+                _logger.LogError(error);
+                return new ServerError(error);
             }
-
             return Ok();
         }
     }
