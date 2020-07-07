@@ -140,7 +140,7 @@ namespace TF47_Api.Controllers
                     .FirstOrDefaultAsync(x => x.Id == enableRequest.PlayerId);
 
                 if (user?.Tf47ServerPlayerWhitelisting.FirstOrDefault(
-                        x => x.WhitelistId == enableRequest.WhitelistId) != null)
+                        x => x.WhitelistId == enableRequest.WhitelistId && x.PlayerId == enableRequest.PlayerId) != null)
                 {
                     await _database.Tf47ServerPlayerWhitelisting.AddAsync(new Tf47ServerPlayerWhitelisting
                     {
