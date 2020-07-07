@@ -131,6 +131,7 @@ namespace TF47_Api.Controllers
                 .Select(x => new
                 {
                     Id = x.Id,
+                    PlayerName = x.Player.PlayerName,
                     Note = x.PlayerNote,
                     TimeWritten = x.TimeWritten,
                     Author = x.Author.ForumName,
