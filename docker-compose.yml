@@ -1,0 +1,17 @@
+version: '3'
+services:
+  tf47-api:
+    container_name: tf47-api
+    image: tf47gadget
+    restart: unless-stopped
+    volumes:
+      - www:/app/wwwroot/
+    #  - dbusr/src/app/db
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - ASPNETCORE_ENIRONMENT=Production
+volumes:
+  www:
