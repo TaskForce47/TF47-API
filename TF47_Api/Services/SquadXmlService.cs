@@ -195,7 +195,7 @@ namespace TF47_Api.Services
 
             _logger.LogInformation("Trying to convert image to paa");
             using var image = Image.FromFile(picturePath);
-            if (image.Height == image.Width)
+            if (image.Height == image.Width && image.Height != 0 && (image.Height & (image.Height - 1)) == 0)
             {
                 try
                 {
@@ -210,7 +210,7 @@ namespace TF47_Api.Services
             }
             else
             {
-                _logger.LogWarning("Image must have the same height and width!");
+                _logger.LogWarning("Image must have the same height and width and must be a factor of 2!");
                 File.Delete(picturePath);
             }
 
