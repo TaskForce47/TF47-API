@@ -42,8 +42,7 @@ namespace TF47_Api
             services.AddAuthorization();
             
             services.AddDbContext<Tf47DatabaseContext>(
-                options => options.UseMySql(
-                    "server=server.taskforce47.com;port=3306;user=dragon;password=bambus123xx#;database=tf47_database_2"));
+                options => options.UseMySql(Configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped<ForumDataProviderService>();
             services.AddScoped<ClaimProviderService>();
             services.AddTransient<GadgetUserProviderService>();
