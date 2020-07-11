@@ -985,6 +985,16 @@ namespace TF47_Api.Database
                     .HasColumnType("varchar(100)")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
+
+                entity.Property(e => e.IsBanned)
+                    .HasColumnName("is_banned")
+                    .HasDefaultValue(false)
+                    .HasDefaultValueSql("false");
+
+                entity.Property(e => e.BannedUntil)
+                    .HasColumnName("banned_until")
+                    .HasDefaultValue(null)
+                    .HasDefaultValueSql("null");
             });
 
             modelBuilder.Entity<Tf47ServerPositionTracking>(entity =>

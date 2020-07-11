@@ -120,14 +120,15 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Moderator, Admin")]
-        [HttpGet("getLatest")]
-        public async Task<IActionResult> GetLatest()
+        [HttpGet("getLatest/{page}")]
+        public async Task<IActionResult> GetLatest(uint page = 0)
         {
             var latestNotes = _database.Tf47GadgetUserNotes
                 .Include(x => x.Player)
                 .Where(x => x.Id > 0)
                 .OrderByDescending(x => x.Id)
-                .Take(25)
+                .Skip(20 * Convert.ToInt32(page))
+                .Take(20)
                 .Select(x => new
                 {
                     Id = x.Id,
