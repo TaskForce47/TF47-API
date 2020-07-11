@@ -987,14 +987,10 @@ namespace TF47_Api.Database
                     .HasCollation("utf8mb4_0900_ai_ci");
 
                 entity.Property(e => e.IsBanned)
-                    .HasColumnName("is_banned")
-                    .HasDefaultValue(false)
-                    .HasDefaultValueSql("false");
+                    .HasColumnName("is_banned");
 
                 entity.Property(e => e.BannedUntil)
-                    .HasColumnName("banned_until")
-                    .HasDefaultValue(null)
-                    .HasDefaultValueSql("null");
+                    .HasColumnName("banned_until");
             });
 
             modelBuilder.Entity<Tf47ServerPositionTracking>(entity =>
