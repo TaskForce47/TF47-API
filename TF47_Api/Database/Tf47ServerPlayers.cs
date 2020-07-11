@@ -22,6 +22,8 @@ namespace TF47_Api.Database
         public string PlayerUid { get; set; }
         public uint Id { get; set; }
         public string PlayerName { get; set; }
+        public bool IsBanned { get; set; }
+        public DateTime? BannedUntil { get; set; }
 
         public virtual Tf47ServerPlayerStats Tf47ServerPlayerStats { get; set; }
         public virtual Tf47ServerPlayerStatsCreatedOnce Tf47ServerPlayerStatsCreatedOnce { get; set; }
