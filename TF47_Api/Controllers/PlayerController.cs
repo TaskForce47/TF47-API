@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Web.CodeGeneration;
 using TF47_Api.CustomStatusCodes;
 using TF47_Api.Database;
+using TF47_Api.Services;
 
 namespace TF47_Api.Controllers
 {
@@ -20,11 +21,13 @@ namespace TF47_Api.Controllers
     {
         private readonly ILogger<PlayerNotesController> _logger;
         private readonly Tf47DatabaseContext _database;
+        private readonly GadgetUserProviderService _gadgetUserProviderService;
 
-        public PlayerController(ILogger<PlayerNotesController> logger, Tf47DatabaseContext database)
+        public PlayerController(ILogger<PlayerNotesController> logger, Tf47DatabaseContext database, GadgetUserProviderService gadgetUserProviderService)
         {
             _logger = logger;
             _database = database;
+            _gadgetUserProviderService = gadgetUserProviderService;
         }
 
         [HttpGet("GetAllPlayers")]
@@ -55,7 +58,9 @@ namespace TF47_Api.Controllers
             {
                 Id = serverPlayer.Id,
                 Name = serverPlayer.PlayerName,
-                Uid = serverPlayer.PlayerUid
+                Uid = serverPlayer.PlayerUid,
+                IsBanned = serverPlayer.IsBanned,
+                BannedUntil = serverPlayer.BannedUntil
             };
             if (gadgetUser != null)
             {
@@ -102,12 +107,6 @@ namespace TF47_Api.Controllers
             return Ok(result);
         }
 
-        [HttpGet("GetPlayerDetailsLoggedIn")]
-        public async Task<IActionResult> GetPlayerDetailsLoggedIn()
-        {
-            return NotFound("not implemented yet!");
-        }
-
         [Authorize(Roles = "Admin, Moderator")]
         [HttpDelete("{id}/delete")]
         public async Task<IActionResult> DeletePlayer(uint id)
@@ -130,6 +129,20 @@ namespace TF47_Api.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Admin, Moderator")]
+        [HttpPost("{id}/ban")]
+        public async Task<IActionResult> BanUser(uint id, [FromBody] BanPlayerRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+            var gadgetUser = await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
+            var player = await _database.Tf47ServerPlayers
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (player == null) return BadRequest("Player id doesn't exist!");
+            player.IsBanned = true;
+            player.BannedUntil = request.BannedUntil;
+            return Ok();
+        }
+
         [HttpGet("{id}/stats")]
         public async Task<IActionResult> Stats(uint id)
         {
@@ -146,6 +159,8 @@ namespace TF47_Api.Controllers
                 Id = player.Id,
                 PlayerName = player.PlayerName,
                 PlayerUid = player.PlayerUid,
+                IsBanned = player.IsBanned,
+                BannedUntil = player.BannedUntil,
                 PlayerNameFirstConnect = player.Tf47ServerPlayerStatsCreatedOnce.PlayerNameConnected,
                 PlayerFirstTimeSeen = player.Tf47ServerPlayerStatsCreatedOnce.FirstConnectionTime,
                 LastTimeSeen = player.Tf47ServerPlayerStats.LastTimeSeen,
@@ -202,6 +217,8 @@ namespace TF47_Api.Controllers
             public uint? DeathsVehicleTracked { get; set; }
             public uint? DeathsVehicleHelicopter { get; set; }
             public uint? DeathsVehiclePlane { get; set; }
+            public bool IsBanned { get; set; }
+            public DateTime? BannedUntil { get; set; }
         }
 
         public class ServerPlayer
@@ -209,6 +226,8 @@ namespace TF47_Api.Controllers
             public uint Id { get; set; }
             public string Name { get; set; }
             public string Uid { get; set; }
+            public bool IsBanned { get; set; }
+            public DateTime? BannedUntil { get; set; }
             public GadgetUser GadgetUser { get; set; }
         }
 
@@ -254,6 +273,11 @@ namespace TF47_Api.Controllers
             if(user.ForumIsSponsor != null && user.ForumIsSponsor.Value)
                 roles.Add("Sponsor");
             return roles;
+        }
+
+        public class BanPlayerRequest
+        {
+            public DateTime BannedUntil { get; set; }
         }
     }
 }
