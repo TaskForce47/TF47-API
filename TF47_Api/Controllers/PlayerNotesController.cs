@@ -123,23 +123,33 @@ namespace TF47_Api.Controllers
         [HttpGet("getLatest/{page}")]
         public async Task<IActionResult> GetLatest(uint page = 1)
         {
-            page--; //let pages start at 1 instead of 0
-            var latestNotes = _database.Tf47GadgetUserNotes
-                .Include(x => x.Player)
-                .Where(x => x.Id > 0)
-                .OrderByDescending(x => x.Id)
-                .Skip(20 * Convert.ToInt32(page))
-                .Take(20)
-                .Select(x => new
+            return await Task.Run(() =>
+            {
+                page--; //let pages start at 1 instead of 0
+                if (page < 1) page = 1;
+
+                var totalNoteCount = _database.Tf47GadgetUserNotes.Count(x => x.Id > 0);
+                var latestNotes = _database.Tf47GadgetUserNotes
+                    .Include(x => x.Player)
+                    .Where(x => x.Id > 0)
+                    .OrderByDescending(x => x.Id)
+                    .Skip(20 * Convert.ToInt32(page))
+                    .Take(20)
+                    .Select(x => new
+                    {
+                        x.Id,
+                        x.Player.PlayerName,
+                        Note = x.PlayerNote,
+                        x.TimeWritten,
+                        Author = x.Author.ForumName,
+                        x.Type
+                    });
+                return Ok(new
                 {
-                    Id = x.Id,
-                    PlayerName = x.Player.PlayerName,
-                    Note = x.PlayerNote,
-                    TimeWritten = x.TimeWritten,
-                    Author = x.Author.ForumName,
-                    Type = x.Type
+                    TotalNoteCount = totalNoteCount,
+                    Notes = latestNotes
                 });
-            return Ok(latestNotes);
+            });
         }
 
         public class AddNoteRequest
