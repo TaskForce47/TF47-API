@@ -125,8 +125,8 @@ namespace TF47_Api.Controllers
         {
             return await Task.Run(() =>
             {
-                page--; //let pages start at 1 instead of 0
                 if (page < 1) page = 1;
+                page--; //let pages start at 1 instead of 0
 
                 var totalNoteCount = _database.Tf47GadgetUserNotes.Count(x => x.Id > 0);
                 var latestNotes = _database.Tf47GadgetUserNotes
