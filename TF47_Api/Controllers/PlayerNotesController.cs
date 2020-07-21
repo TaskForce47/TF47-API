@@ -120,6 +120,7 @@ namespace TF47_Api.Controllers
         }
 
         [Authorize(Roles = "Moderator, Admin")]
+        [HttpGet("getLatest")]
         [HttpGet("getLatest/{page}")]
         public async Task<IActionResult> GetLatest(uint page = 1)
         {
