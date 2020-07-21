@@ -22,8 +22,8 @@ namespace TF47_Api.Database
         public uint? ForumId { get; set; }
         public string ForumName { get; set; }
         public string ForumMail { get; set; }
-        public bool? ForumIsAdmin { get; set; }
-        public bool? ForumIsModerator { get; set; }
+        public bool ForumIsAdmin { get; set; }
+        public bool ForumIsModerator { get; set; }
         public bool? ForumIsSponsor { get; set; }
         public bool? ForumIsTf { get; set; }
         public DateTime? ForumLastLogin { get; set; }

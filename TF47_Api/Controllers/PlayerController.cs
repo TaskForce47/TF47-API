@@ -264,9 +264,9 @@ namespace TF47_Api.Controllers
         private IEnumerable<string> GetRolesFromGadgetUser(Tf47GadgetUser user)
         {
             var roles = new List<string>();
-            if (user.ForumIsAdmin != null && user.ForumIsAdmin.Value)
+            if (user.ForumIsAdmin)
                 roles.Add("Admin");
-            if(user.ForumIsModerator != null && user.ForumIsModerator.Value)
+            if(user.ForumIsModerator)
                 roles.Add("Moderator");
             if(user.ForumIsTf != null && user.ForumIsTf.Value)
                 roles.Add("TF47");
