@@ -62,7 +62,12 @@ namespace TF47_Api.Controllers
                             SessionId = x.SessionId,
                             TimeSend = x.TimeSend
                         });
-                    return Ok(chats);
+                    var totalChatCount = _database.Tf47GadgetUserNotes.Count(x => x.Id > 0);
+                    return Ok(new
+                    {
+                        TotalChatCount = totalChatCount,
+                        Chats = chats
+                    });
                 });
             }
             else
@@ -90,7 +95,12 @@ namespace TF47_Api.Controllers
                             SessionId = x.SessionId,
                             TimeSend = x.TimeSend
                         });
-                    return Ok(chats);
+                    var totalChatCount = _database.Tf47GadgetUserNotes.Count(x => x.Id > 0);
+                    return Ok(new
+                    {
+                        TotalChatCount = totalChatCount,
+                        Chats = chats
+                    });
                 });
             }
 
@@ -123,7 +133,12 @@ namespace TF47_Api.Controllers
                         MissionName = x.Session.Mission.MissionName,
                         MissionType = x.Session.Mission.MissionType
                     });
-                return Ok(ticketLog);
+                var totalTicketCount = _database.Tf47GadgetUserNotes.Count(x => x.Id > 0);
+                return Ok(new
+                {
+                    TotalTicketCount = totalTicketCount,
+                    TicketLog = ticketLog
+                });
             });
         }
 
