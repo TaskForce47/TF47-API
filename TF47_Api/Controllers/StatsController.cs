@@ -95,7 +95,7 @@ namespace TF47_Api.Controllers
                             SessionId = x.SessionId,
                             TimeSend = x.TimeSend
                         });
-                    var totalChatCount = _database.Tf47GadgetUserNotes.Count(x => x.Id > 0);
+                    var totalChatCount = _database.Tf47ServerChatLog.Count(x => x.Id > 0);
                     return Ok(new
                     {
                         TotalChatCount = totalChatCount,
@@ -133,7 +133,7 @@ namespace TF47_Api.Controllers
                         MissionName = x.Session.Mission.MissionName,
                         MissionType = x.Session.Mission.MissionType
                     });
-                var totalTicketCount = _database.Tf47GadgetUserNotes.Count(x => x.Id > 0);
+                var totalTicketCount = _database.Tf47ServerTicketLog.Count(x => x.Id > 0);
                 return Ok(new
                 {
                     TotalTicketCount = totalTicketCount,
