@@ -155,9 +155,8 @@ namespace TF47_Api.Controllers
 
         [Authorize(Roles = "Admin, Moderator")]
         [HttpPost("{id}/pardon")]
-        public async Task<IActionResult> PardonUser(uint id, [FromBody] BanPlayerRequest request)
+        public async Task<IActionResult> PardonUser(uint id)
         {
-            if (!ModelState.IsValid) return BadRequest();
             var gadgetUser = await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
             var player = await _database.Tf47ServerPlayers
                 .FirstOrDefaultAsync(x => x.Id == id);
