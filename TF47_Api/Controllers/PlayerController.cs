@@ -153,6 +153,30 @@ namespace TF47_Api.Controllers
             return Ok();
         }
 
+        [Authorize(Roles = "Admin, Moderator")]
+        [HttpPost("{id}/pardon")]
+        public async Task<IActionResult> PardonUser(uint id, [FromBody] BanPlayerRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest();
+            var gadgetUser = await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
+            var player = await _database.Tf47ServerPlayers
+                .FirstOrDefaultAsync(x => x.Id == id);
+            if (player == null) return BadRequest("Player id doesn't exist!");
+            player.IsBanned = false;
+            player.BannedUntil = null;
+            try
+            {
+                _database.Update(player);
+                await _database.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Unable to save delete ban for user {player.PlayerName}\nReason: {ex.Message}");
+                return new ServerError($"Error saving deletion of ban for user {player.PlayerName}");
+            }
+            return Ok();
+        }
+
         [HttpGet("{id}/stats")]
         public async Task<IActionResult> Stats(uint id)
         {
