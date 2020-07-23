@@ -140,6 +140,16 @@ namespace TF47_Api.Controllers
             if (player == null) return BadRequest("Player id doesn't exist!");
             player.IsBanned = true;
             player.BannedUntil = request.BannedUntil;
+            try
+            {
+                _database.Update(player);
+                await _database.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Unable to save ban for user {player.PlayerName}\nReason: {ex.Message}");
+                return new ServerError($"Error saving ban for user {player.PlayerName}");
+            }
             return Ok();
         }
 
