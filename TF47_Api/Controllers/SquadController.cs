@@ -377,7 +377,7 @@ namespace TF47_Api.Controllers
         public async Task<IActionResult> LeaveSquad(uint id)
         {
             var gadgetUser = await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
-            var squadUserToDelete = gadgetUser.Tf47GadgetSquadUser
+            var squadUserToDelete = _database.Tf47GadgetSquadUser
                 .FirstOrDefault(x => x.UserId == gadgetUser.Id && x.SquadId == id);
 
             if (squadUserToDelete == null) return BadRequest("nothing to delete!");
