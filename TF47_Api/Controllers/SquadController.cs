@@ -377,20 +377,18 @@ namespace TF47_Api.Controllers
         public async Task<IActionResult> LeaveSquad(uint id)
         {
             var gadgetUser = await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
-            var squadUsersToDelete = gadgetUser.Tf47GadgetSquadUser
-                .Where(x => x.UserId == gadgetUser.Id && x.Squad.Id == id);
+            var squadUserToDelete = gadgetUser.Tf47GadgetSquadUser
+                .FirstOrDefault(x => x.UserId == gadgetUser.Id && x.SquadId == id);
 
-            foreach (var tf47GadgetSquadUser in squadUsersToDelete)
+            if (squadUserToDelete == null) return BadRequest("nothing to delete!");
+
+            _database.Tf47GadgetSquadUser.Remove(squadUserToDelete);
+            _database.Tf47GadgetActionLog.Add(new Tf47GadgetActionLog
             {
-                _database.Tf47GadgetSquadUser.Remove(tf47GadgetSquadUser);
-                _database.Tf47GadgetActionLog.Add(new Tf47GadgetActionLog
-                {
-                    Action = $"User {gadgetUser.ForumName} left group {tf47GadgetSquadUser.UserSquadNick}",
-                    UserId = gadgetUser.Id
-                });
-            }
-
-           
+                Action = $"User {gadgetUser.ForumName} left group {squadUserToDelete.UserSquadNick}",
+                UserId = gadgetUser.Id
+            });
+            
 
             try
             {
