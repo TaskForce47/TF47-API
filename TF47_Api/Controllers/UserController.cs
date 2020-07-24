@@ -53,6 +53,28 @@ namespace TF47_Api.Controllers
             return Ok(roles);
         }
 
+        [HttpGet("getSquads")]
+        public async Task<IActionResult> GetSquads()
+        {
+            var gadgetUser =  await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
+            var squads = _database.Tf47GadgetSquadUser
+                .Include(x => x.User)
+                .Include(x => x.Squad)
+                .Where(x => x.UserId == gadgetUser.Id)
+                .Select(x => new
+                {
+                    SquadId = x.Squad.Id,
+                    x.Squad.SquadNick,
+                    x.Squad.SquadTitle,
+                    x.Squad.SquadEmail,
+                    x.Squad.SquadWeb,
+                    x.Squad.SquadHasPicture,
+                    Remark = x.UserSquadRemark,
+                    Email = x.UserSquadEmail
+                });
+            return Ok(squads);
+        }
+
         [HttpGet("getUserDetails")]
         public async Task<IActionResult> GetPlayerDetails()
         {
