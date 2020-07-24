@@ -27,13 +27,19 @@ namespace TF47_Api.Controllers
         private readonly ILogger<SquadController> _logger;
         private readonly SquadXmlService _squadXmlService;
         private readonly IConfiguration _configuration;
+        private readonly GadgetUserProviderService _gadgetUserProviderService;
 
-        public SquadController(Tf47DatabaseContext database, ILogger<SquadController> logger, SquadXmlService squadXmlService, IConfiguration configuration)
+        public SquadController(Tf47DatabaseContext database, 
+            ILogger<SquadController> logger, 
+            SquadXmlService squadXmlService, 
+            IConfiguration configuration,
+            GadgetUserProviderService gadgetUserProviderService)
         {
             _database = database;
             _logger = logger;
             _squadXmlService = squadXmlService;
             _configuration = configuration;
+            _gadgetUserProviderService = gadgetUserProviderService;
         }
 
         [HttpGet("getSquads")]
@@ -364,6 +370,39 @@ namespace TF47_Api.Controllers
                 _logger.LogError($"Something went wrong fetching squad member count: {ex.Message}\nRequest squadid {id}");
                 return new ServerError("something went wrong fetching squad member count");
             }
+        }
+
+        //TODO: regenerate when regenerate is stable
+        [HttpPost("{id}/leave")]
+        public async Task<IActionResult> LeaveSquad(uint id)
+        {
+            var gadgetUser = await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
+            var squadUsersToDelete = gadgetUser.Tf47GadgetSquadUser
+                .Where(x => x.UserId == gadgetUser.Id && x.Squad.Id == id);
+
+            foreach (var tf47GadgetSquadUser in squadUsersToDelete)
+            {
+                _database.Tf47GadgetSquadUser.Remove(tf47GadgetSquadUser);
+                _database.Tf47GadgetActionLog.Add(new Tf47GadgetActionLog
+                {
+                    Action = $"User {gadgetUser.ForumName} left group {tf47GadgetSquadUser.UserSquadNick}",
+                    UserId = gadgetUser.Id
+                });
+            }
+
+           
+
+            try
+            {
+                await _database.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while trying to save user {gadgetUser.ForumName} leaving squad\n{ex.Message}");
+                return new ServerError("Unable to save update!");
+            }
+
+            return Ok();
         }
     }
 
