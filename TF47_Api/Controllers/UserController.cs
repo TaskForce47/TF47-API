@@ -143,5 +143,25 @@ namespace TF47_Api.Controllers
             await _database.SaveChangesAsync();
             return Ok();
         }
+
+        [HttpGet("getWhitelist")]
+        public async Task<IActionResult> GetWhitelist()
+        {
+            var gadgetUser = await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
+            var whitelists = _database.Tf47ServerPlayerWhitelisting
+                .Include(x => x.Player)
+                .Include(x => x.Whitelist)
+                .Where(x => x.Player.PlayerUid == gadgetUser.PlayerUid)
+                .Select(x => new
+                {
+                    WhitelistingId = x.Id,
+                    x.PlayerId,
+                    x.Player.PlayerName,
+                    x.Whitelist.Id,
+                    x.Whitelist.Description
+                });
+
+            return Ok(whitelists);
+        }
     }
 }
