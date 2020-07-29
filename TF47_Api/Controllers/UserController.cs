@@ -53,6 +53,28 @@ namespace TF47_Api.Controllers
             return Ok(roles);
         }
 
+        [HttpGet("getSquads")]
+        public async Task<IActionResult> GetSquads()
+        {
+            var gadgetUser =  await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
+            var squads = _database.Tf47GadgetSquadUser
+                .Include(x => x.User)
+                .Include(x => x.Squad)
+                .Where(x => x.UserId == gadgetUser.Id)
+                .Select(x => new
+                {
+                    SquadId = x.Squad.Id,
+                    x.Squad.SquadNick,
+                    x.Squad.SquadTitle,
+                    x.Squad.SquadEmail,
+                    x.Squad.SquadWeb,
+                    x.Squad.SquadHasPicture,
+                    Remark = x.UserSquadRemark,
+                    Email = x.UserSquadEmail
+                });
+            return Ok(squads);
+        }
+
         [HttpGet("getUserDetails")]
         public async Task<IActionResult> GetPlayerDetails()
         {
@@ -120,6 +142,26 @@ namespace TF47_Api.Controllers
             user.PlayerUid = null;
             await _database.SaveChangesAsync();
             return Ok();
+        }
+
+        [HttpGet("getWhitelist")]
+        public async Task<IActionResult> GetWhitelist()
+        {
+            var gadgetUser = await _gadgetUserProviderService.GetGadgetUserFromHttpContext(HttpContext);
+            var whitelists = _database.Tf47ServerPlayerWhitelisting
+                .Include(x => x.Player)
+                .Include(x => x.Whitelist)
+                .Where(x => x.Player.PlayerUid == gadgetUser.PlayerUid)
+                .Select(x => new
+                {
+                    WhitelistingId = x.Id,
+                    x.PlayerId,
+                    x.Player.PlayerName,
+                    x.Whitelist.Id,
+                    x.Whitelist.Description
+                });
+
+            return Ok(whitelists);
         }
     }
 }
