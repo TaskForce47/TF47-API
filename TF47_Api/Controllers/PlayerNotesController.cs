@@ -122,7 +122,9 @@ namespace TF47_Api.Controllers
         [Authorize(Roles = "Moderator, Admin")]
         [HttpGet("getLatest")]
         [HttpGet("getLatest/{page}")]
-        public async Task<IActionResult> GetLatest(uint page = 1)
+        public async Task<IActionResult> GetLatest(
+            uint page = 1,
+            [FromQuery(Name = "rows")] int rows = 20)
         {
             return await Task.Run(() =>
             {
@@ -134,8 +136,8 @@ namespace TF47_Api.Controllers
                     .Include(x => x.Player)
                     .Where(x => x.Id > 0)
                     .OrderByDescending(x => x.Id)
-                    .Skip(20 * Convert.ToInt32(page))
-                    .Take(20)
+                    .Skip(rows * Convert.ToInt32(page))
+                    .Take(rows)
                     .Select(x => new
                     {
                         x.Id,

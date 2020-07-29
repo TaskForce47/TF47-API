@@ -30,7 +30,9 @@ namespace TF47_Api.Controllers
 
         [HttpGet("chat")]
         [HttpGet("chat/{page}")]
-        public async Task<IActionResult> GetChat(int page = 1)
+        public async Task<IActionResult> GetChat(
+            int page = 1, 
+            [FromQuery(Name = "rows")]int rows = 20)
         {
             if (page < 1) page = 1;
             page--;
@@ -80,8 +82,8 @@ namespace TF47_Api.Controllers
                         .ThenInclude(x => x.Mission)
                         .Where(x => x.Channel == "Side" || x.Player.PlayerUid == gadgetUser.PlayerUid)
                         .OrderByDescending(x => x.Id)
-                        .Skip(20 * page)
-                        .Take(20)
+                        .Skip(rows * page)
+                        .Take(rows)
                         .Select(x => new ChatMessage
                         {
                             Id = x.Id,
@@ -108,7 +110,9 @@ namespace TF47_Api.Controllers
 
         [HttpGet("TicketLog")]
         [HttpGet("TicketLog/{page}")]
-        public async Task<IActionResult> GetTicketLog(int page = 1)
+        public async Task<IActionResult> GetTicketLog(
+            int page = 1,
+            [FromQuery(Name = "rows")] int rows = 20)
         {
             if (page < 1) page = 1;
             page--;
@@ -119,8 +123,8 @@ namespace TF47_Api.Controllers
                     .Include(x => x.Session)
                     .ThenInclude(x => x.Mission)
                     .OrderByDescending(x => x.Id)
-                    .Skip(20 * page)
-                    .Take(20)
+                    .Skip(rows * page)
+                    .Take(rows)
                     .Select(x => new TicketLog
                     {
                         Id = x.Id,
