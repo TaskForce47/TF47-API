@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -210,6 +211,39 @@ namespace TF47_Api.Controllers
                 return new ServerError(error);
             }
             return Ok();
+        }
+
+        [Authorize(Roles = "Admin, Moderator")]
+        [HttpGet("GetUserByWhitelist/{page}")]
+        public async Task<IActionResult> GetUsersByWhitelist(
+            int page, 
+            [FromQuery(Name = "WhitelistId")][Required, Range(1, Int32.MaxValue)] int whitelistId = -1, 
+            [FromQuery(Name = "rows")]int rows = 20)
+        {
+            if (page < 1) page = 1;
+            page--;
+
+            var userByWhitelist = await Task.Run(() =>
+            {
+                return _database.Tf47ServerPlayerWhitelisting
+                    .Include(x => x.Player)
+                    .Include(x => x.Whitelist)
+                    .Where(x => x.WhitelistId == whitelistId)
+                    .OrderByDescending(x => x.Id)
+                    .Skip(rows * page)
+                    .Take(rows)
+                    .Select(x => new
+                    {
+                        x.Id,
+                        x.PlayerId,
+                        x.Player.PlayerName,
+                        x.WhitelistId,
+                        x.Whitelist.Description
+                    });
+            });
+
+
+            return Ok(userByWhitelist);
         }
     }
 }
