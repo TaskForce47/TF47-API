@@ -223,9 +223,9 @@ namespace TF47_Api.Controllers
             if (page < 1) page = 1;
             page--;
 
-            var userByWhitelist = await Task.Run(() =>
+            var result = await Task.Run(() =>
             {
-                return _database.Tf47ServerPlayerWhitelisting
+                var usersByWhitelist =_database.Tf47ServerPlayerWhitelisting
                     .Include(x => x.Player)
                     .Include(x => x.Whitelist)
                     .Where(x => x.WhitelistId == whitelistId)
@@ -240,10 +240,15 @@ namespace TF47_Api.Controllers
                         x.WhitelistId,
                         x.Whitelist.Description
                     });
+                return new
+                {
+                    TotalUsersWithWhitelist = usersByWhitelist.Count(),
+                    UsersByWhitelist = usersByWhitelist
+                };
             });
 
 
-            return Ok(userByWhitelist);
+            return Ok(result);
         }
     }
 }
