@@ -225,6 +225,9 @@ namespace TF47_Api.Controllers
 
             var result = await Task.Run(() =>
             {
+                var totalUsersWithWhitelist =
+                    _database.Tf47ServerPlayerWhitelisting
+                        .Count(x => x.WhitelistId == whitelistId);
                 var usersByWhitelist =_database.Tf47ServerPlayerWhitelisting
                     .Include(x => x.Player)
                     .Include(x => x.Whitelist)
@@ -242,7 +245,7 @@ namespace TF47_Api.Controllers
                     });
                 return new
                 {
-                    TotalUsersWithWhitelist = usersByWhitelist.Count(),
+                    TotalUsersWithWhitelist = totalUsersWithWhitelist,
                     UsersByWhitelist = usersByWhitelist
                 };
             });
