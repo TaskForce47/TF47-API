@@ -34,7 +34,8 @@ namespace TF47_Api.Controllers
             int page = 1, 
             [FromQuery(Name = "rows")]int rows = 20,
             [FromQuery(Name = "playerId")]uint? playerId = null,
-            [FromQuery(Name = "playerName")]string playerName = null)
+            [FromQuery(Name = "playerName")]string playerName = null,
+            [FromQuery(Name = "side")]string side = null)
         {
             if (page < 1) page = 1;
             page--;
@@ -43,6 +44,40 @@ namespace TF47_Api.Controllers
 
             if (gadgetUser.ForumIsAdmin || gadgetUser.ForumIsModerator)
             {
+                if (playerId != null || playerName != null || side != null)
+                {
+                    return await Task.Run(() =>
+                    {
+                        var chats = _database.Tf47ServerChatLog
+                            .Include(x => x.Player)
+                            .Include(x => x.Session)
+                            .ThenInclude(x => x.Mission)
+                            .Where(x => x.PlayerId == playerId || x.Player.PlayerName == playerName || side == "")
+                            .OrderByDescending(x => x.Id)
+                            .Skip(20 * page)
+                            .Take(20)
+                            .Select(x => new ChatMessage
+                            {
+                                Id = x.Id,
+                                Channel = x.Channel,
+                                Message = x.Message,
+                                MissionId = x.Session.MissionId,
+                                MissionName = x.Session.Mission.MissionName,
+                                MissionType = x.Session.Mission.MissionType,
+                                PlayerId = x.PlayerId,
+                                PlayerName = x.Player.PlayerName,
+                                SessionId = x.SessionId,
+                                TimeSend = x.TimeSend
+                            });
+
+                        var totalChatCount = _database.Tf47ServerChatLog.Count(x => x.PlayerId == playerId || x.Player.PlayerName == playerName || side == "");
+                        return Ok(new
+                        {
+                            TotalChatCount = totalChatCount,
+                            Chats = chats
+                        });
+                    });
+                }
 
                 return await Task.Run(() =>
                 {
@@ -67,16 +102,6 @@ namespace TF47_Api.Controllers
                             TimeSend = x.TimeSend
                         });
 
-                    if (playerId != null)
-                    {
-                        chats = chats.Where(x => x.PlayerId == playerId);
-                    }
-
-                    if (playerName != null)
-                    {
-                        chats = chats.Where(x => x.PlayerName == playerName);
-                    }
-
                     var totalChatCount = _database.Tf47ServerChatLog.Count(x => x.Id > 0);
                     return Ok(new
                     {
@@ -85,39 +110,37 @@ namespace TF47_Api.Controllers
                     });
                 });
             }
-            else
+
+            return await Task.Run(() =>
             {
-                return await Task.Run(() =>
-                {
-                    var chats = _database.Tf47ServerChatLog
-                        .Include(x => x.Player)
-                        .Include(x => x.Session)
-                        .ThenInclude(x => x.Mission)
-                        .Where(x => x.Channel == "Side" || x.Player.PlayerUid == gadgetUser.PlayerUid)
-                        .OrderByDescending(x => x.Id)
-                        .Skip(rows * page)
-                        .Take(rows)
-                        .Select(x => new ChatMessage
-                        {
-                            Id = x.Id,
-                            Channel = x.Channel,
-                            Message = x.Message,
-                            MissionId = x.Session.MissionId,
-                            MissionName = x.Session.Mission.MissionName,
-                            MissionType = x.Session.Mission.MissionType,
-                            PlayerId = x.PlayerId,
-                            PlayerName = x.Player.PlayerName,
-                            SessionId = x.SessionId,
-                            TimeSend = x.TimeSend
-                        });
-                    var totalChatCount = _database.Tf47ServerChatLog.Count(x => x.Id > 0);
-                    return Ok(new
+                var chats = _database.Tf47ServerChatLog
+                    .Include(x => x.Player)
+                    .Include(x => x.Session)
+                    .ThenInclude(x => x.Mission)
+                    .Where(x => x.Channel == "Side" || x.Player.PlayerUid == gadgetUser.PlayerUid)
+                    .OrderByDescending(x => x.Id)
+                    .Skip(rows * page)
+                    .Take(rows)
+                    .Select(x => new ChatMessage
                     {
-                        TotalChatCount = totalChatCount,
-                        Chats = chats
+                        Id = x.Id,
+                        Channel = x.Channel,
+                        Message = x.Message,
+                        MissionId = x.Session.MissionId,
+                        MissionName = x.Session.Mission.MissionName,
+                        MissionType = x.Session.Mission.MissionType,
+                        PlayerId = x.PlayerId,
+                        PlayerName = x.Player.PlayerName,
+                        SessionId = x.SessionId,
+                        TimeSend = x.TimeSend
                     });
+                var totalChatCount = _database.Tf47ServerChatLog.Count(x => x.Id > 0);
+                return Ok(new
+                {
+                    TotalChatCount = totalChatCount,
+                    Chats = chats
                 });
-            }
+            });
 
         }
 
