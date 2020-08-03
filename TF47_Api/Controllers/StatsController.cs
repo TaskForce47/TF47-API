@@ -54,8 +54,8 @@ namespace TF47_Api.Controllers
                             .ThenInclude(x => x.Mission)
                             .Where(x => x.PlayerId == playerId || x.Player.PlayerName == playerName || side == "")
                             .OrderByDescending(x => x.Id)
-                            .Skip(20 * page)
-                            .Take(20)
+                            .Skip(rows * page)
+                            .Take(rows)
                             .Select(x => new ChatMessage
                             {
                                 Id = x.Id,
@@ -86,8 +86,8 @@ namespace TF47_Api.Controllers
                         .Include(x => x.Session)
                         .ThenInclude(x => x.Mission)
                         .OrderByDescending(x => x.Id)
-                        .Skip(20 * page)
-                        .Take(20)
+                        .Skip(rows * page)
+                        .Take(rows)
                         .Select(x => new ChatMessage
                         {
                             Id = x.Id,
