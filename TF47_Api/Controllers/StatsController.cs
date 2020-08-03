@@ -67,12 +67,12 @@ namespace TF47_Api.Controllers
                             TimeSend = x.TimeSend
                         });
 
-                    if (playerId == null)
+                    if (playerId != null)
                     {
                         chats = chats.Where(x => x.PlayerId == playerId);
                     }
 
-                    if (playerName == null)
+                    if (playerName != null)
                     {
                         chats = chats.Where(x => x.PlayerName == playerName);
                     }
