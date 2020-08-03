@@ -32,7 +32,9 @@ namespace TF47_Api.Controllers
         [HttpGet("chat/{page}")]
         public async Task<IActionResult> GetChat(
             int page = 1, 
-            [FromQuery(Name = "rows")]int rows = 20)
+            [FromQuery(Name = "rows")]int rows = 20,
+            [FromQuery(Name = "playerId")]uint? playerId = null,
+            [FromQuery(Name = "playerName")]string playerName = null)
         {
             if (page < 1) page = 1;
             page--;
@@ -64,6 +66,17 @@ namespace TF47_Api.Controllers
                             SessionId = x.SessionId,
                             TimeSend = x.TimeSend
                         });
+
+                    if (playerId == null)
+                    {
+                        chats = chats.Where(x => x.PlayerId == playerId);
+                    }
+
+                    if (playerName == null)
+                    {
+                        chats = chats.Where(x => x.PlayerName == playerName);
+                    }
+
                     var totalChatCount = _database.Tf47ServerChatLog.Count(x => x.Id > 0);
                     return Ok(new
                     {
