@@ -35,7 +35,7 @@ namespace TF47_Api.Controllers
             [FromQuery(Name = "rows")]int rows = 20,
             [FromQuery(Name = "playerId")]uint? playerId = null,
             [FromQuery(Name = "playerName")]string playerName = null,
-            [FromQuery(Name = "side")]string side = null)
+            [FromQuery(Name = "channel")]string channel = null)
         {
             if (page < 1) page = 1;
             page--;
@@ -44,7 +44,7 @@ namespace TF47_Api.Controllers
 
             if (gadgetUser.ForumIsAdmin || gadgetUser.ForumIsModerator)
             {
-                if (playerId != null || playerName != null || side != null)
+                if (playerId != null || playerName != null || channel != null)
                 {
                     return await Task.Run(() =>
                     {
@@ -52,7 +52,7 @@ namespace TF47_Api.Controllers
                             .Include(x => x.Player)
                             .Include(x => x.Session)
                             .ThenInclude(x => x.Mission)
-                            .Where(x => x.PlayerId == playerId || x.Player.PlayerName == playerName || side == "")
+                            .Where(x => x.PlayerId == playerId || x.Player.PlayerName.Contains(playerName) || x.Channel == channel)
                             .OrderByDescending(x => x.Id)
                             .Skip(rows * page)
                             .Take(rows)
@@ -70,7 +70,7 @@ namespace TF47_Api.Controllers
                                 TimeSend = x.TimeSend
                             });
 
-                        var totalChatCount = _database.Tf47ServerChatLog.Count(x => x.PlayerId == playerId || x.Player.PlayerName == playerName || side == "");
+                        var totalChatCount = _database.Tf47ServerChatLog.Count(x => x.PlayerId == playerId || x.Player.PlayerName.Contains(playerName) || x.Channel == channel);
                         return Ok(new
                         {
                             TotalChatCount = totalChatCount,
