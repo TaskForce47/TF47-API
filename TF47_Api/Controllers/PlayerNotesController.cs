@@ -124,8 +124,43 @@ namespace TF47_Api.Controllers
         [HttpGet("getLatest/{page}")]
         public async Task<IActionResult> GetLatest(
             uint page = 1,
-            [FromQuery(Name = "rows")] int rows = 20)
+            [FromQuery(Name = "rows")] int rows = 20,
+            [FromQuery(Name = "authorName")] string author = null,
+            [FromQuery(Name = "playerName")] string playerName = null)
+
         {
+            if (author != null || playerName != null)
+            {
+                return await Task.Run(() =>
+                {
+                    if (page < 1) page = 1;
+                    page--; //let pages start at 1 instead of 0
+
+                   
+                    var latestNotes = _database.Tf47GadgetUserNotes
+                        .Include(x => x.Player)
+                        .Where(x => x.Author.ForumName == author || x.Player.PlayerName == playerName)
+                        .OrderByDescending(x => x.Id)
+                        .Skip(rows * Convert.ToInt32(page))
+                        .Take(rows)
+                        .Select(x => new
+                        {
+                            x.Id,
+                            x.Player.PlayerName,
+                            Note = x.PlayerNote,
+                            x.TimeWritten,
+                            Author = x.Author.ForumName,
+                            x.Type
+                        });
+                    var totalNoteCount = _database.Tf47GadgetUserNotes.Count(x => x.Author.ForumName == author || x.Player.PlayerName == playerName);
+                    return Ok(new
+                    {
+                        TotalNoteCount = totalNoteCount,
+                        Notes = latestNotes
+                    });
+                });
+            }
+
             return await Task.Run(() =>
             {
                 if (page < 1) page = 1;
