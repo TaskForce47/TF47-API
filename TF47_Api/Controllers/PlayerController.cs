@@ -197,6 +197,7 @@ namespace TF47_Api.Controllers
                 PlayerNameFirstConnect = player.Tf47ServerPlayerStatsCreatedOnce.PlayerNameConnected,
                 PlayerFirstTimeSeen = player.Tf47ServerPlayerStatsCreatedOnce.FirstConnectionTime,
                 LastTimeSeen = player.Tf47ServerPlayerStats.LastTimeSeen,
+                NumberConnections = player.Tf47ServerPlayerStats.NumberConnections,
                 TimePlayedTotal = player.Tf47ServerPlayerStats.TimePlayedBase +
                                   player.Tf47ServerPlayerStats.TimePlayedInf +
                                   player.Tf47ServerPlayerStats.TimePlayedObjective +
@@ -232,6 +233,7 @@ namespace TF47_Api.Controllers
             public string PlayerNameFirstConnect { get; set; }
             public DateTime? PlayerFirstTimeSeen { get; set; }
             public DateTime? LastTimeSeen { get; set; }
+            public uint NumberConnections { get; set; }
             public uint? TimePlayedTotal { get; set; }
             public uint? TimePlayedBase { get; set; }
             public uint? TimePlayedObjective { get; set; }
