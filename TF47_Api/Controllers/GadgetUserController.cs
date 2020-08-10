@@ -37,7 +37,11 @@ namespace TF47_Api.Controllers
                 Id = user.Id,
                 AvatarUrl = user.ForumAvatarPath,
                 ForumName = user.ForumName,
-                PlayerUid = user.PlayerUid
+                PlayerUid = user.PlayerUid,
+                isAdmin = user.ForumIsAdmin,
+                isModerator = user.ForumIsModerator,
+                isSponsor = user.ForumIsSponsor,
+                isTf = user.ForumIsTf
             };
             return Ok(response);
         }
@@ -56,6 +60,10 @@ namespace TF47_Api.Controllers
                         AvatarUrl = x.ForumAvatarPath,
                         ForumName = x.ForumName,
                         PlayerUid = x.PlayerUid,
+                        isAdmin = x.ForumIsAdmin,
+                        isModerator = x.ForumIsModerator,
+                        isSponsor = x.ForumIsSponsor,
+                        isTf = x.ForumIsTf
                     });
                 return Ok(response);
             });
@@ -67,6 +75,10 @@ namespace TF47_Api.Controllers
             public string ForumName { get; set; }
             public string AvatarUrl { get; set; }
             public string PlayerUid { get; set; }
+            public bool isAdmin { get; set; }
+            public bool isModerator { get; set; }
+            public bool? isSponsor { get; set; }
+            public bool? isTf { get; set; }
         }
     }
 }
