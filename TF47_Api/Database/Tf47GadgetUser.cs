@@ -19,13 +19,13 @@ namespace TF47_Api.Database
 
         public uint Id { get; set; }
         public string PlayerUid { get; set; }
-        public uint? ForumId { get; set; }
+        public uint ForumId { get; set; }
         public string ForumName { get; set; }
         public string ForumMail { get; set; }
         public bool ForumIsAdmin { get; set; }
         public bool ForumIsModerator { get; set; }
-        public bool? ForumIsSponsor { get; set; }
-        public bool? ForumIsTf { get; set; }
+        public bool ForumIsSponsor { get; set; }
+        public bool ForumIsTf { get; set; }
         public DateTime? ForumLastLogin { get; set; }
         public string ForumAvatarPath { get; set; }
 

@@ -303,9 +303,9 @@ namespace TF47_Api.Controllers
                 roles.Add("Admin");
             if(user.ForumIsModerator)
                 roles.Add("Moderator");
-            if(user.ForumIsTf != null && user.ForumIsTf.Value)
+            if(user.ForumIsTf)
                 roles.Add("TF47");
-            if(user.ForumIsSponsor != null && user.ForumIsSponsor.Value)
+            if(user.ForumIsSponsor)
                 roles.Add("Sponsor");
             return roles;
         }
