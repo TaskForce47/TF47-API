@@ -24,7 +24,6 @@ namespace TF47_Backend.Database.Models.GameServer
         public string? VehicleName { get; set; }
         public long Distance { get; set; }
         public long GameTime { get; set; }
-        [Timestamp]
         public DateTime RealTime { get; set; }
     }
 }

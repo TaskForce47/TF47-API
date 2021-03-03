@@ -17,9 +17,7 @@ namespace TF47_Backend.Database.Models
         [Required]
         [MaxLength(100)]
         public string PlayerUid { get; set; }
-        [Timestamp]
         public DateTime FirstVisit { get; set; }
-        [Timestamp]
         public DateTime LastVisit { get; set; }
         public Playtime PlayerPlaytime { get; set; }
 

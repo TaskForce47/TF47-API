@@ -22,9 +22,7 @@ namespace TF47_Backend.Database.Models.Services
         public bool IsConnectedSteam { get; set; }
         public string? ProfilePicture { get; set; }
         public string? ProfileBackground { get; set; }
-        [Timestamp]
         public DateTime FirstTimeSeen { get; set; }
-        [Timestamp]
         public DateTime LastTimeSeen { get; set; }
         public ICollection<UserHasGroup> UserHasGroups { get; set; }
     }
