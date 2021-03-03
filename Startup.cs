@@ -7,11 +7,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using TF47_Backend.Database;
 using TF47_Backend.Services.Authentication;
@@ -21,6 +19,7 @@ namespace TF47_Backend
 {
     public class Startup
     {
+        readonly string CustomOrigins = "_myAllowSpecificOrigins";
 
         public Startup(IConfiguration configuration)
         {
@@ -32,7 +31,17 @@ namespace TF47_Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: CustomOrigins,
+                    builder =>
+                    {
+                        builder.WithOrigins("https://localhost:5001",
+                            "https://test.taskforce47.com",
+                            "https://beta.taskforce47.com",
+                            "https://api.taskforce47.com");
+                    });
+            });
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -74,7 +83,12 @@ namespace TF47_Backend
                 logger.LogCritical("JWT Secret must be at least 32 Characters long! Terminating...");
                 Environment.Exit(-1);
             }
-            
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -89,6 +103,8 @@ namespace TF47_Backend
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(CustomOrigins);
 
             app.UseAuthentication();
             app.UseAuthorization();
