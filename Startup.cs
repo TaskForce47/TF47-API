@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using TF47_Backend.Database;
 using TF47_Backend.Services.Authentication;
+using TF47_Backend.Services.Mail;
 using TF47_Backend.Services.OAuth;
 
 namespace TF47_Backend
@@ -67,7 +68,7 @@ namespace TF47_Backend
             });
             services.AddDbContext<DatabaseContext>();
 
-            
+            services.AddTransient<MailService>();
             services.AddTransient<ITokenProvider, TokenProvider>();
             services.AddSingleton<IUserManager, UserManager>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
