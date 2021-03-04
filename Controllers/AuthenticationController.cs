@@ -41,7 +41,7 @@ namespace TF47_Backend.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("/login")]
+        [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var loginResult = await _userManager.AuthenticateUser(request.Username, request.Password);
@@ -51,7 +51,7 @@ namespace TF47_Backend.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("/register")]
+        [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserRegisterRequest request)
         {
             if (!request.AcceptTermsOfService) return BadRequest("You must accept the Terms of Service to register");
@@ -62,7 +62,7 @@ namespace TF47_Backend.Controllers
             return Ok(await result.GetJwtToken());
         }
 
-        [HttpGet("/updateToken")]
+        [HttpGet("updateToken")]
         public async Task<IActionResult> RefreshToken()
         {
             var guid = Guid.Parse(HttpContext.User.Claims.First(x => x.Type == "Guid").Value);
@@ -70,7 +70,7 @@ namespace TF47_Backend.Controllers
             return Ok(token);
         }
 
-        [HttpPost("/resetPasswordRequest")]
+        [HttpPost("resetPasswordRequest")]
         public async Task<IActionResult> ResetPasswordRequest()
         {
             var guid = Guid.Parse(HttpContext.User.Claims.First(x => x.Type == "Guid").Value);
@@ -124,7 +124,7 @@ namespace TF47_Backend.Controllers
             return Ok();
         }
 
-        [HttpPost("/updatePassword")]
+        [HttpPost("updatePassword")]
         public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest updatePasswordRequest)
         {
             var guid = Guid.Parse(HttpContext.User.Claims.First(x => x.Type == "Guid").Value);
@@ -137,7 +137,7 @@ namespace TF47_Backend.Controllers
             return Ok();
         }
 
-        [HttpPost("/updatePasswordToken")]
+        [HttpPost("updatePasswordToken")]
         public async Task<IActionResult> UpdatePasswordByToken([FromBody] UpdatePasswordToken updatePasswordToken)
         {
             var guid = Guid.Parse(HttpContext.User.Claims.First(x => x.Type == "Guid").Value);
