@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using NpgsqlTypes;
@@ -10,9 +11,10 @@ using TF47_Backend.Database;
 namespace TF47_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20210304144433_addPasswordResetTokenTable")]
+    partial class addPasswordResetTokenTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -574,12 +576,12 @@ namespace TF47_Backend.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("PasswordResetId")
-                        .HasName("pk_service_password_resets");
+                        .HasName("pk_password_resets");
 
                     b.HasIndex("UserId")
-                        .HasDatabaseName("ix_service_password_resets_user_id");
+                        .HasDatabaseName("ix_password_resets_user_id");
 
-                    b.ToTable("service_password_resets");
+                    b.ToTable("password_resets");
                 });
 
             modelBuilder.Entity("TF47_Backend.Database.Models.Services.User", b =>
@@ -659,15 +661,15 @@ namespace TF47_Backend.Migrations
                         .HasColumnName("user_id");
 
                     b.HasKey("UserHasGroupId")
-                        .HasName("pk_service_userhasgroups");
+                        .HasName("pk_user_has_groups");
 
                     b.HasIndex("GroupId")
-                        .HasDatabaseName("ix_service_userhasgroups_group_id");
+                        .HasDatabaseName("ix_user_has_groups_group_id");
 
                     b.HasIndex("UserId")
-                        .HasDatabaseName("ix_service_userhasgroups_user_id");
+                        .HasDatabaseName("ix_user_has_groups_user_id");
 
-                    b.ToTable("service_userhasgroups");
+                    b.ToTable("user_has_groups");
                 });
 
             modelBuilder.Entity("TF47_Backend.Database.Models.GameServer.Chat", b =>
@@ -801,7 +803,7 @@ namespace TF47_Backend.Migrations
                     b.HasOne("TF47_Backend.Database.Models.Services.User", "User")
                         .WithMany("UserPasswordResets")
                         .HasForeignKey("UserId")
-                        .HasConstraintName("fk_service_password_resets_service_users_user_id");
+                        .HasConstraintName("fk_password_resets_users_user_id");
 
                     b.Navigation("User");
                 });
@@ -811,12 +813,12 @@ namespace TF47_Backend.Migrations
                     b.HasOne("TF47_Backend.Database.Models.Services.Group", "Group")
                         .WithMany()
                         .HasForeignKey("GroupId")
-                        .HasConstraintName("fk_service_userhasgroups_service_groups_group_id");
+                        .HasConstraintName("fk_user_has_groups_groups_group_id");
 
                     b.HasOne("TF47_Backend.Database.Models.Services.User", "User")
                         .WithMany("UserHasGroups")
                         .HasForeignKey("UserId")
-                        .HasConstraintName("fk_service_userhasgroups_service_users_user_id");
+                        .HasConstraintName("fk_user_has_groups_users_user_id");
 
                     b.Navigation("Group");
 

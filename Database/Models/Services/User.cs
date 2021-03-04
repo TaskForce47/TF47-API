@@ -25,5 +25,6 @@ namespace TF47_Backend.Database.Models.Services
         public DateTime FirstTimeSeen { get; set; }
         public DateTime LastTimeSeen { get; set; }
         public ICollection<UserHasGroup> UserHasGroups { get; set; }
+        public ICollection<PasswordReset> UserPasswordResets { get; set; }
     }
 }

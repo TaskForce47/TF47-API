@@ -7,6 +7,7 @@ namespace TF47_Backend.Services.Authentication
     {
         ITokenProvider GetTokenProvider();
         Task<UserManager.AuthenticatedUser> AuthenticateUser(string username, string password);
+        Task UpdatePasswordAsync(Guid userId, string newPassword);
         Task<UserManager.AuthenticatedUser> CreateUser(string username, string password, string email);
         Task<bool> DeleteUser(Guid id);
     }

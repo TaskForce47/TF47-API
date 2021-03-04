@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TF47_Backend.Dto
+namespace TF47_Backend.Dto.RequestModels
 {
     public class CreateCampaignRequest
     {

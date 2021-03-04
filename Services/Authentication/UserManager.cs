@@ -44,6 +44,16 @@ namespace TF47_Backend.Services.Authentication
             return SecurePasswordHasher.Verify(password, user.Password) ? new AuthenticatedUser(GetTokenProvider(), user.UserId) : null;
         }
 
+        public async Task UpdatePasswordAsync(Guid userId, string newPassword)
+        {
+            using var scope = _serviceProvider.CreateScope();
+            var database = scope.ServiceProvider.GetService<DatabaseContext>();
+            var user = database.Users.First(x => x.UserId == userId);
+
+            user.Password = SecurePasswordHasher.Hash(newPassword);
+            await database.SaveChangesAsync();
+        }
+
         public async Task<AuthenticatedUser> CreateUser(string username, string password, string email)
         {
             //get a database service because it is scoped
@@ -58,7 +68,7 @@ namespace TF47_Backend.Services.Authentication
             }
             
             //create the new user and salt and hash the password
-            var user = new User()
+            var user = new User
             {
                 Banned = false,
                 FirstTimeSeen = DateTime.Now,
