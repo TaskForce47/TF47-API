@@ -16,6 +16,7 @@ using TF47_Backend.Database;
 using TF47_Backend.Database.Models.Services;
 using TF47_Backend.Dto;
 using TF47_Backend.Dto.RequestModels;
+using TF47_Backend.Dto.ResponseModels;
 using TF47_Backend.Services.Authentication;
 using TF47_Backend.Services.Mail;
 
@@ -47,7 +48,11 @@ namespace TF47_Backend.Controllers
             var loginResult = await _userManager.AuthenticateUser(request.Username, request.Password);
             if (loginResult == null) return BadRequest("Username or password incorrect");
 
-            return Ok(await loginResult.GetJwtToken());
+            return Ok(new JwtTokenResponse
+            {
+                Token = await loginResult.GetJwtToken(),
+                ValidUntil = DateTime.Now + TimeSpan.FromMinutes(10)
+            });
         }
 
         [AllowAnonymous]
@@ -59,7 +64,11 @@ namespace TF47_Backend.Controllers
             var result = await _userManager.CreateUser(request.Username, request.Password, request.Email);
             if (result == null) return BadRequest("Either the username or email is already in use");
 
-            return Ok(await result.GetJwtToken());
+            return Ok(new JwtTokenResponse
+            {
+                Token = await result.GetJwtToken(),
+                ValidUntil = DateTime.Now + TimeSpan.FromMinutes(10)
+            });
         }
 
         [HttpGet("updateToken")]
@@ -70,16 +79,15 @@ namespace TF47_Backend.Controllers
             return Ok(token);
         }
 
-        [HttpPost("resetPasswordRequest")]
-        public async Task<IActionResult> ResetPasswordRequest()
+        [AllowAnonymous]
+        [HttpPost("resetPasswordRequest/{username:string}")]
+        public async Task<IActionResult> ResetPasswordRequest(string username)
         {
-            var guid = Guid.Parse(HttpContext.User.Claims.First(x => x.Type == "Guid").Value);
-            var user = await _database.Users.FirstOrDefaultAsync(x => x.UserId == guid);
+            var user = await _database.Users
+                .Include(x => x.UserPasswordResets)
+                .FirstOrDefaultAsync(x => x.Username == username);
     
-            var passwordReset = await _database.PasswordResets
-                .Include(x => x.User)
-                .FirstOrDefaultAsync(x =>
-                    x.User.UserId == guid && (DateTime.UtcNow - x.TimePasswordResetGenerated) < TimeSpan.FromHours(24));
+            var passwordReset = user.UserPasswordResets.FirstOrDefault(x => (DateTime.UtcNow - x.TimePasswordResetGenerated) < TimeSpan.FromHours(24));
 
             using var cryptoProvider = new SHA512CryptoServiceProvider();
             var resetTokenBytes = Encoding.UTF8.GetBytes(user.Password).Concat(
@@ -88,7 +96,7 @@ namespace TF47_Backend.Controllers
 
 
             var stringBuilder = new StringBuilder();
-            foreach (var b in resetTokenBytes)
+            foreach (var b in resetTokenHash)
             {
                 stringBuilder.Append(b.ToString("x2"));
             }
@@ -137,6 +145,7 @@ namespace TF47_Backend.Controllers
             return Ok();
         }
 
+        [AllowAnonymous]
         [HttpPost("updatePasswordToken")]
         public async Task<IActionResult> UpdatePasswordByToken([FromBody] UpdatePasswordToken updatePasswordToken)
         {
