@@ -80,12 +80,14 @@ namespace TF47_Backend.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("resetPasswordRequest/{username:string}")]
+        [HttpPost("resetPasswordRequest/{username}")]
         public async Task<IActionResult> ResetPasswordRequest(string username)
         {
             var user = await _database.Users
                 .Include(x => x.UserPasswordResets)
                 .FirstOrDefaultAsync(x => x.Username == username);
+
+            if (user == null) return BadRequest("user not found");
     
             var passwordReset = user.UserPasswordResets.FirstOrDefault(x => (DateTime.UtcNow - x.TimePasswordResetGenerated) < TimeSpan.FromHours(24));
 
@@ -149,10 +151,9 @@ namespace TF47_Backend.Controllers
         [HttpPost("updatePasswordToken")]
         public async Task<IActionResult> UpdatePasswordByToken([FromBody] UpdatePasswordToken updatePasswordToken)
         {
-            var guid = Guid.Parse(HttpContext.User.Claims.First(x => x.Type == "Guid").Value);
             var user = await _database.Users
                 .Include(x => x.UserPasswordResets)
-                .FirstOrDefaultAsync(x => x.UserId == guid);
+                .FirstOrDefaultAsync(x => x.UserPasswordResets.Any(y => y.ResetToken == updatePasswordToken.Token));
 
             var passwordReset = user.UserPasswordResets.FirstOrDefault(x =>
                 x.ResetToken == updatePasswordToken.Token &&
