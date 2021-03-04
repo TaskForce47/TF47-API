@@ -155,6 +155,8 @@ namespace TF47_Backend.Controllers
                 .Include(x => x.UserPasswordResets)
                 .FirstOrDefaultAsync(x => x.UserPasswordResets.Any(y => y.ResetToken == updatePasswordToken.Token));
 
+            if (user == null) return BadRequest("token invalid");
+
             var passwordReset = user.UserPasswordResets.FirstOrDefault(x =>
                 x.ResetToken == updatePasswordToken.Token &&
                 DateTime.UtcNow - x.TimePasswordResetGenerated < TimeSpan.FromHours(24));
