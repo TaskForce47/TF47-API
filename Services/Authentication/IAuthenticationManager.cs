@@ -8,7 +8,7 @@ namespace TF47_Backend.Services.Authentication
     public interface IAuthenticationManager
     {
         Task<ClaimsIdentity> CreateUserAsync(Player steamUser);
-        Task UpdateUserDataAsync(Player steamUser);
+        Task<ClaimsIdentity> UpdateUserDataAsync(Player steamUser);
         Task<ClaimsIdentity> GetClaimIdentityAsync(Guid guid);
     }
 }

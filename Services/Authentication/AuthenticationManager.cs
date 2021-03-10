@@ -55,12 +55,12 @@ namespace TF47_Backend.Services.Authentication
             return await GetClaimIdentityAsync(newUser.UserId);
         }
 
-        public async Task UpdateUserDataAsync(Player steamUser)
+        public async Task<ClaimsIdentity> UpdateUserDataAsync(Player steamUser)
         {
             if (steamUser == null)
             {
                 _logger.LogWarning($"Failed to update user! steam response returned null");
-                return;
+                return null;
             }
 
             if (steamUser.Communityvisibilitystate == 1)
@@ -76,6 +76,7 @@ namespace TF47_Backend.Services.Authentication
             user.SteamId = steamUser.Steamid;
 
             await _database.SaveChangesAsync();
+            return await GetClaimIdentityAsync(user.UserId);
         }
 
 

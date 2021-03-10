@@ -65,7 +65,7 @@ namespace TF47_Backend.Controllers
         public async Task<IActionResult> HandleSteamLoginCallback(Guid guid)
         {
             var steamUser = await _steamAuthenticationService.HandleSteamCallbackAsync(HttpContext);
-            var claimsIdentity = await _authenticationManager.CreateUserAsync(steamUser.Response.Players.First());
+            var claimsIdentity = await _authenticationManager.UpdateUserDataAsync(steamUser.Response.Players.First());
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
                 {
