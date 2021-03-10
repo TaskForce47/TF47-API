@@ -4,10 +4,13 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using RestSharp.Serialization.Json;
 using TF47_Backend.Database;
 using TF47_Backend.Services.Authentication;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace TF47_Backend.Services.OAuth
 {
@@ -15,28 +18,32 @@ namespace TF47_Backend.Services.OAuth
     {
         private readonly ILogger<SteamAuthenticationService> _logger;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly Dictionary<Guid, Guid> _steamChallenges;
+        private readonly List<Guid> _steamChallenges;
+        private readonly string _apiToken;
 
-
-        public SteamAuthenticationService(ILogger<SteamAuthenticationService> logger, IHttpClientFactory httpClientFactory, IServiceProvider serviceProvider)
+        public SteamAuthenticationService(ILogger<SteamAuthenticationService> logger,
+            IHttpClientFactory httpClientFactory, IServiceProvider serviceProvider, IConfiguration configuration)
         {
             _logger = logger;
             _httpClientFactory = httpClientFactory;
-            _serviceProvider = serviceProvider;
-            _steamChallenges = new Dictionary<Guid, Guid>();
+            _steamChallenges = new List<Guid>();
+            _apiToken = configuration["Credentials:Steam:ApiToken"];
         }
 
-        public async Task<bool> HandleSteamCallback(HttpContext httpContext)
+        public async Task<SteamUserResponse> HandleSteamCallbackAsync(HttpContext httpContext)
         {
-            using var scope = _serviceProvider.CreateScope();
-            var database = scope.ServiceProvider.GetService<DatabaseContext>();
-
-
             _logger.LogInformation($"Callback guid: {httpContext.Request.Path}");
 
-            var guid = Guid.Parse(httpContext.Request.Path.Value.Replace("/api/user/steamCallback/", ""));
+            var challengeGuidString = httpContext.Request.Cookies.FirstOrDefault(x => x.Key == "tf47_steam_challenge").Value;
+            if (string.IsNullOrEmpty(challengeGuidString))
+            {
+                _logger.LogWarning($"Got steam callback without guid cookie set!");
+                return null;
+            }
 
+            var challengeGuid = Guid.Parse(challengeGuidString);
+
+            //begin steam verification challenge
             string queryString;
             if (httpContext.Request.QueryString.Value != null)
             {
@@ -46,7 +53,7 @@ namespace TF47_Backend.Services.OAuth
             else
             {
                 _logger.LogWarning("Invalid query string in steam challenge response");
-                return false;
+                return null;
             }
 
             var client = _httpClientFactory.CreateClient();
@@ -54,39 +61,65 @@ namespace TF47_Backend.Services.OAuth
 
             if (!response.Contains("is_valid:true"))
             {
-                _logger.LogWarning($"Challenge {guid} is not valid!");
-                return false;
+                _logger.LogWarning($"Challenge {challengeGuid} is not valid!");
+                return null;
             }
+            //end steam verification challenge
 
-            var userId = _steamChallenges[guid];
-            var user = database?.Users.FirstOrDefault(x => x.UserId == userId);
-
-            if (user == null)
-            {
-                _logger.LogWarning("Challenge user not found");
-                return false;
-            }
+            var userId = _steamChallenges.FirstOrDefault(x => x == challengeGuid);
 
             var steamId = httpContext.Request.Query.First(x => x.Key == "openid.identity").Value
                 .ToString()
                 .Replace("https://steamcommunity.com/openid/id/", "");
 
+            _steamChallenges.Remove(challengeGuid);
+            //query steam user from api
 
-            user.SteamId = steamId;
-            user.IsConnectedSteam = true;
-            await database.SaveChangesAsync();
 
-            _steamChallenges.Remove(guid);
+            response = await client.GetStringAsync(
+                $"http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key={_apiToken}&steamids={steamId}");
+            var steamUser = JsonSerializer.Deserialize<SteamUserResponse>(response);
 
-            return true;
-
+            return steamUser;
         }
 
-        public Guid CreateChallenge(Guid userId)
+        //Generates steam oath url with challenge build in
+        public string CreateChallenge(HttpContext httpContext, string callbackPath)
         {
-            var guid = Guid.NewGuid();
-            _steamChallenges.Add(guid, userId);
-            return guid;
+            var challengeGuid = Guid.NewGuid();
+            _steamChallenges.Add(challengeGuid);
+            httpContext.Response.Cookies.Append("tf47_steam_challenge", challengeGuid.ToString(), new CookieOptions
+            {
+                Domain = httpContext.Request.Host.Host,
+                Expires = DateTimeOffset.Now + TimeSpan.FromMinutes(5),
+                HttpOnly = true,
+                IsEssential = true,
+                Path = "/",
+                Secure = true
+            });
+            return $"https://steamcommunity.com/openid/login?" + $"{GetHeaders(challengeGuid, httpContext, callbackPath)}";
         }
+
+
+        private static string GetHeaders(Guid guid, HttpContext httpContext, string callbackPath)
+        {
+            var headers = new Dictionary<string, string>
+            {
+                {"openid.ns", "http://specs.openid.net/auth/2.0"},
+                {"openid.mode", "checkid_setup"},
+                {"openid.return_to", $"https://{httpContext.Request.Host.Value}/{callbackPath}/{guid}"},
+                {"openid.realm", $"https://{httpContext.Request.Host.Value}"},
+                {"openid.identity", "http://specs.openid.net/auth/2.0/identifier_select"},
+                {"openid.claimed_id", "http://specs.openid.net/auth/2.0/identifier_select"}
+            };
+            foreach (var (key, value) in headers)
+            {
+
+                headers[key] = value.Replace(":", "%3A").Replace("/", "%2F");
+            }
+
+            return string.Join("&", headers.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+        }
+
     }
 }

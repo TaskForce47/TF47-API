@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -23,70 +24,25 @@ namespace TF47_Backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly DatabaseContext _database;
 
-        public UserController(ILogger<UserController> logger, IServiceProvider serviceProvider)
+        public UserController(ILogger<UserController> logger, DatabaseContext database)
         {
             _logger = logger;
-            _serviceProvider = serviceProvider;
+            _database = database;
         }
 
-        [HttpGet("steamCallback/{id:guid}")]
-        public async Task<IActionResult> SteamAccountCallback(Guid id)
+        [HttpGet("{userid:guid}/get")]
+        public async Task<IActionResult> GetUserDetails(Guid userId)
         {
-            using var scope = _serviceProvider.CreateScope();
-            var steamAuthenticationService = scope.ServiceProvider.GetService<ISteamAuthenticationService>();
-            var result = await steamAuthenticationService.HandleSteamCallback(HttpContext);
-            return Ok("success");
+            //var userGuid = Guid.Parse(userId);
+            var userDetails = await _database.Users
+                .Include(x => x.UserHasGroups)
+                .ThenInclude(y => y.Group)
+                .ThenInclude(z => z.GroupPermission)
+                .FirstOrDefaultAsync(x => x.UserId == userId);
+
+            return Ok(userDetails);
         }
-
-        [HttpGet("linkSteam")]
-        public async Task<IActionResult> LinkSteamAccount()
-        {
-            return await Task.Run(() =>
-            {
-                using var scope = _serviceProvider.CreateScope();
-                var steamAuthenticationService = scope.ServiceProvider.GetService<ISteamAuthenticationService>();
-
-
-                var userId = Guid.NewGuid();
-                var guid = steamAuthenticationService.CreateChallenge(userId);
-
-                var url = $"https://steamcommunity.com/openid/login?" + $"{GetHeaders(guid)}";
-
-                _logger.LogInformation($"Request guid: {guid}");
-                _logger.LogInformation($"{url}");
-                return Redirect(url);
-            });
-        }
-
-        /* Needed?
-        [HttpGet("getRoles")]
-        public async Task<IActionResult> GetRoles()
-        {
-            
-        }*/
-
-        private string GetHeaders(Guid guid)
-        {
-            var headers = new Dictionary<string, string>
-            {
-                {"openid.ns", "http://specs.openid.net/auth/2.0"},
-                {"openid.mode", "checkid_setup"},
-                {"openid.return_to", $"https://{HttpContext.Request.Host.Value}/api/user/steamCallback/{guid}"},
-                {"openid.realm", $"https://{HttpContext.Request.Host.Value}"},
-                {"openid.identity", "http://specs.openid.net/auth/2.0/identifier_select"},
-                {"openid.claimed_id", "http://specs.openid.net/auth/2.0/identifier_select"}
-            };
-            foreach (var (key, value) in headers)
-            {
-
-                headers[key] = value.Replace(":", "%3A").Replace("/", "%2F");
-            }
-
-            return string.Join("&", headers.Select(kvp => $"{kvp.Key}={kvp.Value}"));
-        }
-
-        
     }
 }

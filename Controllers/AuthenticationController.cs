@@ -8,6 +8,8 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -16,9 +18,9 @@ using TF47_Backend.Database;
 using TF47_Backend.Database.Models.Services;
 using TF47_Backend.Dto;
 using TF47_Backend.Dto.RequestModels;
-using TF47_Backend.Dto.ResponseModels;
 using TF47_Backend.Services.Authentication;
 using TF47_Backend.Services.Mail;
+using TF47_Backend.Services.OAuth;
 
 namespace TF47_Backend.Controllers
 {
@@ -29,142 +31,78 @@ namespace TF47_Backend.Controllers
     {
         private readonly ILogger<AuthenticationController> _logger;
         private readonly DatabaseContext _database;
-        private readonly IUserManager _userManager;
         private readonly MailService _mailService;
+        private readonly ISteamAuthenticationService _steamAuthenticationService;
+        private readonly IAuthenticationManager _authenticationManager;
 
         public AuthenticationController(ILogger<AuthenticationController> logger, DatabaseContext database,
-            IUserManager userManager, MailService mailService)
+           MailService mailService, ISteamAuthenticationService steamAuthenticationService,
+           IAuthenticationManager authenticationManager)
         {
             _logger = logger;
             _database = database;
-            _userManager = userManager;
             _mailService = mailService;
+            _steamAuthenticationService = steamAuthenticationService;
+            _authenticationManager = authenticationManager;
         }
 
         [AllowAnonymous]
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        [HttpGet("login")]
+        public IActionResult Login()
         {
-            var loginResult = await _userManager.AuthenticateUser(request.Username, request.Password);
-            if (loginResult == null) return BadRequest("Username or password incorrect");
-
-            return Ok(new JwtTokenResponse
+            if (HttpContext.User.Identity == null || !HttpContext.User.Identity.IsAuthenticated)
             {
-                Token = await loginResult.GetJwtToken(),
-                ValidUntil = DateTime.Now + TimeSpan.FromMinutes(10)
-            });
-        }
-
-        [AllowAnonymous]
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserRegisterRequest request)
-        {
-            if (!request.AcceptTermsOfService) return BadRequest("You must accept the Terms of Service to register");
-
-            var result = await _userManager.CreateUser(request.Username, request.Password, request.Email);
-            if (result == null) return BadRequest("Either the username or email is already in use");
-
-            return Ok(new JwtTokenResponse
-            {
-                Token = await result.GetJwtToken(),
-                ValidUntil = DateTime.Now + TimeSpan.FromMinutes(10)
-            });
-        }
-
-        [HttpGet("updateToken")]
-        public async Task<IActionResult> RefreshToken()
-        {
-            var guid = Guid.Parse(HttpContext.User.Claims.First(x => x.Type == "Guid").Value);
-            var token = await _userManager.GetTokenProvider().GenerateToken(guid);
-            return Ok(token);
-        }
-
-        [AllowAnonymous]
-        [HttpPost("resetPasswordRequest/{username}")]
-        public async Task<IActionResult> ResetPasswordRequest(string username)
-        {
-            var user = await _database.Users
-                .Include(x => x.UserPasswordResets)
-                .FirstOrDefaultAsync(x => x.Username == username);
-
-            if (user == null) return BadRequest("user not found");
-    
-            var passwordReset = user.UserPasswordResets.FirstOrDefault(x => (DateTime.UtcNow - x.TimePasswordResetGenerated) < TimeSpan.FromHours(24));
-
-            using var cryptoProvider = new SHA512CryptoServiceProvider();
-            var resetTokenBytes = Encoding.UTF8.GetBytes(user.Password).Concat(
-                                  Encoding.UTF8.GetBytes(DateTime.UtcNow.ToString("F"))).ToArray();
-            var resetTokenHash = cryptoProvider.ComputeHash(resetTokenBytes);
-
-
-            var stringBuilder = new StringBuilder();
-            foreach (var b in resetTokenHash)
-            {
-                stringBuilder.Append(b.ToString("x2"));
+                var challenge =
+                    _steamAuthenticationService.CreateChallenge(HttpContext, "api/Authentication/login/steam/callback");
+                return Redirect(challenge);
             }
-            var resetToken = stringBuilder.ToString();
 
-            if (passwordReset == null)
-            {
-                passwordReset = new PasswordReset
+            return BadRequest("user is already authenticated");
+        }
+
+        [AllowAnonymous]
+        [HttpGet("login/steam/callback/{guid}")]
+        public async Task<IActionResult> HandleSteamLoginCallback(Guid guid)
+        {
+            var steamUser = await _steamAuthenticationService.HandleSteamCallbackAsync(HttpContext);
+            var claimsIdentity = await _authenticationManager.CreateUserAsync(steamUser.Response.Players.First());
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
                 {
-                    User = user,
-                    ResetToken = resetToken,
-                    TimePasswordResetGenerated = DateTime.UtcNow
-                };
-                await _database.AddAsync(passwordReset);
+                    IsPersistent = true,
+                    ExpiresUtc = DateTime.UtcNow.AddDays(4)
+                });
+            return Ok();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("register/steam")]
+        public IActionResult RegisterWithSteam()
+        {
+            var challenge = _steamAuthenticationService.CreateChallenge(HttpContext, "api/Authentication/register/steam/callback");
+            return Redirect(challenge);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("register/steam/callback/{guid}")]
+        public async Task<IActionResult> HandleSteamRegisterCallback(Guid guid)
+        {
+            var steamUser = await _steamAuthenticationService.HandleSteamCallbackAsync(HttpContext);
+            var claimsIdentity = await _authenticationManager.CreateUserAsync(steamUser.Response.Players.First());
+
+            if (claimsIdentity != null)
+            {
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTime.UtcNow.AddDays(4)
+                    });
             }
             else
             {
-                passwordReset.ResetToken = resetToken;
-                passwordReset.TimePasswordResetGenerated = DateTime.UtcNow;
-                
+                return BadRequest("something went wrong");
             }
-            await _database.SaveChangesAsync();
-
-            var mailBody = "You are receiving this mail because you tried to reset your account at taskforce47.\n" +
-                           "If you did not request a password reset you can ignore this mail.\n" +
-                           $"Otherwise you can press this link: {resetToken}";
-
-            await _mailService.SendMailAsync(user.Mail, user.Username, "Reset password request",
-                mailBody, CancellationToken.None);
-
-            _logger.LogInformation($"Send password reset mail to {user.Username} {user.Mail}");
-
-            return Ok();
-        }
-
-        [HttpPost("updatePassword")]
-        public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest updatePasswordRequest)
-        {
-            var guid = Guid.Parse(HttpContext.User.Claims.First(x => x.Type == "Guid").Value);
-            var user = await _database.Users.FirstOrDefaultAsync(x => x.UserId == guid);
-
-            var isAuthenticatedUser = await _userManager.AuthenticateUser(user.Username, updatePasswordRequest.OldPassword);
-            if (isAuthenticatedUser == null) return BadRequest("password wrong");
-
-            await _userManager.UpdatePasswordAsync(user.UserId, updatePasswordRequest.NewPassword);
-            return Ok();
-        }
-
-        [AllowAnonymous]
-        [HttpPost("updatePasswordToken")]
-        public async Task<IActionResult> UpdatePasswordByToken([FromBody] UpdatePasswordToken updatePasswordToken)
-        {
-            var user = await _database.Users
-                .Include(x => x.UserPasswordResets)
-                .FirstOrDefaultAsync(x => x.UserPasswordResets.Any(y => y.ResetToken == updatePasswordToken.Token));
-
-            if (user == null) return BadRequest("token invalid");
-
-            var passwordReset = user.UserPasswordResets.FirstOrDefault(x =>
-                x.ResetToken == updatePasswordToken.Token &&
-                DateTime.UtcNow - x.TimePasswordResetGenerated < TimeSpan.FromHours(24));
-
-            if (passwordReset == null)
-                return BadRequest("Token does not exist");
-
-            await _userManager.UpdatePasswordAsync(user.UserId, updatePasswordToken.NewPassword);
 
             return Ok();
         }

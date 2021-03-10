@@ -35,7 +35,6 @@ namespace TF47_Backend.Database
         public virtual DbSet<Group> Groups { get; set; }
         public virtual DbSet<GroupPermission> GroupPermissions { get; set; }
         public virtual DbSet<UserHasGroup> UserHasGroups { get; set; }
-        public virtual DbSet<PasswordReset> PasswordResets { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -51,6 +50,7 @@ namespace TF47_Backend.Database
             //Console.WriteLine(builder.ToString());
             optionsBuilder.UseNpgsql(builder.ToString());
             optionsBuilder.UseSnakeCaseNamingConvention();
+            optionsBuilder.LogTo(Console.WriteLine);
 
             //Database.Migrate();
         }
@@ -139,7 +139,6 @@ namespace TF47_Backend.Database
             {
                 entity.Property(x => x.UserId).ValueGeneratedOnAdd();
                 entity.HasMany(x => x.UserHasGroups).WithOne(x => x.User);
-                entity.HasMany(x => x.UserPasswordResets).WithOne(x => x.User);
                 entity.ToTable("Service_users".ToLower());
             });
             builder.Entity<Group>(entity =>
@@ -159,11 +158,6 @@ namespace TF47_Backend.Database
             {
                 entity.Property(x => x.UserHasGroupId).ValueGeneratedOnAdd();
                 entity.ToTable("Service_UserHasGroups".ToLower());
-            });
-            builder.Entity<PasswordReset>(entity =>
-            {
-                entity.Property(x => x.PasswordResetId).ValueGeneratedOnAdd();
-                entity.ToTable("Service_password_resets".ToLower());
             });
         }
     }
