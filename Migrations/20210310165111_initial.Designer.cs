@@ -11,8 +11,8 @@ using TF47_Backend.Database;
 namespace TF47_Backend.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210310130801_movedUserToOauthRegistration")]
-    partial class movedUserToOauthRegistration
+    [Migration("20210310165111_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
