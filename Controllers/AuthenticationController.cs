@@ -31,17 +31,14 @@ namespace TF47_Backend.Controllers
     {
         private readonly ILogger<AuthenticationController> _logger;
         private readonly DatabaseContext _database;
-        private readonly MailService _mailService;
         private readonly ISteamAuthenticationService _steamAuthenticationService;
         private readonly IAuthenticationManager _authenticationManager;
 
-        public AuthenticationController(ILogger<AuthenticationController> logger, DatabaseContext database,
-           MailService mailService, ISteamAuthenticationService steamAuthenticationService,
-           IAuthenticationManager authenticationManager)
+        public AuthenticationController(ILogger<AuthenticationController> logger, DatabaseContext database, 
+            ISteamAuthenticationService steamAuthenticationService, IAuthenticationManager authenticationManager)
         {
             _logger = logger;
             _database = database;
-            _mailService = mailService;
             _steamAuthenticationService = steamAuthenticationService;
             _authenticationManager = authenticationManager;
         }
