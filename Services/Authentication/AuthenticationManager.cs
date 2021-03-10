@@ -23,39 +23,7 @@ namespace TF47_Backend.Services.Authentication
             _database = database;
         }
 
-        public async Task<ClaimsIdentity> CreateUserAsync(Player steamUser)
-        {
-            if (steamUser == null) return null;
-
-            _logger.LogInformation(
-                $"Creating new account for steam user {steamUser.Personaname}, Profile link: {steamUser.Profileurl}");
-            if (steamUser.Communityvisibilitystate == 1)
-                _logger.LogInformation($"{steamUser.Personaname} profile is set to private");
-
-            if (await _database.Users.AnyAsync(x => x.SteamId == steamUser.Steamid))
-            {
-                _logger.LogWarning($"User account for {steamUser.Personaname} already exists!");
-                return null;
-            }
-
-            var newUser = new User
-            {
-                Banned = false,
-                CountryCode = steamUser.Loccountrycode,
-                FirstTimeSeen = DateTime.Now,
-                LastTimeSeen = DateTime.Now,
-                Username = steamUser.Personaname,
-                ProfileUrl = steamUser.Profileurl,
-                ProfilePicture = steamUser.Avatarfull,
-                SteamId = steamUser.Steamid
-            };
-            await _database.AddAsync(newUser);
-            await _database.SaveChangesAsync();
-
-            return await GetClaimIdentityAsync(newUser.UserId);
-        }
-
-        public async Task<ClaimsIdentity> UpdateUserDataAsync(Player steamUser)
+        public async Task<ClaimsIdentity> UpdateOrCreateUserAsync(Player steamUser)
         {
             if (steamUser == null)
             {
@@ -68,17 +36,35 @@ namespace TF47_Backend.Services.Authentication
 
             var user = await _database.Users.FirstOrDefaultAsync(x => x.SteamId == steamUser.Steamid);
 
-            user.CountryCode = steamUser.Loccountrycode;
-            user.LastTimeSeen = DateTime.Now;
-            user.Username = steamUser.Personaname;
-            user.ProfileUrl = steamUser.Profileurl;
-            user.ProfilePicture = steamUser.Avatarfull;
-            user.SteamId = steamUser.Steamid;
+            if (user == null)
+            {
+                _logger.LogInformation($"We don't have a user for {steamUser.Personaname} yet, creating a new user!");
+                user = new User
+                {
+                    Banned = false,
+                    CountryCode = steamUser.Loccountrycode,
+                    FirstTimeSeen = DateTime.Now,
+                    LastTimeSeen = DateTime.Now,
+                    Username = steamUser.Personaname,
+                    ProfileUrl = steamUser.Profileurl,
+                    ProfilePicture = steamUser.Avatarfull,
+                    SteamId = steamUser.Steamid
+                };
+                await _database.AddAsync(user);
+            }
+            else
+            {
+                user.CountryCode = steamUser.Loccountrycode;
+                user.LastTimeSeen = DateTime.Now;
+                user.Username = steamUser.Personaname;
+                user.ProfileUrl = steamUser.Profileurl;
+                user.ProfilePicture = steamUser.Avatarfull;
+                user.SteamId = steamUser.Steamid;
+            }
 
             await _database.SaveChangesAsync();
             return await GetClaimIdentityAsync(user.UserId);
         }
-
 
         public async Task<ClaimsIdentity> GetClaimIdentityAsync(Guid guid)
         {

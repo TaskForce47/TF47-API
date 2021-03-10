@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using RestSharp;
 using TF47_Backend.Database;
@@ -33,18 +34,24 @@ namespace TF47_Backend.Controllers
         private readonly DatabaseContext _database;
         private readonly ISteamAuthenticationService _steamAuthenticationService;
         private readonly IAuthenticationManager _authenticationManager;
+        private readonly IConfiguration _configuration;
 
-        public AuthenticationController(ILogger<AuthenticationController> logger, DatabaseContext database, 
-            ISteamAuthenticationService steamAuthenticationService, IAuthenticationManager authenticationManager)
+        public AuthenticationController(
+            ILogger<AuthenticationController> logger, 
+            DatabaseContext database, 
+            ISteamAuthenticationService steamAuthenticationService, 
+            IAuthenticationManager authenticationManager,
+            IConfiguration configuration)
         {
             _logger = logger;
             _database = database;
             _steamAuthenticationService = steamAuthenticationService;
             _authenticationManager = authenticationManager;
+            _configuration = configuration;
         }
 
         [AllowAnonymous]
-        [HttpGet("login")]
+        [HttpGet("login/steam")]
         public IActionResult Login()
         {
             if (HttpContext.User.Identity == null || !HttpContext.User.Identity.IsAuthenticated)
@@ -62,46 +69,31 @@ namespace TF47_Backend.Controllers
         public async Task<IActionResult> HandleSteamLoginCallback(Guid guid)
         {
             var steamUser = await _steamAuthenticationService.HandleSteamCallbackAsync(HttpContext);
-            var claimsIdentity = await _authenticationManager.UpdateUserDataAsync(steamUser.Response.Players.First());
+
+            if (steamUser.Response.Players.FirstOrDefault() == null)
+            {
+                _logger.LogError($"Steam did not return a user");
+                return Redirect(_configuration["Redirections:AuthenticationFailed"]);
+            }
+
+            var claimsIdentity = await _authenticationManager.UpdateOrCreateUserAsync(steamUser.Response.Players.First());
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
                 {
                     IsPersistent = true,
                     ExpiresUtc = DateTime.UtcNow.AddDays(4)
                 });
-            return Ok();
+
+            return Redirect(_configuration["Redirections:AuthenticationSuccessful"]);
         }
 
-        [AllowAnonymous]
-        [HttpGet("register/steam")]
-        public IActionResult RegisterWithSteam()
+        [HttpGet("logout")]
+        public async Task<IActionResult> Logout()
         {
-            var challenge = _steamAuthenticationService.CreateChallenge(HttpContext, "api/Authentication/register/steam/callback");
-            return Redirect(challenge);
-        }
-
-        [AllowAnonymous]
-        [HttpGet("register/steam/callback/{guid}")]
-        public async Task<IActionResult> HandleSteamRegisterCallback(Guid guid)
-        {
-            var steamUser = await _steamAuthenticationService.HandleSteamCallbackAsync(HttpContext);
-            var claimsIdentity = await _authenticationManager.CreateUserAsync(steamUser.Response.Players.First());
-
-            if (claimsIdentity != null)
-            {
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity), new AuthenticationProperties
-                    {
-                        IsPersistent = true,
-                        ExpiresUtc = DateTime.UtcNow.AddDays(4)
-                    });
-            }
-            else
-            {
-                return BadRequest("something went wrong");
-            }
-
-            return Ok();
+            if (HttpContext.User.Identity != null && HttpContext.User.Identity.IsAuthenticated)
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+#
+            return Redirect(_configuration["Redirections:LogoutSuccessful"]);
         }
     }
 }
