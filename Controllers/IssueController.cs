@@ -69,7 +69,7 @@ namespace TF47_Backend.Controllers
             return Ok(issue);
         }
 
-        [HttpGet("{issueId:int}")]
+        [HttpPut("{issueId:int}")]
         public async Task<IActionResult> UpdateIssue(int issueId, [FromBody] UpdateIssueRequest request)
         {
             var issue = await _database.Issues.FindAsync(issueId);
