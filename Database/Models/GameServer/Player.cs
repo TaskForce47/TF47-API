@@ -24,7 +24,7 @@ namespace TF47_Backend.Database.Models
         public ICollection<Kill> PlayerKills { get; set; }
         public ICollection<Kill> PlayerDeaths { get; set; }
         public ICollection<Position> PlayerPositions { get; set; }
-        public ICollection<Whitelisting> PlayerWhitelistings { get; set; }
+        public ICollection<Whitelist> PlayerWhitelistings { get; set; }
         public ICollection<Chat> PlayerChats { get; set; }
     }
 }

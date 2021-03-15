@@ -92,7 +92,6 @@ namespace TF47_Backend.Controllers
         {
             if (HttpContext.User.Identity != null && HttpContext.User.Identity.IsAuthenticated)
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-#
             return Redirect(_configuration["Redirections:LogoutSuccessful"]);
         }
     }

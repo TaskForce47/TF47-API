@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MimeKit.Encodings;
 using Npgsql;
 using TF47_Backend.Database.Models;
 using TF47_Backend.Database.Models.GameServer;
@@ -34,9 +36,11 @@ namespace TF47_Backend.Database
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Group> Groups { get; set; }
         public virtual DbSet<GroupPermission> GroupPermissions { get; set; }
-        public virtual DbSet<UserHasGroup> UserHasGroups { get; set; }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public virtual DbSet<IssueGroup> IssueGroups { get; set; }
+        public virtual DbSet<Issue> Issues { get; set; }
+        public virtual DbSet<IssueItem> IssueItems { get; set; }
+    
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (optionsBuilder.IsConfigured) return;
             var builder = new NpgsqlConnectionStringBuilder
@@ -64,7 +68,9 @@ namespace TF47_Backend.Database
             builder.Entity<Player>(entity =>
             {
                 entity.Property(x => x.PlayerId).ValueGeneratedOnAdd();
-                entity.HasMany(x => x.PlayerWhitelistings).WithOne(x => x.Player);
+                entity.HasMany(x => x.PlayerWhitelistings)
+                    .WithMany(x => x.Players)
+                    .UsingEntity(y => y.ToTable("GameServer_PlayerWhitelistings".ToLower()));
                 entity.HasMany(x => x.PlayerPositions).WithOne(x => x.Player);
                 entity.HasMany(x => x.PlayerKills).WithOne(x => x.Killer);
                 entity.HasMany(x => x.PlayerDeaths).WithOne(x => x.Victim);
@@ -121,13 +127,6 @@ namespace TF47_Backend.Database
                 entity.Property(x => x.WhitelistId).ValueGeneratedOnAdd();
                 entity.ToTable("GameServer_Whitelists".ToLower());
             });
-            builder.Entity<Whitelisting>(entity =>
-            {
-                entity.Property(x => x.WhitelistingId).ValueGeneratedOnAdd();
-                entity.HasOne(x => x.Whitelist);
-                entity.HasOne(x => x.Player).WithMany(x => x.PlayerWhitelistings);
-                entity.ToTable("GameServer_Whitelistings".ToLower());
-            });
             builder.Entity<Chat>(entity =>
             {
                 entity.Property(x => x.ChatId).ValueGeneratedOnAdd();
@@ -138,14 +137,15 @@ namespace TF47_Backend.Database
             builder.Entity<User>(entity =>
             {
                 entity.Property(x => x.UserId).ValueGeneratedOnAdd();
-                entity.HasMany(x => x.UserHasGroups).WithOne(x => x.User);
-                entity.ToTable("Service_users".ToLower());
+                entity.HasMany(x => x.Groups).WithMany(x => x.Users)
+                    .UsingEntity(y => y.ToTable("Service_UserGroups".ToLower()));
+                entity.ToTable("Service_Users".ToLower());
             });
             builder.Entity<Group>(entity =>
             {
                 entity.Property(x => x.GroupId).ValueGeneratedOnAdd();
                 entity.HasOne(x => x.GroupPermission).WithOne(x => x.Group);
-                entity.ToTable("Service_groups".ToLower());
+                entity.ToTable("Service_Groups".ToLower());
             });
             builder.Entity<GroupPermission>(entity =>
             {
@@ -154,10 +154,26 @@ namespace TF47_Backend.Database
                     .HasForeignKey<GroupPermission>(x => x.GroupId);
                 entity.ToTable("Service_GroupPermissions".ToLower());
             });
-            builder.Entity<UserHasGroup>(entity =>
+            builder.Entity<IssueGroup>(entity =>
             {
-                entity.Property(x => x.UserHasGroupId).ValueGeneratedOnAdd();
-                entity.ToTable("Service_UserHasGroups".ToLower());
+                entity.Property(x => x.IssueGroupId).ValueGeneratedOnAdd();
+                entity.ToTable("Service_IssueGroups".ToLower());
+                entity.HasMany(x => x.Issues)
+                    .WithOne(y => y.IssueGroup)
+                    .HasForeignKey(y => y.IssueGroupId);
+            });
+            builder.Entity<Issue>(entity =>
+            {
+                entity.Property(x => x.IssueId).ValueGeneratedOnAdd();
+                entity.ToTable("Service_Issues".ToLower());
+                entity.HasMany(x => x.IssueItems)
+                    .WithOne(y => y.Issue)
+                    .HasForeignKey(y => y.IssueId);
+            });
+            builder.Entity<IssueItem>(entity =>
+            {
+                entity.Property(x => x.IssueItemId).ValueGeneratedOnAdd();
+                entity.ToTable("Service_IssueItems".ToLower());
             });
         }
     }

@@ -69,8 +69,7 @@ namespace TF47_Backend.Services.Authentication
         public async Task<ClaimsIdentity> GetClaimIdentityAsync(Guid guid)
         {
             var user = await _database.Users
-                .Include(x => x.UserHasGroups)
-                .ThenInclude(x => x.Group)
+                .Include(x => x.Groups)
                 .ThenInclude(x => x.GroupPermission)
                 .SingleOrDefaultAsync(x => x.UserId == guid);
 
@@ -84,7 +83,7 @@ namespace TF47_Backend.Services.Authentication
             };
 
             //add user groups and permissions
-            claims.AddRange(user.UserHasGroups.Select(userGroup => new Claim(ClaimTypes.Role, userGroup.Group.Name)));
+            claims.AddRange(user.Groups.Select(userGroup => new Claim(ClaimTypes.Role, userGroup.Name)));
 
             return new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         }

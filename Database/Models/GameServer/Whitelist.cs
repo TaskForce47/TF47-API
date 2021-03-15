@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace TF47_Backend.Database.Models.GameServer
 {
@@ -12,5 +13,7 @@ namespace TF47_Backend.Database.Models.GameServer
         [Required]
         [MaxLength(1000)]
         public string Description { get; set; }
+
+        public ICollection<Player> Players { get; set; }
     }
 }

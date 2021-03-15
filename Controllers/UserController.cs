@@ -37,12 +37,16 @@ namespace TF47_Backend.Controllers
         {
             //var userGuid = Guid.Parse(userId);
             var userDetails = await _database.Users
-                .Include(x => x.UserHasGroups)
-                .ThenInclude(y => y.Group)
+                .Include(x => x.Groups)
                 .ThenInclude(z => z.GroupPermission)
                 .FirstOrDefaultAsync(x => x.UserId == userId);
 
             return Ok(userDetails);
+        }
+
+        public async Task<IActionResult> LinkDiscord()
+        {
+            return Ok();
         }
     }
 }

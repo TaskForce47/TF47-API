@@ -25,6 +25,6 @@ namespace TF47_Backend.Database.Models.Services
         public string ProfileUrl { get; set; }
         public DateTime FirstTimeSeen { get; set; }
         public DateTime LastTimeSeen { get; set; }
-        public ICollection<UserHasGroup> UserHasGroups { get; set; }
+        public ICollection<Group> Groups { get; set; }
     }
 }

@@ -27,6 +27,7 @@ namespace TF47_Backend.Database.Models.Services
         [Required]
         public bool IsVisible { get; set; }
         public GroupPermission GroupPermission { get; set; }
+        public ICollection<User> Users { get; set; }
     }
 
     public class DiscordUser
