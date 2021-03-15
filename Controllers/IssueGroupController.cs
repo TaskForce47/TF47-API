@@ -45,7 +45,8 @@ namespace TF47_Backend.Controllers
             await _database.AddAsync(newIssueGroup);
             await _database.SaveChangesAsync();
 
-            return Created(Url.RouteUrl(newIssueGroup.IssueGroupId), newIssueGroup);
+            return CreatedAtAction(nameof(GetIssueGroup), new {issueGroupId = newIssueGroup.IssueGroupId},
+                newIssueGroup);
         }
 
         [HttpGet("{issueGroupId}/")]

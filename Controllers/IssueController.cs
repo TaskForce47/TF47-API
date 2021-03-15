@@ -58,7 +58,7 @@ namespace TF47_Backend.Controllers
             await _database.AddAsync(newIssue);
             await _database.SaveChangesAsync();
 
-            return Created("", newIssue);
+            return CreatedAtAction(nameof(GetIssue), new { issueId = newIssue.IssueId }, newIssue);
         }
 
         [HttpGet("{issueId:int}")]
@@ -69,7 +69,7 @@ namespace TF47_Backend.Controllers
             return Ok(issue);
         }
 
-        [HttpPatch("{issueId:int}")]
+        [HttpGet("{issueId:int}")]
         public async Task<IActionResult> UpdateIssue(int issueId, [FromBody] UpdateIssueRequest request)
         {
             var issue = await _database.Issues.FindAsync(issueId);
