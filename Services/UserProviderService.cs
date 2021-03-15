@@ -27,7 +27,7 @@ namespace TF47_Backend.Services
         {
             var userId = Guid.Parse(context.User.Claims.First(claim => claim.Type == "UserId").Value);
             var user = await _database.Users.FirstAsync(x =>
-                x.UserId == userId));
+                x.UserId == userId);
             return user;
         }
     }
