@@ -43,10 +43,5 @@ namespace TF47_Backend.Controllers
 
             return Ok(userDetails);
         }
-
-        public async Task<IActionResult> LinkDiscord()
-        {
-            return Ok();
-        }
     }
 }
