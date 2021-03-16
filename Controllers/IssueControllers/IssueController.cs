@@ -30,7 +30,7 @@ namespace TF47_Backend.Controllers.IssueControllers
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> CreateIssue([FromBody]CreateIssueRequest request)
+        public async Task<IActionResult> CreateIssue([FromBody] CreateIssueRequest request)
         {
             var issueGroup = await _database.IssueGroups.FindAsync(request.IssueGroupId).AsTask();
             var issueTags = await _database.IssueTags
@@ -44,7 +44,7 @@ namespace TF47_Backend.Controllers.IssueControllers
             }
 
             var newIssue = new Issue
-            { 
+            {
                 IsClosed = false,
                 IssueCreator = user,
                 IssueGroup = issueGroup,
@@ -54,9 +54,24 @@ namespace TF47_Backend.Controllers.IssueControllers
                 Title = request.Title
             };
 
-            await _database.AddAsync(newIssue);
-            await _database.SaveChangesAsync();
+            try
+            {
+                await _database.AddAsync(newIssue);
+                await _database.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return BadRequest("Issue does already exist");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return Problem("Something went wrong while trying to add the new Issue to the database",
+                    null, 500, "Failed to create");
 
+
+            }
             return CreatedAtAction(nameof(GetIssue), new { issueId = newIssue.IssueId }, newIssue);
         }
 
