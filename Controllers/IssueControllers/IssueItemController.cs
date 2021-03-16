@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_Backend.Database;
@@ -11,7 +8,7 @@ using TF47_Backend.Database.Models.Services;
 using TF47_Backend.Dto.RequestModels;
 using TF47_Backend.Services;
 
-namespace TF47_Backend.Controllers
+namespace TF47_Backend.Controllers.IssueControllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -35,16 +32,14 @@ namespace TF47_Backend.Controllers
         [HttpPost("")]
         public async Task<IActionResult> CreateIssueItem([FromBody] CreateIssueItemRequest request)
         {
-            var issueGroupTask = _database.Issues.FirstOrDefaultAsync(x => x.IssueId == request.IssueId);
-            var userTask = _userProviderService.GetDatabaseUser(HttpContext);
+            var issueGroup =  await _database.Issues.FirstOrDefaultAsync(x => x.IssueId == request.IssueId);
+            var user = await _userProviderService.GetDatabaseUser(HttpContext);
 
-            await Task.WhenAll(issueGroupTask, userTask);
-
-            if (issueGroupTask.Result == null) return BadRequest("Issue not found");
+            if (issueGroup == null) return BadRequest("Issue does not exist");
 
             var issueItem = new IssueItem
             {
-                Author = userTask.Result,
+                Author = user,
                 IsEdited = false,
                 Message = request.Message,
                 TimeCreated = DateTime.Now,
@@ -69,17 +64,13 @@ namespace TF47_Backend.Controllers
         [HttpPut("{issueItemId:int}")]
         public async Task<IActionResult> UpdateIssueItem(int issueItemId, [FromBody] UpdateIssueItemRequest request)
         {
-            var issueItemTask = _database.IssueItems.FindAsync(issueItemId).AsTask();
-            var userTask = _userProviderService.GetDatabaseUser(HttpContext);
-
-            await Task.WhenAll(issueItemTask, userTask);
-
-            var issueItem = issueItemTask.Result;
+            var issueItem = await _database.IssueItems.FindAsync(issueItemId).AsTask();
+            var user = await _userProviderService.GetDatabaseUser(HttpContext);
 
             if (issueItem == null)
                 return BadRequest("IssueItem does not exist");
 
-            if (userTask.Result.UserId != issueItem.Author.UserId)
+            if (user.UserId != issueItem.Author.UserId)
                 return BadRequest("Only the user the wrote that created the item can edit it");
 
             issueItem.IsEdited = true;

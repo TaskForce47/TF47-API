@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_Backend.Database;
@@ -12,7 +9,7 @@ using TF47_Backend.Database.Models.Services;
 using TF47_Backend.Dto.RequestModels;
 using TF47_Backend.Services;
 
-namespace TF47_Backend.Controllers
+namespace TF47_Backend.Controllers.IssueControllers
 {
     [Authorize]
     [Route("api/[controller]")]
@@ -42,8 +39,23 @@ namespace TF47_Backend.Controllers
                 GroupName = request.GroupName,
                 TimeGroupCreated = DateTime.Now
             };
-            await _database.AddAsync(newIssueGroup);
-            await _database.SaveChangesAsync();
+
+            try
+            {
+                await _database.AddAsync(newIssueGroup);
+                await _database.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogWarning(ex.Message);
+                return BadRequest("Issue Group does already exist");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return Problem("Something went wrong while trying to add the new Issue Group to the database",
+                    null, 500, "Failed to create");
+            }
 
             return CreatedAtAction(nameof(GetIssueGroup), new {issueGroupId = newIssueGroup.IssueGroupId},
                 newIssueGroup);
@@ -56,7 +68,7 @@ namespace TF47_Backend.Controllers
                 .Include(x => x.Issues)
                 .ThenInclude(x => x.IssueItems)
                 .FirstOrDefaultAsync(x => x.IssueGroupId == issueGroupId);
-            return Ok(issueGroupId);
+            return Ok(issueGroup);
         }
 
         [HttpGet("")]

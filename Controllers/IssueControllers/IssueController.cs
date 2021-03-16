@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_Backend.Database;
@@ -11,7 +9,7 @@ using TF47_Backend.Database.Models.Services;
 using TF47_Backend.Dto.RequestModels;
 using TF47_Backend.Services;
 
-namespace TF47_Backend.Controllers
+namespace TF47_Backend.Controllers.IssueControllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -34,12 +32,13 @@ namespace TF47_Backend.Controllers
         [HttpPost("")]
         public async Task<IActionResult> CreateIssue([FromBody]CreateIssueRequest request)
         {
-            var issueGroupTask = _database.IssueGroups.FirstOrDefaultAsync(x => x.IssueGroupId == request.IssueGroupId);
-            var userTask = _userProviderService.GetDatabaseUser(HttpContext);
+            var issueGroup = await _database.IssueGroups.FindAsync(request.IssueGroupId).AsTask();
+            var issueTags = await _database.IssueTags
+                .Where(x => request.Tags.Contains(x.IssueTagId))
+                .ToListAsync();
+            var user = await _userProviderService.GetDatabaseUser(HttpContext);
 
-            await Task.WhenAll(issueGroupTask, userTask);
-
-            if (issueGroupTask.Result == null)
+            if (issueGroup == null)
             {
                 return BadRequest("Issue group does not exist");
             }
@@ -47,9 +46,9 @@ namespace TF47_Backend.Controllers
             var newIssue = new Issue
             { 
                 IsClosed = false,
-                IssueCreator = userTask.Result,
-                IssueGroup = issueGroupTask.Result,
-                Tags = request.Tags,
+                IssueCreator = user,
+                IssueGroup = issueGroup,
+                IssueTags = issueTags,
                 TimeCreated = DateTime.Now,
                 TimeLastUpdated = DateTime.Now,
                 Title = request.Title
@@ -79,7 +78,12 @@ namespace TF47_Backend.Controllers
                 issue.Title = request.Title;
 
             if (request.Tags.Length > 0)
-                issue.Tags = request.Tags;
+            {
+                var issueTags = await _database.IssueTags
+                    .Where(x => request.Tags.Contains(x.IssueTagId))
+                    .ToListAsync();
+                issue.IssueTags = issueTags;
+            }
 
             issue.TimeLastUpdated = DateTime.Now;
             //_database.Update(issue);
