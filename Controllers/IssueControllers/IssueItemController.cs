@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,7 @@ using TF47_Backend.Services;
 
 namespace TF47_Backend.Controllers.IssueControllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class IssueItemController : ControllerBase

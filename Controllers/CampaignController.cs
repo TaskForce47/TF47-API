@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using TF47_Backend.Database;
 using TF47_Backend.Database.Models;
@@ -13,6 +14,7 @@ using TF47_Backend.Dto.RequestModels;
 
 namespace TF47_Backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CampaignController : ControllerBase
