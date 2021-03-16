@@ -68,10 +68,9 @@ namespace TF47_Backend.Services.Authentication
 
         public async Task<ClaimsIdentity> GetClaimIdentityAsync(Guid guid)
         {
-            var user = await _database.Users
-                .Include(x => x.Groups)
-                .ThenInclude(x => x.GroupPermission)
-                .SingleOrDefaultAsync(x => x.UserId == guid);
+            var user = await _database.Users.FindAsync(guid);
+                
+            await _database.Entry(user).Reference(x => x.Groups).LoadAsync();
 
             //add user details
             var claims = new List<Claim>
