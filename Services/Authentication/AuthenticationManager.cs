@@ -68,17 +68,17 @@ namespace TF47_Backend.Services.Authentication
 
         public async Task<ClaimsIdentity> GetClaimIdentityAsync(Guid guid)
         {
-            var user = await _database.Users.FindAsync(guid);
+            var user = await _database.Users.Include(x => x.Groups).FirstOrDefaultAsync(x => x.UserId == guid);
                 
-            await _database.Entry(user).Reference(x => x.Groups).LoadAsync();
+            //await _database.Entry(user).Reference(x => x.Groups).LoadAsync();
 
             //add user details
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim("UserId", user.UserId.ToString()),
-                new Claim(ClaimTypes.Country, user.CountryCode ?? string.Empty),
-                new Claim("SteamId", user.SteamId)
+                new(ClaimTypes.Name, user.Username),
+                new("UserId", user.UserId.ToString()),
+                new(ClaimTypes.Country, user.CountryCode ?? string.Empty),
+                new("SteamId", user.SteamId)
             };
 
             //add user groups and permissions
