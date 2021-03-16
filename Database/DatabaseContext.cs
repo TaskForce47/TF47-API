@@ -39,6 +39,7 @@ namespace TF47_Backend.Database
         public virtual DbSet<IssueGroup> IssueGroups { get; set; }
         public virtual DbSet<Issue> Issues { get; set; }
         public virtual DbSet<IssueItem> IssueItems { get; set; }
+        public virtual DbSet<IssueTag> IssueTags { get; set; }
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -157,7 +158,7 @@ namespace TF47_Backend.Database
             builder.Entity<IssueGroup>(entity =>
             {
                 entity.Property(x => x.IssueGroupId).ValueGeneratedOnAdd();
-                entity.ToTable("Service_IssueGroups".ToLower());
+                entity.ToTable("Service_Issue_Groups".ToLower());
                 entity.HasMany(x => x.Issues)
                     .WithOne(y => y.IssueGroup)
                     .HasForeignKey(y => y.IssueGroupId);
@@ -169,11 +170,19 @@ namespace TF47_Backend.Database
                 entity.HasMany(x => x.IssueItems)
                     .WithOne(y => y.Issue)
                     .HasForeignKey(y => y.IssueId);
+                entity.HasMany(x => x.IssueTags)
+                    .WithMany(x => x.Issues)
+                    .UsingEntity(y => y.ToTable("Service_Issue_Tags".ToLower()));
             });
             builder.Entity<IssueItem>(entity =>
             {
                 entity.Property(x => x.IssueItemId).ValueGeneratedOnAdd();
-                entity.ToTable("Service_IssueItems".ToLower());
+                entity.ToTable("Service_Issue_Items".ToLower());
+            });
+            builder.Entity<IssueTag>(entity =>
+            {
+                entity.Property(x => x.IssueTagId).ValueGeneratedOnAdd();
+                entity.ToTable("Service_Issue_Tags".ToLower());
             });
         }
     }
