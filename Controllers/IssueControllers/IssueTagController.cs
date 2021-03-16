@@ -56,7 +56,7 @@ namespace TF47_Backend.Controllers.IssueControllers
             return CreatedAtAction(nameof(GetIssueTag), new {issueTagId = issueTag.IssueTagId}, issueTag);
         }
 
-        [HttpPatch("{issueTagId:int")]
+        [HttpPatch("{issueTagId:int}")]
         public async Task<IActionResult> UpdateIssueTag(int issueTagId, [FromBody] UpdateIssueTagRequest request)
         {
             var issueTag = await _database.IssueTags.FindAsync(issueTagId);
