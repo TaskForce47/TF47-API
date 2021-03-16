@@ -2,15 +2,7 @@
 
 namespace TF47_Backend.Dto.RequestModels
 {
-    public class CreateCampaignRequest
-    {
-        public string Name { get; set; }
-        public string Description { get; set; }
-    }
+    public record CreateCampaignRequest(string Name, string Description);
 
-    public class CampaignResponse : CreateCampaignRequest
-    {
-        public long CampaignId { get; set; }
-        public DateTime TimeCreated { get; set; }
-    }
+    public record CampaignResponse(string Name, string Description, long CampaignId, DateTime TimeCreated);
 }

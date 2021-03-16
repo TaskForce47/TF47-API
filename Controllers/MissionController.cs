@@ -10,6 +10,7 @@ using TF47_Backend.Database;
 using TF47_Backend.Database.Models;
 using TF47_Backend.Database.Models.GameServer;
 using TF47_Backend.Dto;
+using TF47_Backend.Dto.RequestModels;
 using TF47_Backend.Dto.Response;
 
 namespace TF47_Backend.Controllers
