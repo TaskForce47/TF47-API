@@ -172,7 +172,7 @@ namespace TF47_Backend.Database
                     .HasForeignKey(y => y.IssueId);
                 entity.HasMany(x => x.IssueTags)
                     .WithMany(x => x.Issues)
-                    .UsingEntity(y => y.ToTable("Service_Issue_Tags".ToLower()));
+                    .UsingEntity(y => y.ToTable("Service_Issue_Has_Tags".ToLower()));
             });
             builder.Entity<IssueItem>(entity =>
             {
