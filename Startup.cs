@@ -52,7 +52,12 @@ namespace TF47_Backend
             });
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie();
+                .AddCookie(options =>
+                {
+                    options.Cookie.HttpOnly = false;
+                    options.Cookie.Domain = Configuration["CookieBaseUrl"];
+                    options.Cookie.Name = "OperationDachdaggerAuthCookie";
+                });
 
             services.AddDbContext<DatabaseContext>();
             services.AddTransient<IUserProviderService, UserProviderService>();
