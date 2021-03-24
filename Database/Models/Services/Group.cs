@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -8,6 +9,7 @@ using System.Threading.Tasks.Dataflow;
 
 namespace TF47_Backend.Database.Models.Services
 {
+    [Table("ServiceGroups")]
     public class Group 
     {
         [Key]

@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TF47_Backend.Database.Models.GameServer
 {
+    [Table("GameServerWhitelists")]
     public class Whitelist
     {
         [Key]

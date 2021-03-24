@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TF47_Backend.Database.Models.Services
 {
+    [Table("ServiceGroupPermissions")]
     public class GroupPermission
     {
         [Key]

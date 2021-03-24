@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TF47_Backend.Database.Models.Services
 {
+    [Table("ServiceIssues")]
     public class Issue
     {
         [Key]

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace TF47_Backend.Database.Models.Services
 {
+    [Table("ServiceIssueTags")]
     [Index(nameof(TagName), IsUnique = true)]
     public class IssueTag
     {

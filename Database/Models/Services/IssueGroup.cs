@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace TF47_Backend.Database.Models.Services
 {
+    [Table("ServiceIssueGroups")]
     [Index(nameof(GroupName), IsUnique = true)]
     public class IssueGroup
     {
