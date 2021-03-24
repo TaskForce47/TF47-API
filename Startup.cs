@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using TF47_Backend.Database;
+using TF47_Backend.Grpc;
 using TF47_Backend.Services;
 using TF47_Backend.Services.Authentication;
 using TF47_Backend.Services.Mail;
@@ -99,6 +100,7 @@ namespace TF47_Backend
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapGrpcService<TestService>();
             });
         }
     }
