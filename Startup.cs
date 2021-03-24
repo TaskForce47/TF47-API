@@ -15,6 +15,7 @@ using Microsoft.IdentityModel.Tokens;
 using TF47_Backend.Database;
 using TF47_Backend.Grpc;
 using TF47_Backend.Services;
+using TF47_Backend.Services.ApiToken;
 using TF47_Backend.Services.Authentication;
 using TF47_Backend.Services.Mail;
 using TF47_Backend.Services.OAuth;
@@ -61,12 +62,16 @@ namespace TF47_Backend
                 });
 
             services.AddDbContext<DatabaseContext>();
-            services.AddTransient<IUserProviderService, UserProviderService>();
             services.AddTransient<MailService>();
+            services.AddTransient<IUserProviderService, UserProviderService>();
+            
             services.AddTransient<IAuthenticationManager, AuthenticationManager>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<ISteamAuthenticationService, SteamAuthenticationService>();
+            services.AddSingleton<ApiTokenCache>();
+            services.AddSingleton<TestService>();
             services.AddHttpClient();
+            services.AddGrpc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
