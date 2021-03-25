@@ -15,8 +15,6 @@ namespace TF47_Backend.Database.Models.Services
         public Guid UserId { get; set; }
         [Required]
         public bool Banned { get; set; }
-        [DataType(DataType.EmailAddress)]
-        public string Mail { get; set; }
         [Required]
         public string Username { get; set; }
         [Required]
@@ -26,6 +24,12 @@ namespace TF47_Backend.Database.Models.Services
         public string CountryCode { get; set; } = null;
         public string ProfilePicture { get; set; }
         public string ProfileUrl { get; set; }
+        public string DiscordId { get; set; } = null;
+        [DataType(DataType.EmailAddress)]
+        public string Email { get; set; } = null;
+
+        public bool AllowEmails { get; set; } = false;
+
         public DateTime FirstTimeSeen { get; set; }
         public DateTime LastTimeSeen { get; set; }
         public ICollection<Group> Groups { get; set; }
