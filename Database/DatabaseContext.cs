@@ -20,13 +20,8 @@ namespace TF47_Backend.Database
 {
     public class DatabaseContext : DbContext
     {
-        private readonly IConfiguration _configuration;
-        private readonly ILogger _logger;
-
-        public DatabaseContext(IConfiguration configuration, ILogger<DatabaseContext> logger)
-        {
-            _configuration = configuration;
-            _logger = logger;
+        public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
+        { 
         }
 
         public virtual DbSet<Player> Players { get; set; }
@@ -50,24 +45,7 @@ namespace TF47_Backend.Database
     
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if (optionsBuilder.IsConfigured) return;
-            var builder = new NpgsqlConnectionStringBuilder
-            {
-                Host = _configuration["Credentials:Database:Server"],
-                Port = int.Parse(_configuration["Credentials:Database:Port"]),
-                Username = _configuration["Credentials:Database:Username"],
-                Password = _configuration["Credentials:Database:Password"],
-                Database = _configuration["Credentials:Database:Database"]
-            };
-            //Console.WriteLine(builder.ToString());
-            optionsBuilder.UseNpgsql(builder.ToString());
-            optionsBuilder.UseSnakeCaseNamingConvention();
-            optionsBuilder.LogTo(s =>
-            {
-                _logger.LogInformation("Database: {s}", s);
-            });
-
-            //Database.Migrate();
+            
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
