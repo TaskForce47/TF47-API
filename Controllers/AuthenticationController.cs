@@ -31,20 +31,17 @@ namespace TF47_Backend.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly ILogger<AuthenticationController> _logger;
-        private readonly DatabaseContext _database;
         private readonly ISteamAuthenticationService _steamAuthenticationService;
         private readonly IAuthenticationManager _authenticationManager;
         private readonly IConfiguration _configuration;
 
         public AuthenticationController(
-            ILogger<AuthenticationController> logger, 
-            DatabaseContext database, 
+            ILogger<AuthenticationController> logger,
             ISteamAuthenticationService steamAuthenticationService, 
             IAuthenticationManager authenticationManager,
             IConfiguration configuration)
         {
             _logger = logger;
-            _database = database;
             _steamAuthenticationService = steamAuthenticationService;
             _authenticationManager = authenticationManager;
             _configuration = configuration;
@@ -57,7 +54,7 @@ namespace TF47_Backend.Controllers
             if (HttpContext.User.Identity == null || !HttpContext.User.Identity.IsAuthenticated)
             {
                 var challenge =
-                    _steamAuthenticationService.CreateChallenge(HttpContext, "api/Authentication/login/steam/callback");
+                    _steamAuthenticationService.CreateChallenge(HttpContext, "api/Authentication/login/callback/steam");
                 return Redirect(challenge);
             }
 
@@ -65,10 +62,10 @@ namespace TF47_Backend.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("login/steam/callback/{guid}")]
-        public async Task<IActionResult> HandleSteamLoginCallback(Guid guid)
+        [HttpGet("login/callback/steam")]
+        public async Task<IActionResult> HandleSteamLoginCallback()
         {
-            var steamUser = await _steamAuthenticationService.HandleSteamCallbackAsync(HttpContext);
+            var steamUser = (SteamUserResponse)await _steamAuthenticationService.HandleCallbackAsync(HttpContext);
 
             if (steamUser.Response.Players.FirstOrDefault() == null)
             {

@@ -30,7 +30,7 @@ namespace TF47_Backend.Services.OAuth
             _apiToken = configuration["Credentials:Steam:ApiToken"];
         }
 
-        public async Task<SteamUserResponse> HandleSteamCallbackAsync(HttpContext httpContext)
+        public async Task<object> HandleCallbackAsync(HttpContext httpContext)
         {
             _logger.LogInformation($"Callback guid: {httpContext.Request.Path}");
 
@@ -97,17 +97,17 @@ namespace TF47_Backend.Services.OAuth
                 Path = "/",
                 Secure = true
             });
-            return $"https://steamcommunity.com/openid/login?" + $"{GetHeaders(challengeGuid, httpContext, callbackPath)}";
+            return $"https://steamcommunity.com/openid/login?" + $"{GetHeaders(httpContext, callbackPath)}";
         }
 
 
-        private static string GetHeaders(Guid guid, HttpContext httpContext, string callbackPath)
+        private static string GetHeaders(HttpContext httpContext, string callbackPath)
         {
             var headers = new Dictionary<string, string>
             {
                 {"openid.ns", "http://specs.openid.net/auth/2.0"},
                 {"openid.mode", "checkid_setup"},
-                {"openid.return_to", $"https://{httpContext.Request.Host.Value}/{callbackPath}/{guid}"},
+                {"openid.return_to", $"https://{httpContext.Request.Host.Value}/{callbackPath}"},
                 {"openid.realm", $"https://{httpContext.Request.Host.Value}"},
                 {"openid.identity", "http://specs.openid.net/auth/2.0/identifier_select"},
                 {"openid.claimed_id", "http://specs.openid.net/auth/2.0/identifier_select"}
