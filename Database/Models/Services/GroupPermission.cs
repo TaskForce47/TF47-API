@@ -9,14 +9,10 @@ namespace TF47_Backend.Database.Models.Services
         [Key]
         public long GroupPermissionId { get; set; }
 
-        public bool CanEditGroups { get; set; }
-        public bool CanBanUsers { get; set; }
-        public bool CanBanPermanent { get; set; }
-        public bool CanEditUsers { get; set; }
-        public bool CanDeleteUsers { get; set; }
-        public bool CanEditServers { get; set; }
-        public bool CanCreateServers { get; set; }
-        public bool CanUseServers { get; set; }
+        public string PermissionsDiscord { get; set; } = "0x00000000";
+        public string PermissionsTeamspeak { get; set; } = "0x00000000";
+        //public string PermissionServerManager { get; set; }
+        public string PermissionsGadget { get; set; } = "0x00000000";
 
         public Group Group { get; set; }
         public long GroupId { get; set; }
