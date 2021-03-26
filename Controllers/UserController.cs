@@ -46,7 +46,7 @@ namespace TF47_Backend.Controllers
             _configuration = configuration;
         }
 
-        [HttpGet]
+        [HttpGet("me")]
         public async Task<IActionResult> GetUserDetail()
         {
             var user = await _userProviderService.GetDatabaseUser(HttpContext);
@@ -54,12 +54,12 @@ namespace TF47_Backend.Controllers
             if (user == null)
                 return BadRequest("You must be logged in to query this endpoint");
             
-            var userDetail = _database.Users
-                .Include(x => x.Groups)
-                .ThenInclude(x => x.GroupPermission)
+            var userDetail = await _database.Users
                 .Include(x => x.ApiKeys)
                 .Include(x => x.WrittenNotes)
                 .Include(x => x.WrittenChangelogs)
+                .Include(x => x.Groups)
+                .ThenInclude(y => y.GroupPermission)
                 .FirstOrDefaultAsync(x => x.UserId == user.UserId);
             return Ok(userDetail);
         }
