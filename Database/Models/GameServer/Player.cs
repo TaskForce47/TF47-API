@@ -14,6 +14,8 @@ namespace TF47_Backend.Database.Models.GameServer
         [Key]
         [MaxLength(100)]
         public string PlayerUid { get; set; }
+        [MaxLength(100)]
+        public string PlayerName { get; set; }
 
         public DateTime? FirstVisit { get; set; } = null;
         public DateTime? LastVisit { get; set; } = null;
