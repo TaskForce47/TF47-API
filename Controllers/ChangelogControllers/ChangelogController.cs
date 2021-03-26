@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_Backend.Database;
 using TF47_Backend.Database.Models.Services;
@@ -50,7 +51,8 @@ namespace TF47_Backend.Controllers.ChangelogControllers
         public async Task<IActionResult> GetChangelog(int changelogId)
         {
             var changelog = await _database.Changelogs
-                .FindAsync(changelogId);
+                .Select(x => new ChangelogResponse(x.ChangelogId, x.Title, x.Tags, x.Text, x.TimeReleased))
+                .FirstOrDefaultAsync(x => x.ChangelogId == changelogId);
             if (changelog == null)
                 return BadRequest("Changelog requested does not exist");
 

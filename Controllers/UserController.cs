@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TF47_Backend.Database;
+using TF47_Backend.Dto.ResponseModels;
 using TF47_Backend.Services;
 using TF47_Backend.Services.Authentication;
 using TF47_Backend.Services.OAuth;
@@ -47,13 +48,14 @@ namespace TF47_Backend.Controllers
         }
 
         [HttpGet("me")]
+        [ProducesResponseType(typeof(UserResponse), 200)]
         public async Task<IActionResult> GetUserDetail()
         {
             var user = await _userProviderService.GetDatabaseUser(HttpContext);
 
             if (user == null)
                 return BadRequest("You must be logged in to query this endpoint");
-            
+
             var userDetail = await _database.Users
                 .Include(x => x.ApiKeys)
                 .Include(x => x.WrittenNotes)
@@ -61,9 +63,26 @@ namespace TF47_Backend.Controllers
                 .Include(x => x.Groups)
                 .ThenInclude(y => y.GroupPermission)
                 .FirstOrDefaultAsync(x => x.UserId == user.UserId);
-            return Ok(userDetail);
+
+            var userResponse = new UserResponse(userDetail.UserId, userDetail.Banned, userDetail.Email,
+                userDetail.Username, userDetail.AllowEmails, userDetail.CountryCode,
+                userDetail.DiscordId, userDetail.ProfilePicture, userDetail.ProfileUrl, userDetail.SteamId,
+                userDetail.FirstTimeSeen, userDetail.LastTimeSeen,
+                userDetail.WrittenNotes
+                    .Select(y => new NotesResponse(y.NoteId, y.Player.PlayerUid, y.Player.PlayerName, y.Type,
+                        y.Text, y.Writer.UserId, y.Writer.Username, y.TimeCreated, y.TimeLastUpdate)),
+                userDetail.WrittenChangelogs
+                    .Select(y => new ChangelogResponse(y.ChangelogId, y.Title, y.Tags, y.Text, y.TimeReleased)),
+                userDetail.Groups
+                    .Select(y => new GroupResponse(y.GroupId, y.Name, y.Description, y.TextColor,
+                        y.BackgroundColor, y.IsVisible, new GroupPermissionsResponse(y.GroupPermission.GroupId,
+                            y.GroupPermission.PermissionsDiscord, y.GroupPermission.PermissionsTeamspeak,
+                            y.GroupPermission.PermissionsGadget))),
+                userDetail.ApiKeys.Select(y => new ApiKeysResponse(y.ApiKeyId, y.OwnerId, userDetail.Username, y
+                    .ApiKeyValue, y.TimeCreated, y.ValidUntil)));
+            
+            return Ok(userResponse);
         }
-        
         
         [HttpGet("{userid:guid}/get")]
         public async Task<IActionResult> GetUserDetails(Guid userId)
