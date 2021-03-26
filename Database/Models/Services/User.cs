@@ -34,5 +34,7 @@ namespace TF47_Backend.Database.Models.Services
         public DateTime LastTimeSeen { get; set; }
         public ICollection<Group> Groups { get; set; }
         public ICollection<Note> WrittenNotes { get; set; }
+        public ICollection<Changelog> WrittenChangelogs { get; set; }
+        public ICollection<ApiKey> ApiKeys { get; set; }
     }
 }

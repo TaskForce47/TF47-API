@@ -21,7 +21,7 @@ namespace TF47_Backend.Database
     public class DatabaseContext : DbContext
     {
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
-        { 
+        {
         }
 
         public virtual DbSet<Player> Players { get; set; }
@@ -42,10 +42,10 @@ namespace TF47_Backend.Database
         public virtual DbSet<IssueItem> IssueItems { get; set; }
         public virtual DbSet<IssueTag> IssueTags { get; set; }
         public virtual DbSet<ApiKey> ApiKeys { get; set; }
-    
+        public virtual DbSet<Changelog> Changelogs { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            
         }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -96,31 +96,35 @@ namespace TF47_Backend.Database
                 entity.HasOne(x => x.Player).WithOne(x => x.PlayerPlaytime);
                 entity.HasOne(x => x.Session).WithMany(x => x.PlayTimes).HasForeignKey(x => x.SessionId);
             });
-            builder.Entity<Whitelist>(entity =>
-            {
-                entity.Property(x => x.WhitelistId).ValueGeneratedOnAdd();
-            });
+            builder.Entity<Whitelist>(entity => { entity.Property(x => x.WhitelistId).ValueGeneratedOnAdd(); });
             builder.Entity<Chat>(entity =>
             {
                 entity.Property(x => x.ChatId).ValueGeneratedOnAdd();
                 entity.HasOne(x => x.Session).WithMany(x => x.Chats).HasForeignKey(x => x.SessionId);
                 entity.HasOne(x => x.Player).WithMany(x => x.PlayerChats).HasForeignKey(x => x.PlayerId);
             });
-            builder.Entity<Note>(entity =>
-            {
-                entity.Property(x => x.NoteId).ValueGeneratedOnAdd();
-            });
+            builder.Entity<Note>(entity => { entity.Property(x => x.NoteId).ValueGeneratedOnAdd(); });
             builder.Entity<User>(entity =>
             {
                 entity.Property(x => x.UserId).ValueGeneratedOnAdd();
-                entity.HasMany(x => x.WrittenNotes).WithOne(x => x.Writer).HasForeignKey(x => x.WriterId);
-                entity.HasMany(x => x.Groups).WithMany(x => x.Users)
+                entity.HasMany(x => x.WrittenNotes)
+                    .WithOne(x => x.Writer)
+                    .HasForeignKey(x => x.WriterId);
+                entity.HasMany(x => x.Groups)
+                    .WithMany(x => x.Users)
                     .UsingEntity(y => y.ToTable("ServiceUserGroups"));
+                entity.HasMany(x => x.ApiKeys)
+                    .WithOne(x => x.Owner)
+                    .HasForeignKey(x => x.OwnerId);
+                entity.HasMany(x => x.WrittenChangelogs)
+                    .WithOne(x => x.Author)
+                    .HasForeignKey(x => x.AuthorId);
             });
             builder.Entity<Group>(entity =>
             {
                 entity.Property(x => x.GroupId).ValueGeneratedOnAdd();
-                entity.HasOne(x => x.GroupPermission).WithOne(x => x.Group);
+                entity.HasOne(x => x.GroupPermission)
+                    .WithOne(x => x.Group);
             });
             builder.Entity<GroupPermission>(entity =>
             {
@@ -145,13 +149,21 @@ namespace TF47_Backend.Database
                     .WithMany(x => x.Issues)
                     .UsingEntity(y => y.ToTable("ServiceIssueHasTags"));
             });
-            builder.Entity<IssueItem>(entity =>
+            builder.Entity<IssueItem>(entity => { entity.Property(x => x.IssueItemId).ValueGeneratedOnAdd(); });
+            builder.Entity<IssueTag>(entity => { entity.Property(x => x.IssueTagId).ValueGeneratedOnAdd(); });
+            builder.Entity<ApiKey>(entity =>
             {
-                entity.Property(x => x.IssueItemId).ValueGeneratedOnAdd();
+                entity.Property(x => x.ApiKeyId).ValueGeneratedOnAdd();
+                entity.HasOne(x => x.Owner)
+                    .WithMany(x => x.ApiKeys)
+                    .HasForeignKey(x => x.OwnerId);
             });
-            builder.Entity<IssueTag>(entity =>
+            builder.Entity<Changelog>(entity =>
             {
-                entity.Property(x => x.IssueTagId).ValueGeneratedOnAdd();
+                entity.Property(x => x.ChangelogId).ValueGeneratedOnAdd();
+                entity.HasOne(x => x.Author)
+                    .WithMany(x => x.WrittenChangelogs)
+                    .HasForeignKey(x => x.AuthorId);
             });
         }
     }
