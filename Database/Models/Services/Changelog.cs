@@ -1,8 +1,10 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TF47_Backend.Database.Models.Services
 {
+    [Table("ServiceChangelogs")]
     public class Changelog
     {
         [Key]
