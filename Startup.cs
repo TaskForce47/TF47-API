@@ -46,7 +46,8 @@ namespace TF47_Backend
                         builder.WithOrigins("https://localhost:5001",
                             "https://test.taskforce47.com",
                             "https://beta.taskforce47.com",
-                            "https://api.taskforce47.com");
+                            "https://api.taskforce47.com",
+                            "https://gadget.taskforce47.com:8080");
                     });
             });
             services.AddControllers();
