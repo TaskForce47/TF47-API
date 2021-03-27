@@ -13,7 +13,7 @@ using TF47_Backend.Services;
 
 namespace TF47_Backend.Controllers.IssueControllers
 {
-    [Authorize]
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class IssueItemController : ControllerBase
@@ -32,7 +32,8 @@ namespace TF47_Backend.Controllers.IssueControllers
             _userProviderService = userProviderService;
 
         }
-
+        
+        [Authorize]
         [HttpPost("")]
         [ProducesResponseType(typeof(IssueItemResponse), 200)]
         public async Task<IActionResult> CreateIssueItem([FromBody] CreateIssueItemRequest request)
@@ -69,7 +70,8 @@ namespace TF47_Backend.Controllers.IssueControllers
                 .FirstOrDefaultAsync(x => x.IssueItemId == issueItemId);
             return Ok(issueItem);
         }
-
+        
+        [Authorize]
         [HttpPut("{issueItemId:int}")]
         [ProducesResponseType(typeof(IssueItemResponse), 200)]
         public async Task<IActionResult> UpdateIssueItem(int issueItemId, [FromBody] UpdateIssueItemRequest request)
@@ -92,7 +94,8 @@ namespace TF47_Backend.Controllers.IssueControllers
             return Ok(new IssueItemResponse(issueItem.IssueId, issueItem.Author.UserId, issueItem.Author.Username,
                 issueItem.Message, issueItem.TimeCreated, issueItem.TimeLastEdited));
         }
-
+        
+        [Authorize]
         [HttpDelete("{issueItemId:int}")]
         public async Task<IActionResult> DeleteIssueItem(int issueItemId)
         {

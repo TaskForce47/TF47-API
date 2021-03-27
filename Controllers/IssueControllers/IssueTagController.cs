@@ -14,7 +14,7 @@ using TF47_Backend.Dto.ResponseModels;
 
 namespace TF47_Backend.Controllers.IssueControllers
 {
-    [Authorize]
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class IssueTagController : ControllerBase
@@ -60,8 +60,9 @@ namespace TF47_Backend.Controllers.IssueControllers
             return CreatedAtAction(nameof(GetIssueTag), new {issueTagId = issueTag.IssueTagId}, 
                 new IssueTagResponse(issueTag.IssueTagId, issueTag.TagName, issueTag.Color));
         }
-
-        [HttpPatch("{issueTagId:int}")]
+        
+        [Authorize]
+        [HttpPut("{issueTagId:int}")]
         [ProducesResponseType(typeof(IssueTagResponse), 200)]
         public async Task<IActionResult> UpdateIssueTag(int issueTagId, [FromBody] UpdateIssueTagRequest request)
         {
@@ -110,7 +111,8 @@ namespace TF47_Backend.Controllers.IssueControllers
                 return Ok(issueTags);
             });
         }
-
+        
+        [Authorize]
         [HttpDelete("{issueTagId:int}")]
         public async Task<IActionResult> RemoveIssueTag(int issueTagId)
         {

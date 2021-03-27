@@ -13,7 +13,6 @@ using TF47_Backend.Services;
 
 namespace TF47_Backend.Controllers.IssueControllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class IssueGroupController : ControllerBase
@@ -31,7 +30,8 @@ namespace TF47_Backend.Controllers.IssueControllers
             _database = database;
             _userProviderService = userProviderService;
         }
-
+        
+        [Authorize]
         [HttpPost("")]
         [ProducesResponseType(typeof(IssueGroupResponse), 201)]
         public async Task<IActionResult> CreateIssueGroup([FromBody] CreateIssueGroupRequest request)

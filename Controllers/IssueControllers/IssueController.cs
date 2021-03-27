@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -13,6 +14,7 @@ using TF47_Backend.Services;
 
 namespace TF47_Backend.Controllers.IssueControllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class IssueController : ControllerBase
@@ -30,7 +32,8 @@ namespace TF47_Backend.Controllers.IssueControllers
             _database = database;
             _userProviderService = userProviderService;
         }
-
+        
+        [Authorize]
         [HttpPost("")]
         [ProducesResponseType(typeof(IssueResponse), 201)]
         public async Task<IActionResult> CreateIssue([FromBody] CreateIssueRequest request)
@@ -95,7 +98,8 @@ namespace TF47_Backend.Controllers.IssueControllers
 
             return Ok(issue);
         }
-
+        
+        [Authorize]
         [HttpPut("{issueId:int}")]
         [ProducesResponseType(typeof(IssueResponse), 200)]
         public async Task<IActionResult> UpdateIssue(int issueId, [FromBody] UpdateIssueRequest request)
@@ -122,7 +126,8 @@ namespace TF47_Backend.Controllers.IssueControllers
                 issue.IssueCreator.Username, issue.TimeCreated, 
                 issue.TimeLastUpdated, null, null));
         }
-
+        
+        [Authorize]
         [HttpDelete("{issueId:int}")]
         public async Task<IActionResult> DeleteIssue(int issueId)
         {

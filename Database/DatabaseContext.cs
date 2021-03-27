@@ -43,6 +43,8 @@ namespace TF47_Backend.Database
         public virtual DbSet<IssueTag> IssueTags { get; set; }
         public virtual DbSet<ApiKey> ApiKeys { get; set; }
         public virtual DbSet<Changelog> Changelogs { get; set; }
+        public virtual DbSet<Squad> Squads { get; set; }
+        public virtual DbSet<SquadMember> SquadMembers { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -164,6 +166,20 @@ namespace TF47_Backend.Database
                 entity.HasOne(x => x.Author)
                     .WithMany(x => x.WrittenChangelogs)
                     .HasForeignKey(x => x.AuthorId);
+            });
+            builder.Entity<Squad>(entity =>
+            {
+                entity.Property(x => x.SquadId).ValueGeneratedOnAdd();
+                entity.HasMany(x => x.SquadMembers)
+                    .WithOne(x => x.Squad)
+                    .HasForeignKey(x => x.SquadId);
+            });
+            builder.Entity<SquadMember>(entity =>
+            {
+                entity.Property(x => x.SquadMemberId).ValueGeneratedOnAdd();
+                entity.HasOne(x => x.Squad)
+                    .WithMany(x => x.SquadMembers)
+                    .HasForeignKey(x => x.SquadId);
             });
         }
     }
