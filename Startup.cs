@@ -61,7 +61,11 @@ namespace TF47_Backend
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "TF47 Backend", Version = "v1" });
             });
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
                 .AddCookie(options =>
                 {
                     options.AccessDeniedPath = Configuration["Redirections:Unauthorized"];
