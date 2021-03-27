@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TF47_Backend.Database;
 using TF47_Backend.Database.Models.Services;
+using TF47_Backend.Helper;
 
 namespace TF47_Backend.Services.SquadManager
 {
@@ -28,16 +29,16 @@ namespace TF47_Backend.Services.SquadManager
             _logger = logger;
             _serviceProvider = serviceProvider;
             _lock = new SemaphoreSlim(1);
-            _squadHomePath = Path.Combine(Environment.CurrentDirectory, "wwwroot", "squadxml");
+            _squadHomePath = PathCombiner.Combine(Environment.CurrentDirectory, "wwwroot", "squadxml");
             _squadUrl = $"{configuration["BaseUrl"]}/squadxml";
         }
 
         public async Task<bool> WriteSquadXml(long squadId, CancellationToken cancellationToken)
         {
-            var squadPath = Path.Combine(_squadHomePath, squadId.ToString());
-            var dtdPath = Path.Combine(squadPath, "squad.dtd");
-            var xmlPath = Path.Combine(squadPath, "squad.xml");
-            var logoPath = Path.Combine(squadPath, "logo.png");
+            var squadPath = PathCombiner.Combine(_squadHomePath, squadId.ToString());
+            var dtdPath = PathCombiner.Combine(squadPath, "squad.dtd");
+            var xmlPath = PathCombiner.Combine(squadPath, "squad.xml");
+            var logoPath = PathCombiner.Combine(squadPath, "logo.png");
             
             await _lock.WaitAsync(cancellationToken);
 
@@ -151,8 +152,8 @@ namespace TF47_Backend.Services.SquadManager
 
         public async Task<bool> UpdateSquadImage(long squadId, Stream image, CancellationToken cancellationToken)
         {
-            var squadPath = Path.Combine(_squadHomePath, squadId.ToString());
-            var logoPath = Path.Combine(squadPath, "logo.png");
+            var squadPath = PathCombiner.Combine(_squadHomePath, squadId.ToString());
+            var logoPath = PathCombiner.Combine(squadPath, "logo.png");
             
             if (!Directory.Exists(squadPath))
                 Directory.CreateDirectory(squadPath);
@@ -183,7 +184,7 @@ namespace TF47_Backend.Services.SquadManager
         {
             await _lock.WaitAsync(cancellationToken);
             
-            var squadPath = Path.Combine(_squadHomePath, squadId.ToString());
+            var squadPath = PathCombiner.Combine(_squadHomePath, squadId.ToString());
 
             try
             {

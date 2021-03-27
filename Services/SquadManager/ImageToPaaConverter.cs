@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using TF47_Backend.Helper;
 
 namespace TF47_Backend.Services.SquadManager
 {
@@ -12,7 +13,7 @@ namespace TF47_Backend.Services.SquadManager
         
         public ImageToPaaConverter()
         {
-            _path = Path.Combine(Environment.CurrentDirectory, "Includes", "ImageToPaa.exe");
+            _path = PathCombiner.Combine(Environment.CurrentDirectory, "Includes", "ImageToPaa.exe");
         }
 
         public async Task<bool> Convert(string inputFile, CancellationToken cancellationToken)
