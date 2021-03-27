@@ -20,6 +20,7 @@ using TF47_Backend.Services.ApiToken;
 using TF47_Backend.Services.Authentication;
 using TF47_Backend.Services.Mail;
 using TF47_Backend.Services.OAuth;
+using TF47_Backend.Services.SquadManager;
 using TF47_Backend.SignalR;
 
 namespace TF47_Backend
@@ -63,6 +64,7 @@ namespace TF47_Backend
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
+                    options.AccessDeniedPath = Configuration["Redirections:Unauthorized"];
                     options.Cookie.HttpOnly = false;
                     options.Cookie.Domain = Configuration["CookieBaseUrl"];
                     options.Cookie.Name = "OperationDachdaggerAuthCookie";
@@ -91,6 +93,7 @@ namespace TF47_Backend
             services.AddTransient<IUserProviderService, UserProviderService>();
             services.AddTransient<IAuthenticationManager, AuthenticationManager>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSingleton<ISquadManagerService, SquadManagerService>();
             services.AddSingleton<ISteamAuthenticationService, SteamAuthenticationService>();
             services.AddSingleton<IDiscordAuthenticationService, DiscordAuthenticationService>();
             services.AddSingleton<ApiTokenCache>();
