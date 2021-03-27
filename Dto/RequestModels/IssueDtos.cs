@@ -10,6 +10,4 @@ namespace TF47_Backend.Dto.RequestModels
     public record UpdateIssueTagRequest(string TagName, string Color);
     public record UpdateIssueItemRequest(string Message);
     public record UpdateIssueRequest(string Title, long[] Tags);
-
-    public record IssueTagResponse(long IssueTagId, string TagName, string Color);
 }

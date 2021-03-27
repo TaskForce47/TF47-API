@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using TF47_Backend.Database;
 using TF47_Backend.Database.Models.Services;
 using TF47_Backend.Dto.RequestModels;
+using TF47_Backend.Dto.ResponseModels;
 using TF47_Backend.Services;
 
 namespace TF47_Backend.Controllers.IssueControllers
@@ -31,6 +33,7 @@ namespace TF47_Backend.Controllers.IssueControllers
         }
 
         [HttpPost("")]
+        [ProducesResponseType(typeof(IssueGroupResponse), 201)]
         public async Task<IActionResult> CreateIssueGroup([FromBody] CreateIssueGroupRequest request)
         {
             var newIssueGroup = new IssueGroup
@@ -58,25 +61,46 @@ namespace TF47_Backend.Controllers.IssueControllers
             }
 
             return CreatedAtAction(nameof(GetIssueGroup), new {issueGroupId = newIssueGroup.IssueGroupId},
-                newIssueGroup);
+                new IssueGroupResponse(newIssueGroup.IssueGroupId, newIssueGroup.GroupName,
+                    newIssueGroup.GroupDescription, newIssueGroup.TimeGroupCreated, null));
         }
 
         [HttpGet("{issueGroupId}/")]
+        [ProducesResponseType(typeof(IssueGroupResponse), 200)]
         public async Task<IActionResult> GetIssueGroup(int issueGroupId)
         {
             var issueGroup = await _database.IssueGroups
                 .Include(x => x.Issues)
                 .ThenInclude(x => x.IssueItems)
+                .Select(x =>
+                    new IssueGroupResponse(x.IssueGroupId, x.GroupName, x.GroupDescription, x.TimeGroupCreated, 
+                        x.Issues.Select(y => new IssueResponse(y.IssueId, y.Title, y.IsClosed, 
+                            y.IssueCreator.UserId, y.IssueCreator.Username, y.TimeCreated, y.TimeLastUpdated, 
+                            y.IssueItems
+                                .Select(z => new IssueItemResponse(z.IssueItemId, z.Author.UserId,
+                                z.Author.Username, z.Message, z.TimeCreated, z.TimeLastEdited)), 
+                            y.IssueTags
+                                .Select(z => new IssueTagResponse(z.IssueTagId, z.TagName, z.Color))))))
                 .FirstOrDefaultAsync(x => x.IssueGroupId == issueGroupId);
             return Ok(issueGroup);
         }
 
         [HttpGet("")]
+        [ProducesResponseType(typeof(IssueGroupResponse[]), 200)]
         public async Task<IActionResult> GetIssueGroups()
         {
             var issueGroups = await _database.IssueGroups
                 .Include(x => x.Issues)
                 .ThenInclude(x => x.IssueItems)
+                .Select(x =>
+                    new IssueGroupResponse(x.IssueGroupId, x.GroupName, x.GroupDescription, x.TimeGroupCreated, 
+                        x.Issues.Select(y => new IssueResponse(y.IssueId, y.Title, y.IsClosed, 
+                            y.IssueCreator.UserId, y.IssueCreator.Username, y.TimeCreated, y.TimeLastUpdated, 
+                            y.IssueItems
+                                .Select(z => new IssueItemResponse(z.IssueItemId, z.Author.UserId,
+                                    z.Author.Username, z.Message, z.TimeCreated, z.TimeLastEdited)), 
+                            y.IssueTags
+                                .Select(z => new IssueTagResponse(z.IssueTagId, z.TagName, z.Color))))))
                 .ToArrayAsync();
             return Ok(issueGroups);
         }

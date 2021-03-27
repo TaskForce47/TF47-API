@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using TF47_Backend.Database;
 using TF47_Backend.Database.Models.Services;
 using TF47_Backend.Dto.RequestModels;
+using TF47_Backend.Dto.ResponseModels;
 
 namespace TF47_Backend.Controllers.IssueControllers
 {
@@ -18,18 +19,19 @@ namespace TF47_Backend.Controllers.IssueControllers
     [ApiController]
     public class IssueTagController : ControllerBase
     {
-        private readonly ILogger<IssueItemController> _logger;
+        private readonly ILogger<IssueTagController> _logger;
         private readonly DatabaseContext _database;
 
         public IssueTagController(
-            ILogger<IssueItemController> logger,
+            ILogger<IssueTagController> logger,
             DatabaseContext database)
         {
             _logger = logger;
             _database = database;
         }
-
+        
         [HttpPost("")]
+        [ProducesResponseType(typeof(IssueTagResponse), 201)]
         public async Task<IActionResult> CreateIssueTag(CreateIssueTagRequest request)
         {
             var issueTag = new IssueTag
@@ -45,7 +47,7 @@ namespace TF47_Backend.Controllers.IssueControllers
             }
             catch (DbUpdateException ex)
             {
-                _logger.LogWarning($"User tried to insert a already existing key {ex.Message}");
+                _logger.LogWarning("User tried to insert a already existing key");
                 return BadRequest("Issue Tag does already exist");
             }
             catch (Exception ex)
@@ -55,10 +57,12 @@ namespace TF47_Backend.Controllers.IssueControllers
                     null, 500, "Failed to create tag");
             }
 
-            return CreatedAtAction(nameof(GetIssueTag), new {issueTagId = issueTag.IssueTagId}, issueTag);
+            return CreatedAtAction(nameof(GetIssueTag), new {issueTagId = issueTag.IssueTagId}, 
+                new IssueTagResponse(issueTag.IssueTagId, issueTag.TagName, issueTag.Color));
         }
 
         [HttpPatch("{issueTagId:int}")]
+        [ProducesResponseType(typeof(IssueTagResponse), 200)]
         public async Task<IActionResult> UpdateIssueTag(int issueTagId, [FromBody] UpdateIssueTagRequest request)
         {
             var issueTag = await _database.IssueTags.FindAsync(issueTagId);
@@ -81,10 +85,11 @@ namespace TF47_Backend.Controllers.IssueControllers
                     null, 500, "Failed to update");
             }
 
-            return Ok(issueTag);
+            return Ok(new IssueTagResponse(issueTag.IssueTagId, issueTag.TagName, issueTag.Color));
         }
 
         [HttpGet("{issueTagId:int}")]
+        [ProducesResponseType(typeof(IssueTagResponse), 200)]
         public async Task<IActionResult> GetIssueTag(int issueTagId)
         {
             var issueTag = await _database.IssueTags.FindAsync(issueTagId);
