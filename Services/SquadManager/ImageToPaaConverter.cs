@@ -18,6 +18,7 @@ namespace TF47_Backend.Services.SquadManager
 
         public async Task<bool> Convert(string inputFile, CancellationToken cancellationToken)
         {
+            var fileInfo = new FileInfo(_path);
             if (!File.Exists(_path))
                 throw new Exception("ImageToPaa.exe not found");
             
@@ -26,8 +27,8 @@ namespace TF47_Backend.Services.SquadManager
             
             var process = new Process();
             process.StartInfo = OperatingSystem.IsWindows()
-                ? new ProcessStartInfo(_path, inputFile)
-                : new ProcessStartInfo("wineconsole", $"{_path} {inputFile}");
+                ? new ProcessStartInfo(_path, $"\"{inputFile}\"")
+                : new ProcessStartInfo("wineconsole", $"\"{_path}\" \"{inputFile}\"");
             //process.StartInfo.CreateNoWindow = true;
                 
             process.Start();
