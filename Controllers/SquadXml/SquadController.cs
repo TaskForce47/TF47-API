@@ -51,10 +51,11 @@ namespace TF47_Backend.Controllers.SquadXml
             var squadResponse = await _database.Squads
                 .Include(x => x.SquadMembers)
                 .ThenInclude(x => x.User)
+                .Where(x => x.SquadId == squadId)
                 .Select(x => new SquadResponse(x.SquadId, x.Name, x.Nick, x.Website, x.Mail, x.PictureUrl,
                     x.SquadMembers.Select(y => new SquadMemberResponse(y.SquadMemberId, y.Remark, y.Mail, y.UserId,
                         y.User.Username, y.User.SteamId))))
-                .FirstOrDefaultAsync(x => x.SquadId == squadId);
+                .FirstOrDefaultAsync();
 
             return Ok(squadResponse);
         }
@@ -85,11 +86,12 @@ namespace TF47_Backend.Controllers.SquadXml
 
             var squads = _database.Squads
                 .Include(x => x.SquadMembers)
-                .Select(x => new SquadResponse(x.SquadId, x.Name, x.Nick, x.Website, x.Mail, x.PictureUrl,
-                    x.SquadMembers.Select(y => new SquadMemberResponse(y.SquadMemberId, y.Remark, y.Mail, y.UserId,
-                        y.User.Username, y.User.SteamId))))
-                .Where(x => x.SquadMembers.Any(y => y.UserId == user.UserId));
-
+                .ThenInclude(x => x.User)
+                .Where(x => x.SquadMembers.Any(z => z.UserId == user.UserId))
+                    .Select(x => new SquadResponse(x.SquadId, x.Name, x.Nick, x.Website, x.Mail, x.PictureUrl,
+                        x.SquadMembers.Select(y => new SquadMemberResponse(y.SquadMemberId, y.Remark, y.Mail, y.UserId,
+                            y.User.Username, y.User.SteamId))));
+            
             return Ok(squads);
         }
         
@@ -242,5 +244,23 @@ namespace TF47_Backend.Controllers.SquadXml
             return Ok();
         }
         
+        [HttpPost("{squadid}/rebuild")]
+        public async Task<IActionResult> RebuildSquadXml(long squadid, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _squadManagerService.WriteSquadXml(squadid, cancellationToken);
+                if (result)
+                    return Ok();
+                
+                return BadRequest(
+                    "Could not complete squadxml rebuild. It is possible the provided squadid does not exist");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed to regenerate squadxml for squad {squadId}: {message}", squadid, ex.Message);
+                return Problem("Failed to regenerate squadxml", null, 500, "Failed to regenerate squadxml");
+            }
+        }
     }
 }
