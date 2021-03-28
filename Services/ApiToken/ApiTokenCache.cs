@@ -55,22 +55,21 @@ namespace TF47_Backend.Services.ApiToken
 
         }
 
-        public async Task BackgroundTask()
+        private async Task BackgroundTask()
         {
             while (true)
             {
                 using var scope = _serviceProvider.CreateScope();
-                await using var database = _serviceProvider.GetService<DatabaseContext>();
-                var apiKeys = database?.ApiKeys.Where(x => x.ValidUntil > DateTime.Now);
+                await using var database = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+                var apiKeys = database.ApiKeys.Where(x => x.ValidUntil > DateTime.Now);
 
                 _updateLock = true;
                 _cache.Clear();
 
-                if (apiKeys != null)
-                    foreach (var apiKey in apiKeys)
-                    {
-                        _cache.Add(apiKey.ApiKeyValue, apiKey);
-                    }
+                foreach (var apiKey in apiKeys)
+                {
+                    _cache.Add(apiKey.ApiKeyValue, apiKey);
+                }
 
                 _updateLock = false;
 

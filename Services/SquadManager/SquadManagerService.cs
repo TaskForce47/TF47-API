@@ -43,7 +43,7 @@ namespace TF47_Backend.Services.SquadManager
             await _lock.WaitAsync(cancellationToken);
 
             using var scope = _serviceProvider.CreateScope();
-            await using var database = _serviceProvider.GetService<DatabaseContext>();
+            await using var database = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
             var squad = await database.Squads
                 .Include(x => x.SquadMembers)
                 .ThenInclude(x => x.User)
@@ -83,7 +83,7 @@ namespace TF47_Backend.Services.SquadManager
             var squadXml = new List<string>
             {
                 "<?xml version=\"1.0\"?>",
-                "<?xml-stylesheet type=\"text/xsl\" href=\"../../squadxml/squad.xsl\" ?>",
+                "<?xml-stylesheet type=\"text/xsl\" href=\"../squad.xsl\" ?>",
                 "<!DOCTYPE squad SYSTEM \"squad.dtd\">",
                 $"<squad nick=\"{squad.Nick}\">",
                 $"\t<name>{squad.Name}</name>",
