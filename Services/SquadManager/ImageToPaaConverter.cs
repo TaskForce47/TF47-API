@@ -13,7 +13,7 @@ namespace TF47_Backend.Services.SquadManager
         
         public ImageToPaaConverter()
         {
-            _path = PathCombiner.Combine(Environment.CurrentDirectory, "Includes", "ImageToPaa.exe");
+            _path = PathCombiner.Combine(Environment.CurrentDirectory, "Includes", "ImageToPAA.exe");
         }
 
         public async Task<bool> Convert(string inputFile, CancellationToken cancellationToken)
