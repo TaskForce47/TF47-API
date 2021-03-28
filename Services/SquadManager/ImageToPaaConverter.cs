@@ -28,7 +28,8 @@ namespace TF47_Backend.Services.SquadManager
             var process = new Process();
             process.StartInfo = OperatingSystem.IsWindows()
                 ? new ProcessStartInfo(_path, $"\"{inputFile}\"")
-                : new ProcessStartInfo("wineconsole", $"\"{_path}\" \"{inputFile}\"");
+                //transform "/folder/to/picture.png" to "\folder\to\picture.png"
+                : new ProcessStartInfo("wineconsole", $"{_path} \"{inputFile.Replace("/", "\\")}\"");
             //process.StartInfo.CreateNoWindow = true;
                 
             process.Start();
