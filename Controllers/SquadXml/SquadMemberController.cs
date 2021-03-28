@@ -127,7 +127,7 @@ namespace TF47_Backend.Controllers.SquadXml
                 squadMember.UserId, squadMember.User.Username, squadMember.User.SteamId));
         }
         
-        [HttpPut("{squadMemberId:int}/self")]
+        [HttpPut("{squadMemberId:int}/me")]
         public async Task<IActionResult> UpdateSquadMemberSelf(long squadMemberId, UpdateSquadMemberRequest request)
         {
             var user = await _userProviderService.GetDatabaseUser(HttpContext);
@@ -184,7 +184,7 @@ namespace TF47_Backend.Controllers.SquadXml
             return Ok();
         } 
 
-        [HttpDelete("{squadMemberId:int}/self")]
+        [HttpDelete("{squadMemberId:int}/me")]
         public async Task<IActionResult> RemoveSquadMemberSelf(long squadMemberId)
         {
             var user = await _userProviderService.GetDatabaseUser(HttpContext);
