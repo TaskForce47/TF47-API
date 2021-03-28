@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
@@ -68,6 +69,11 @@ namespace TF47_Backend
                 })
                 .AddCookie(options =>
                 {
+                    options.Events.OnRedirectToLogin = context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return Task.CompletedTask;
+                    };
                     options.AccessDeniedPath = Configuration["Redirections:Unauthorized"];
                     options.Cookie.HttpOnly = false;
                     options.Cookie.Domain = Configuration["CookieBaseUrl"];
