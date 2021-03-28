@@ -76,7 +76,7 @@ namespace TF47_Backend.Controllers.IssueControllers
         [ProducesResponseType(typeof(IssueItemResponse), 200)]
         public async Task<IActionResult> UpdateIssueItem(int issueItemId, [FromBody] UpdateIssueItemRequest request)
         {
-            var issueItem = await _database.IssueItems.FindAsync(issueItemId).AsTask();
+            var issueItem = await _database.IssueItems.FindAsync(issueItemId);
             var user = await _userProviderService.GetDatabaseUser(HttpContext);
 
             if (issueItem == null)
