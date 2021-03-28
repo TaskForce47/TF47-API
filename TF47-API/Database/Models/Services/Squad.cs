@@ -19,6 +19,8 @@ namespace TF47_API.Database.Models.Services
         [MaxLength(64)]
         [DataType(DataType.EmailAddress)]
         public string Mail { get; set; }
+        
+        public string XmlUrl { get; set; } = null;
         public string PictureUrl { get; set; } = null;
         
         public ICollection<SquadMember> SquadMembers { get; set; }

@@ -52,7 +52,7 @@ namespace TF47_API.Controllers.SquadXml
                 .Include(x => x.SquadMembers)
                 .ThenInclude(x => x.User)
                 .Where(x => x.SquadId == squadId)
-                .Select(x => new SquadResponse(x.SquadId, x.Title, x.Name, x.Nick, x.Website, x.Mail, x.PictureUrl,
+                .Select(x => new SquadResponse(x.SquadId, x.Title, x.Name, x.Nick, x.Website, x.Mail, x.XmlUrl, x.PictureUrl,
                     x.SquadMembers.Select(y => new SquadMemberResponse(y.SquadMemberId, y.Remark, y.Mail, y.UserId,
                         y.User.Username, y.User.SteamId))))
                 .FirstOrDefaultAsync();
@@ -69,7 +69,7 @@ namespace TF47_API.Controllers.SquadXml
                 return _database.Squads
                     .Include(x => x.SquadMembers)
                     .ThenInclude(x => x.User)
-                    .Select(x => new SquadResponse(x.SquadId, x.Title,x.Name, x.Nick, x.Website, x.Mail, x.PictureUrl,
+                    .Select(x => new SquadResponse(x.SquadId, x.Title,x.Name, x.Nick, x.Website, x.Mail, x.XmlUrl,x.PictureUrl,
                         x.SquadMembers.Select(y => new SquadMemberResponse(y.SquadMemberId, y.Remark, y.Mail, y.UserId,
                             y.User.Username, y.User.SteamId))));
             });
@@ -88,7 +88,7 @@ namespace TF47_API.Controllers.SquadXml
                 .Include(x => x.SquadMembers)
                 .ThenInclude(x => x.User)
                 .Where(x => x.SquadMembers.Any(z => z.UserId == user.UserId))
-                    .Select(x => new SquadResponse(x.SquadId, x.Title,x.Name, x.Nick, x.Website, x.Mail, x.PictureUrl,
+                    .Select(x => new SquadResponse(x.SquadId, x.Title,x.Name, x.Nick, x.Website, x.Mail, x.XmlUrl,x.PictureUrl,
                         x.SquadMembers.Select(y => new SquadMemberResponse(y.SquadMemberId, y.Remark, y.Mail, y.UserId,
                             y.User.Username, y.User.SteamId))));
             
@@ -129,7 +129,7 @@ namespace TF47_API.Controllers.SquadXml
             }
 
             return CreatedAtAction(nameof(GetSquad), new { SquadId = squad.SquadId },
-                new SquadResponse(squad.SquadId, squad.Title, squad.Name, squad.Nick, squad.Website, squad.Mail, squad.PictureUrl,
+                new SquadResponse(squad.SquadId, squad.Title, squad.Name, squad.Nick, squad.Website, squad.Mail, squad.XmlUrl,squad.PictureUrl,
                     null));
         }
         
@@ -172,7 +172,7 @@ namespace TF47_API.Controllers.SquadXml
             }
 
             return Ok(new SquadResponse(squad.SquadId, squad.Title, squad.Name, squad.Nick, squad.Website, squad.Mail,
-                squad.PictureUrl, null));
+                squad.XmlUrl, squad.PictureUrl, null));
         }
         
         [HttpPut("{squadId:int}/uploadLogo")]

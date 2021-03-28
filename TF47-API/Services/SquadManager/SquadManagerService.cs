@@ -141,9 +141,18 @@ namespace TF47_API.Services.SquadManager
             
             await File.WriteAllLinesAsync(dtdPath, dtd, cancellationToken);
             await File.WriteAllLinesAsync(xmlPath, squadXml, cancellationToken);
-            
+
+            try
+            {
+                squad.XmlUrl = $"{_squadUrl}/{squadId}/squad.xml";
+                await database.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed to add Squad Xml link to database for squad {squadid}", squadId);
+            }
+
             _lock.Release();
-            
             _logger.LogInformation("Updating squadxml xml files for squad {squadName}:{squadId} successful",
                 squad.Name, squadId);
             
