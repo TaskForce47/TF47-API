@@ -41,7 +41,7 @@
 # .idea/modules
 # *.iml
 # *.ipr
-#wwwroot
+wwwroot
 # CMake
 cmake-build-*/
 
