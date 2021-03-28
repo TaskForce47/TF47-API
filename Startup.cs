@@ -122,7 +122,13 @@ namespace TF47_Backend
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ServeUnknownFileTypes = true,
+            });
+            app.UseDefaultFiles();
+            
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -130,7 +136,6 @@ namespace TF47_Backend
             });
 
             app.UseHttpsRedirection();
-
             app.UseRouting();
 
             app.UseCors(CustomOrigins);
