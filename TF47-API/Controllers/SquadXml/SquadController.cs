@@ -79,6 +79,7 @@ namespace TF47_API.Controllers.SquadXml
         public async Task<IActionResult> GetUserNotInSquad(long squadId)
         {
             var users = await _database.Users
+                .AsNoTracking()
                 .Include(x => x.MemberOfSquads)
                 .Where(x => x.MemberOfSquads.Any(y => y.SquadId != squadId))
                 .ToListAsync();
