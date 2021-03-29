@@ -12,7 +12,7 @@ namespace TF47_API.Dto.Mappings
             return data == null
                 ? null
                 : new IssueGroupResponse(data.IssueGroupId, data.GroupName, data.GroupDescription, data.TimeGroupCreated,
-                    data.Issues.ToSquadMemberResponseIEnumerable());
+                    data.Issues.ToIssueResponseIEnumerable());
         }
 
         public static IEnumerable<IssueGroupResponse> ToIssueGroupResponseIEnumerable(this IEnumerable<IssueGroup> data)
@@ -24,13 +24,13 @@ namespace TF47_API.Dto.Mappings
         {
             return data == null
                 ? null
-                : new IssueResponse(data.IssueId, data.Title, data.IsClosed, data.IssueCreator.UserId,
+                : new IssueResponse(data.IssueId, data.IssueGroupId, data.Title, data.IsClosed, data.IssueCreator.UserId,
                     data.IssueCreator.Username, data.TimeCreated,
                     data.TimeLastUpdated, data.IssueItems.ToIssueItemResponseIEnumerable(),
                     data.IssueTags.ToIssueTagResponseIEnumerable());
         }
 
-        public static IEnumerable<IssueResponse> ToSquadMemberResponseIEnumerable(
+        public static IEnumerable<IssueResponse> ToIssueResponseIEnumerable(
             this IEnumerable<Issue> data)
         {
             return data?.Select(x => x.ToIssueResponse());
