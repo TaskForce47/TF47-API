@@ -11,13 +11,13 @@ namespace TF47_API.Dto.Mappings
         {
             return data == null
                 ? null
-                : new NoteResponse(data.NoteId, data.Player.PlayerUid, data.Player.PlayerName, data.TimeCreated,
-                    data.TimeLastUpdate, data.PlayerId, data.Player.PlayerName, data.WriterId, data.Writer.Username);
+                : new NoteResponse(data.NoteId, data.Text, data.Type, data.TimeCreated, data.TimeLastUpdate,
+                    data.PlayerId, data.Player.PlayerName, data.WriterId, data.Writer.Username);
         }
         
         public static IEnumerable<NoteResponse> ToNoteResponseIEnumerable(this IEnumerable<Note> data)
         {
-            return data?.Select(x => ToNoteResponse(x));
+            return data?.Select(ToNoteResponse);
         }
     }
 }
