@@ -49,6 +49,7 @@ namespace TF47_API.Controllers.SquadXml
                 return BadRequest("Squad requested does not exist");
 
             var squadResponse = await _database.Squads
+                .AsNoTracking()
                 .Include(x => x.SquadMembers)
                 .ThenInclude(x => x.User)
                 .Where(x => x.SquadId == squadId)
@@ -67,6 +68,7 @@ namespace TF47_API.Controllers.SquadXml
             var squadResponse = await Task.Run(() =>
             {
                 return _database.Squads
+                    .AsNoTracking()
                     .Include(x => x.SquadMembers)
                     .ThenInclude(x => x.User)
                     .Select(x => new SquadResponse(x.SquadId, x.Title,x.Name, x.Nick, x.Website, x.Mail, x.XmlUrl,x.PictureUrl,
@@ -85,6 +87,7 @@ namespace TF47_API.Controllers.SquadXml
             var user = await _userProviderService.GetDatabaseUser(HttpContext);
 
             var squads = _database.Squads
+                .AsNoTracking()
                 .Include(x => x.SquadMembers)
                 .ThenInclude(x => x.User)
                 .Where(x => x.SquadMembers.Any(z => z.UserId == user.UserId))

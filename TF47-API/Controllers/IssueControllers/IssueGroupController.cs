@@ -70,6 +70,7 @@ namespace TF47_API.Controllers.IssueControllers
         public async Task<IActionResult> GetIssueGroup(int issueGroupId)
         {
             var issueGroup = await _database.IssueGroups
+                .AsNoTracking()
                 .Include(x => x.Issues)
                 .ThenInclude(x => x.IssueItems)
                 .Select(x =>
@@ -90,6 +91,7 @@ namespace TF47_API.Controllers.IssueControllers
         public async Task<IActionResult> GetIssueGroups()
         {
             var issueGroups = await _database.IssueGroups
+                .AsNoTracking()
                 .Include(x => x.Issues)
                 .ThenInclude(x => x.IssueItems)
                 .Select(x =>

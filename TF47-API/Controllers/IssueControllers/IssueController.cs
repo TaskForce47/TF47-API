@@ -38,7 +38,7 @@ namespace TF47_API.Controllers.IssueControllers
         [ProducesResponseType(typeof(IssueResponse), 201)]
         public async Task<IActionResult> CreateIssue([FromBody] CreateIssueRequest request)
         {
-            var issueGroup = await _database.IssueGroups.FindAsync(request.IssueGroupId).AsTask();
+            var issueGroup = await _database.IssueGroups.FindAsync(request.IssueGroupId);
             var issueTags = await _database.IssueTags
                 .Where(x => request.Tags.Contains(x.IssueTagId))
                 .ToListAsync();
@@ -89,6 +89,7 @@ namespace TF47_API.Controllers.IssueControllers
         public async Task<IActionResult> GetIssue(int issueId)
         {
             var issue = await _database.Issues
+                .AsNoTracking()
                 .Select(x => new IssueResponse(x.IssueId, x.Title, x.IsClosed, x.IssueCreator.UserId,
                     x.IssueCreator.Username, x.TimeCreated, x.TimeLastUpdated,
                     x.IssueItems.Select(y => new IssueItemResponse(y.IssueItemId, y.Author.UserId, y

@@ -65,6 +65,7 @@ namespace TF47_API.Controllers.IssueControllers
         public async Task<IActionResult> GetIssueItem(int issueItemId)
         {
             var issueItem = await _database.IssueItems
+                .AsNoTracking()
                 .Select(x => new IssueItemResponse(x.IssueItemId, x.Author.UserId, x.Author.Username, x.Message,
                     x.TimeCreated, x.TimeLastEdited))
                 .FirstOrDefaultAsync(x => x.IssueItemId == issueItemId);

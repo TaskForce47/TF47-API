@@ -26,7 +26,9 @@ namespace TF47_API.Services
         public async Task<User> GetDatabaseUser(HttpContext context)
         {
             var userId = Guid.Parse(context.User.Claims.First(claim => claim.Type == "UserId").Value);
-            var user = await _database.Users.FirstAsync(x =>
+            var user = await _database.Users
+                .AsNoTracking()
+                .FirstAsync(x =>
                 x.UserId == userId);
             return user;
         }

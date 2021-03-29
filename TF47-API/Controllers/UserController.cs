@@ -57,6 +57,7 @@ namespace TF47_API.Controllers
                 return BadRequest("You must be logged in to query this endpoint");
 
             var userDetail = await _database.Users
+                .AsNoTracking()
                 .Include(x => x.ApiKeys)
                 .Include(x => x.WrittenNotes)
                 .Include(x => x.WrittenChangelogs)
