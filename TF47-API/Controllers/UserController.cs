@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
+using TF47_API.Dto.Mappings;
 using TF47_API.Dto.ResponseModels;
 using TF47_API.Services;
 using TF47_API.Services.Authentication;
@@ -57,23 +58,9 @@ namespace TF47_API.Controllers
                 .Include(x => x.WrittenChangelogs)
                 .Include(x => x.Groups)
                 .ThenInclude(y => y.GroupPermission)
-                .Select(x => new UserResponse(x.UserId, x.Banned, x.Email,
-                    x.Username, x.AllowEmails, x.CountryCode,
-                    x.DiscordId, x.ProfilePicture, x.ProfileUrl, x.SteamId,
-                    x.FirstTimeSeen, x.LastTimeSeen,
-                    x.WrittenNotes
-                        .Select(y => new NotesResponse(y.NoteId, y.Player.PlayerUid, y.Player.PlayerName, y.Type,
-                            y.Text, y.Writer.UserId, y.Writer.Username, y.TimeCreated, y.TimeLastUpdate)),
-                    x.WrittenChangelogs
-                        .Select(y => new ChangelogResponse(y.ChangelogId, y.Title, y.Tags, y.Text, y.TimeReleased)),
-                    x.Groups
-                        .Select(y => new GroupResponse(y.GroupId, y.Name, y.Description, y.TextColor,
-                            y.BackgroundColor, y.IsVisible, new GroupPermissionsResponse(y.GroupPermission.GroupId,
-                                y.GroupPermission.PermissionsDiscord, y.GroupPermission.PermissionsTeamspeak,
-                                y.GroupPermission.PermissionsGadget))),null))
                 .ToListAsync();
 
-            return Ok(userResponses);
+            return Ok(userResponses.AsEnumerable().ToUserResponseIEnumerable(true));
         }
         
         
@@ -95,27 +82,10 @@ namespace TF47_API.Controllers
                 .ThenInclude(y => y.GroupPermission)
                 .FirstOrDefaultAsync(x => x.UserId == user.UserId);
 
-            var userResponse = new UserResponse(userDetail.UserId, userDetail.Banned, userDetail.Email,
-                userDetail.Username, userDetail.AllowEmails, userDetail.CountryCode,
-                userDetail.DiscordId, userDetail.ProfilePicture, userDetail.ProfileUrl, userDetail.SteamId,
-                userDetail.FirstTimeSeen, userDetail.LastTimeSeen,
-                userDetail.WrittenNotes
-                    .Select(y => new NotesResponse(y.NoteId, y.Player.PlayerUid, y.Player.PlayerName, y.Type,
-                        y.Text, y.Writer.UserId, y.Writer.Username, y.TimeCreated, y.TimeLastUpdate)),
-                userDetail.WrittenChangelogs
-                    .Select(y => new ChangelogResponse(y.ChangelogId, y.Title, y.Tags, y.Text, y.TimeReleased)),
-                userDetail.Groups
-                    .Select(y => new GroupResponse(y.GroupId, y.Name, y.Description, y.TextColor,
-                        y.BackgroundColor, y.IsVisible, new GroupPermissionsResponse(y.GroupPermission.GroupId,
-                            y.GroupPermission.PermissionsDiscord, y.GroupPermission.PermissionsTeamspeak,
-                            y.GroupPermission.PermissionsGadget))),
-                userDetail.ApiKeys.Select(y => new ApiKeysResponse(y.ApiKeyId, y.OwnerId, userDetail.Username, y
-                    .ApiKeyValue, y.TimeCreated, y.ValidUntil)));
-            
-            return Ok(userResponse);
+            return Ok(userDetail.ToUserResponse());
         }
         
-        [HttpGet("{userid:guid}/get")]
+        [HttpGet("{userid:guid}/")]
         public async Task<IActionResult> GetUserDetails(Guid userId)
         {
             //var userGuid = Guid.Parse(userId);
@@ -124,7 +94,9 @@ namespace TF47_API.Controllers
                 .ThenInclude(z => z.GroupPermission)
                 .FirstOrDefaultAsync(x => x.UserId == userId);
 
-            return Ok(userDetails);
+            if (userDetails == null) return BadRequest("Requested user details not found");
+            
+            return Ok(userDetails.ToUserResponse());
         }
 
         [HttpGet("link/Discord")]

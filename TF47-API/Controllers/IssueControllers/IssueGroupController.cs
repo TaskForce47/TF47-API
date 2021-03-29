@@ -72,7 +72,12 @@ namespace TF47_API.Controllers.IssueControllers
             var issueGroup = await _database.IssueGroups
                 .AsNoTracking()
                 .Include(x => x.Issues)
+                .ThenInclude(x => x.IssueTags)
+                .Include(x => x.Issues)
+                .ThenInclude(x => x.IssueCreator)
+                .Include(x => x.Issues)
                 .ThenInclude(x => x.IssueItems)
+                .ThenInclude(x => x.Author)
                 .FirstOrDefaultAsync(x => x.IssueGroupId == issueGroupId);
 
             return Ok(issueGroup.ToIssueGroupResponse());
@@ -86,8 +91,14 @@ namespace TF47_API.Controllers.IssueControllers
             {
                 return _database.IssueGroups
                     .AsNoTracking()
+                    .AsNoTracking()
+                    .Include(x => x.Issues)
+                    .ThenInclude(x => x.IssueTags)
+                    .Include(x => x.Issues)
+                    .ThenInclude(x => x.IssueCreator)
                     .Include(x => x.Issues)
                     .ThenInclude(x => x.IssueItems)
+                    .ThenInclude(x => x.Author)
                     .ToIssueGroupResponseIEnumerable();
             });
             return Ok(issueGroups);

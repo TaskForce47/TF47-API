@@ -27,6 +27,7 @@ namespace TF47_API.Controllers
         
         [AllowAnonymous]
         [HttpGet]
+        [ProducesResponseType(typeof(PlayerResponse), 200)]
         public async Task<IActionResult> GetPlayers()
         {
             var response = await _databaseContext.Players
@@ -38,6 +39,7 @@ namespace TF47_API.Controllers
         
         [AllowAnonymous]
         [HttpGet("{playerUid}")]
+        [ProducesResponseType(typeof(PlayerResponse), 200)]
         public async Task<IActionResult> GetPlayer(string playerUid)
         {
             var response = await _databaseContext.Players
@@ -50,6 +52,7 @@ namespace TF47_API.Controllers
         }
         
         [HttpGet("details")]
+        [ProducesResponseType(typeof(PlayerResponse[]), 200)]
         public async Task<IActionResult> GetPlayersDetails()
         {
             var response = _databaseContext.Players

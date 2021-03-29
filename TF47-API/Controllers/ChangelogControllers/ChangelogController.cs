@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
 using TF47_API.Database.Models.Services;
+using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
 using TF47_API.Services;
@@ -37,13 +38,13 @@ namespace TF47_API.Controllers.ChangelogControllers
         public async Task<IActionResult> GetChangelogs()
         {
             var response = await Task.Run (() =>
-                {
-                    return _database.Changelogs
-                        .Where(x => x.ChangelogId > 0)
-                        .OrderByDescending(x => x.ChangelogId)
-                        .Select(x => new ChangelogResponse(x.ChangelogId, x.Title, x.Tags, x.Text, x.TimeReleased));
-                });
-            return Ok(response);
+            {
+                return _database.Changelogs
+                    .AsNoTracking()
+                    .Where(x => x.ChangelogId > 0)
+                    .OrderByDescending(x => x.ChangelogId);
+            });
+            return Ok(response.ToChangelogResponseIEnumerable());
         }
 
         [HttpGet("{changelogId:int}")]
@@ -51,12 +52,12 @@ namespace TF47_API.Controllers.ChangelogControllers
         public async Task<IActionResult> GetChangelog(int changelogId)
         {
             var changelog = await _database.Changelogs
-                .Select(x => new ChangelogResponse(x.ChangelogId, x.Title, x.Tags, x.Text, x.TimeReleased))
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.ChangelogId == changelogId);
             if (changelog == null)
                 return BadRequest("Changelog requested does not exist");
 
-            return Ok(changelog);
+            return Ok(changelog.ToChangelogResponse());
         }
         
         [Authorize]
@@ -84,7 +85,7 @@ namespace TF47_API.Controllers.ChangelogControllers
                 return Problem("Failed to save new changelog to database", null, 500, "Cannot create changelog");
             }
             return CreatedAtAction(nameof(GetChangelog), new {changelogId = changelog.ChangelogId},
-                changelog);
+                changelog.ToChangelogResponse());
         }
         
         [Authorize]
@@ -113,7 +114,7 @@ namespace TF47_API.Controllers.ChangelogControllers
                 return Problem("Failed to update changelog changes to database", null, 500, "Failed to save changes");
             }
 
-            return Ok(changelog);
+            return Ok(changelog.ToChangelogResponse());
         }
         
 

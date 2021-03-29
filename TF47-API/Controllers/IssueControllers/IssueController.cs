@@ -44,12 +44,14 @@ namespace TF47_API.Controllers.IssueControllers
                 .Where(x => request.Tags.Contains(x.IssueTagId))
                 .ToListAsync();
             var user = await _userProviderService.GetDatabaseUser(HttpContext);
-
+            
             if (issueGroup == null)
             {
                 return BadRequest("Issue group does not exist");
             }
-
+        
+            _database.Attach(user);
+            
             var newIssue = new Issue
             {
                 IsClosed = false,
@@ -63,7 +65,7 @@ namespace TF47_API.Controllers.IssueControllers
 
             try
             {
-                await _database.AddAsync(newIssue);
+                await _database.Issues.AddAsync(newIssue);
                 await _database.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
@@ -88,6 +90,10 @@ namespace TF47_API.Controllers.IssueControllers
         {
             var issue = await _database.Issues
                 .AsNoTracking()
+                .Include(x => x.IssueCreator)
+                .Include(x => x.IssueItems)
+                .ThenInclude(x => x.Author)
+                .Include(x => x.IssueTags)
                 .FirstOrDefaultAsync(x => x.IssueId == issueId);
 
             return Ok(issue.ToIssueResponse());
@@ -121,7 +127,7 @@ namespace TF47_API.Controllers.IssueControllers
         
         [Authorize]
         [HttpDelete("{issueId:int}")]
-        public async Task<IActionResult> DeleteIssue(int issueId)
+        public async Task<IActionResult> DeleteIssue(long issueId)
         {
             var issue = await _database.Issues.FindAsync(issueId);
             if (issue == null) return BadRequest("Issue does not exist");

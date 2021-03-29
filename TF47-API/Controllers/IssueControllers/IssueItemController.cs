@@ -39,21 +39,24 @@ namespace TF47_API.Controllers.IssueControllers
         [ProducesResponseType(typeof(IssueItemResponse), 200)]
         public async Task<IActionResult> CreateIssueItem([FromBody] CreateIssueItemRequest request)
         {
-            var issueGroup =  await _database.Issues.FirstOrDefaultAsync(x => x.IssueId == request.IssueId);
+            var issue =  await _database.Issues.FirstOrDefaultAsync(x => x.IssueId == request.IssueId);
             var user = await _userProviderService.GetDatabaseUser(HttpContext);
 
-            if (issueGroup == null) return BadRequest("Issue does not exist");
+            _database.Attach(user);
+            
+            if (issue == null) return BadRequest("Issue does not exist");
 
             var issueItem = new IssueItem
             {
                 Author = user,
+                Issue = issue,
                 IsEdited = false,
                 Message = request.Message,
                 TimeCreated = DateTime.Now,
                 TimeLastEdited = DateTime.Now
             };
 
-            await _database.AddAsync(issueItem);
+            await _database.IssueItems.AddAsync(issueItem);
             await _database.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetIssueItem), new {issueItemId = issueItem.IssueId},
@@ -95,7 +98,7 @@ namespace TF47_API.Controllers.IssueControllers
         
         [Authorize]
         [HttpDelete("{issueItemId:int}")]
-        public async Task<IActionResult> DeleteIssueItem(int issueItemId)
+        public async Task<IActionResult> DeleteIssueItem(long issueItemId)
         {
             var issueItem = await _database.IssueItems.FindAsync(issueItemId);
 
