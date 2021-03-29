@@ -121,6 +121,9 @@ namespace TF47_API.Database
                 entity.HasMany(x => x.WrittenChangelogs)
                     .WithOne(x => x.Author)
                     .HasForeignKey(x => x.AuthorId);
+                entity.HasMany(x => x.MemberOfSquads)
+                    .WithOne(x => x.User)
+                    .HasForeignKey(x => x.UserId);
             });
             builder.Entity<Group>(entity =>
             {
@@ -180,6 +183,9 @@ namespace TF47_API.Database
                 entity.HasOne(x => x.Squad)
                     .WithMany(x => x.SquadMembers)
                     .HasForeignKey(x => x.SquadId);
+                entity.HasOne(x => x.User)
+                    .WithMany(x => x.MemberOfSquads)
+                    .HasForeignKey(x => x.UserId);
             });
         }
     }

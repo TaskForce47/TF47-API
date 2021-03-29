@@ -6,6 +6,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -16,6 +18,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using TF47_API.Database;
+using TF47_API.Database.Models;
+using TF47_API.Database.Models.GameServer;
+using TF47_API.Database.Models.Services;
 using TF47_API.Services;
 using TF47_API.Services.ApiToken;
 using TF47_API.Services.Authentication;
@@ -111,8 +116,74 @@ namespace TF47_API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, DatabaseContext database)
         {
+
+            if (!database.Players.Any(x => x.PlayerUid == "Player1"))
+            {
+                var users = new List<TF47_API.Database.Models.GameServer.Player>();
+                for(int i = 0; i < 1000; i++)
+                {
+                    var random = new Random();
+                    var user = new TF47_API.Database.Models.GameServer.Player
+                    {
+                        PlayerUid = $"Player{i}",
+                        FirstVisit = DateTime.Now - TimeSpan.FromMinutes(random.Next(0, 100000)),
+                        LastVisit = DateTime.Now,
+                        NumberConnections = random.Next(0, 600),
+                        PlayerName = $"Player{i}"
+                    };
+                    users.Add(user);
+                }
+                database.Players.AddRange(users);
+
+                var campaign = new Campaign
+                {
+                    Description = "Test Campaign",
+                    Name = "Test",
+                    TimeCreated = DateTime.Now
+                };
+                database.Campaigns.Add(campaign);
+
+                var mission = new Mission
+                {
+                    Campaign = campaign,
+                    Description = "Test mission",
+                    MissionType = MissionType.Coop,
+                    Name = "Test"
+                };
+                database.Missions.Add(mission);
+
+                var session = new Session
+                {
+                    Mission = mission,
+                    WorldName = "Altis",
+                    SessionCreated = DateTime.Now,
+                };
+                database.Sessions.Add(session);
+                
+                var chats = new List<Chat>();
+                var channels = new string[] {"Direct", "Side", "Group", "Global"};
+                
+                for (int i = 0; i < 1000; i++)
+                {
+                    var random = new Random();
+                    var chat = new Chat
+                    {
+                        Channel = channels[random.Next(0, 3)],
+                        PlayerId = $"Player{random.Next(0, 1000)}",
+                        Session = session,
+                        Text = "ABCE",
+                        TimeSend = DateTime.Now - TimeSpan.FromMinutes(random.Next(0, 10000))
+                    };
+                    chats.Add(chat);
+                }
+                database.Chats.AddRange(chats);
+                database.SaveChanges();
+                //33e78b09-02a7-4007-abab-049ff9ad04be
+            }
+            
+            
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto

@@ -73,6 +73,17 @@ namespace TF47_API.Controllers.SquadXml
 
             return Ok(squadResponse.ToPlayerResponseIEnumerable());
         }
+
+        [HttpGet("{squadId:int}/nonMember")]
+        [ProducesResponseType(typeof(SimpleUserResponse[]), 200)]
+        public async Task<IActionResult> GetUserNotInSquad(long squadId)
+        {
+            var users = await _database.Users
+                .Include(x => x.MemberOfSquads)
+                .Where(x => x.MemberOfSquads.Any(y => y.SquadId != squadId))
+                .ToListAsync();
+            return Ok(users.ToSimpleUserResponseIEnumerable());
+        }
         
         [Authorize]
         [HttpGet("me")]

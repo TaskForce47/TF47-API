@@ -25,5 +25,17 @@ namespace TF47_API.Dto.Mappings
         {
             return data?.Select(x => ToUserResponse(x, hideApiKey));
         }
+
+        public static SimpleUserResponse ToSimpleUserResponse(this User data)
+        {
+            return data == null
+                ? null
+                : new SimpleUserResponse(data.UserId, data.Banned, data.Username, data.SteamId, data.ProfileUrl);
+        }
+
+        public static IEnumerable<SimpleUserResponse> ToSimpleUserResponseIEnumerable(this IEnumerable<User> data)
+        {
+            return data?.Select(x =>  x.ToSimpleUserResponse());
+        }
     }
 }
