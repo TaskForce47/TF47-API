@@ -99,6 +99,22 @@ namespace TF47_API.Controllers.IssueControllers
             return Ok(issue.ToIssueResponse());
         }
         
+        [HttpGet("")]
+        [ProducesResponseType(typeof(IssueResponse[]), 200)]
+        public async Task<IActionResult> GetIssue()
+        {
+            var issue = await _database.Issues
+                .AsNoTracking()
+                .Include(x => x.IssueCreator)
+                .Include(x => x.IssueItems)
+                .ThenInclude(x => x.Author)
+                .Include(x => x.IssueTags)
+                .ToListAsync();
+
+            return Ok(issue.AsEnumerable().ToIssueResponseIEnumerable());
+        }
+        
+        
         [Authorize]
         [HttpPut("{issueId:int}")]
         [ProducesResponseType(typeof(IssueResponse), 200)]
