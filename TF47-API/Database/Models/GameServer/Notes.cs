@@ -14,7 +14,7 @@ namespace TF47_API.Database.Models.GameServer
     public class Note
     {
         [Key]
-        public uint NoteId { get; set; }
+        public long NoteId { get; set; }
 
         [MaxLength(2000)]
         public string Text { get; set; }

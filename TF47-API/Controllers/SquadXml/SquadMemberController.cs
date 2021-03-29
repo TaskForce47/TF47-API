@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
 using TF47_API.Database.Models.Services;
+using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
 using TF47_API.Services;
@@ -74,8 +75,7 @@ namespace TF47_API.Controllers.SquadXml
             await _squadManagerService.WriteSquadXml(squad.SquadId, CancellationToken.None);
             
             return CreatedAtAction(nameof(GetSquadMember), new {squadMemberId = squadMember.SquadMemberId},
-                new SquadMemberResponse(squadMember.SquadMemberId, squadMember.Remark, squadMember.Mail,
-                    squadMember.UserId, squadMember.User.Username, squadMember.User.SteamId));
+                squadMember.ToSquadMemberResponse());
         }
         
         [HttpGet("{squadMemberId:int}")]
@@ -84,14 +84,11 @@ namespace TF47_API.Controllers.SquadXml
         {
             var squadMember = await _database.SquadMembers
                 .Include(x => x.User)
-                .Select(x =>
-                    new SquadMemberResponse(x.SquadMemberId, x.Remark, x.Mail, x.UserId, x.User.Username,
-                        x.User.SteamId))
                 .FirstOrDefaultAsync(x => x.SquadMemberId == squadMemberId);
 
             if (squadMember == null) return BadRequest("Requested squadMember does not exist");
 
-            return Ok(squadMember);
+            return Ok(squadMember.ToSquadMemberResponse());
         }
         
         [HttpPut("{squadMemberId:int}")]
@@ -123,8 +120,7 @@ namespace TF47_API.Controllers.SquadXml
             
             await _squadManagerService.WriteSquadXml(squadMember.SquadId, CancellationToken.None);
 
-            return Ok(new SquadMemberResponse(squadMember.SquadMemberId, squadMember.Remark, squadMember.Mail,
-                squadMember.UserId, squadMember.User.Username, squadMember.User.SteamId));
+            return Ok(squadMember.ToSquadMemberResponse());
         }
         
         [HttpPut("{squadMemberId:int}/me")]
@@ -157,8 +153,7 @@ namespace TF47_API.Controllers.SquadXml
             
             await _squadManagerService.WriteSquadXml(squadMember.SquadId, CancellationToken.None);
 
-            return Ok(new SquadMemberResponse(squadMember.SquadMemberId, squadMember.Remark, squadMember.Mail,
-                squadMember.UserId, squadMember.User.Username, squadMember.User.SteamId));
+            return Ok(squadMember.ToSquadMemberResponse());
         }
         
         [HttpDelete("{squadMemberId:int}")]

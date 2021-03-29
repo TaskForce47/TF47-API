@@ -46,7 +46,37 @@ namespace TF47_API.Controllers
             _discordAuthenticationService = discordAuthenticationService;
             _configuration = configuration;
         }
+        
+        [HttpGet("")]
+        [ProducesResponseType(typeof(UserResponse[]), 200)]
+        public async Task<IActionResult> GetDetailUsers()
+        {
+            var userResponses = await _database.Users
+                .AsNoTracking()
+                .Include(x => x.WrittenNotes)
+                .Include(x => x.WrittenChangelogs)
+                .Include(x => x.Groups)
+                .ThenInclude(y => y.GroupPermission)
+                .Select(x => new UserResponse(x.UserId, x.Banned, x.Email,
+                    x.Username, x.AllowEmails, x.CountryCode,
+                    x.DiscordId, x.ProfilePicture, x.ProfileUrl, x.SteamId,
+                    x.FirstTimeSeen, x.LastTimeSeen,
+                    x.WrittenNotes
+                        .Select(y => new NotesResponse(y.NoteId, y.Player.PlayerUid, y.Player.PlayerName, y.Type,
+                            y.Text, y.Writer.UserId, y.Writer.Username, y.TimeCreated, y.TimeLastUpdate)),
+                    x.WrittenChangelogs
+                        .Select(y => new ChangelogResponse(y.ChangelogId, y.Title, y.Tags, y.Text, y.TimeReleased)),
+                    x.Groups
+                        .Select(y => new GroupResponse(y.GroupId, y.Name, y.Description, y.TextColor,
+                            y.BackgroundColor, y.IsVisible, new GroupPermissionsResponse(y.GroupPermission.GroupId,
+                                y.GroupPermission.PermissionsDiscord, y.GroupPermission.PermissionsTeamspeak,
+                                y.GroupPermission.PermissionsGadget))),null))
+                .ToListAsync();
 
+            return Ok(userResponses);
+        }
+        
+        
         [HttpGet("me")]
         [ProducesResponseType(typeof(UserResponse), 200)]
         public async Task<IActionResult> GetUserDetail()

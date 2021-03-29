@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using TF47_API.Database;
 using TF47_API.Database.Models.Services;
+using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
 using TF47_API.Services;
@@ -52,13 +53,9 @@ namespace TF47_API.Controllers.SquadXml
                 .AsNoTracking()
                 .Include(x => x.SquadMembers)
                 .ThenInclude(x => x.User)
-                .Where(x => x.SquadId == squadId)
-                .Select(x => new SquadResponse(x.SquadId, x.Title, x.Name, x.Nick, x.Website, x.Mail, x.XmlUrl, x.PictureUrl,
-                    x.SquadMembers.Select(y => new SquadMemberResponse(y.SquadMemberId, y.Remark, y.Mail, y.UserId,
-                        y.User.Username, y.User.SteamId))))
-                .FirstOrDefaultAsync();
+                .SingleOrDefaultAsync(x => x.SquadId == squadId);
 
-            return Ok(squadResponse);
+            return Ok(squadResponse.ToSquadResponse());
         }
         
         [HttpGet]
@@ -71,12 +68,10 @@ namespace TF47_API.Controllers.SquadXml
                     .AsNoTracking()
                     .Include(x => x.SquadMembers)
                     .ThenInclude(x => x.User)
-                    .Select(x => new SquadResponse(x.SquadId, x.Title,x.Name, x.Nick, x.Website, x.Mail, x.XmlUrl,x.PictureUrl,
-                        x.SquadMembers.Select(y => new SquadMemberResponse(y.SquadMemberId, y.Remark, y.Mail, y.UserId,
-                            y.User.Username, y.User.SteamId))));
+                    .AsEnumerable();
             });
 
-            return Ok(squadResponse);
+            return Ok(squadResponse.ToPlayerResponseIEnumerable());
         }
         
         [Authorize]
@@ -91,11 +86,9 @@ namespace TF47_API.Controllers.SquadXml
                 .Include(x => x.SquadMembers)
                 .ThenInclude(x => x.User)
                 .Where(x => x.SquadMembers.Any(z => z.UserId == user.UserId))
-                    .Select(x => new SquadResponse(x.SquadId, x.Title,x.Name, x.Nick, x.Website, x.Mail, x.XmlUrl,x.PictureUrl,
-                        x.SquadMembers.Select(y => new SquadMemberResponse(y.SquadMemberId, y.Remark, y.Mail, y.UserId,
-                            y.User.Username, y.User.SteamId))));
-            
-            return Ok(squads);
+                .AsEnumerable();
+
+            return Ok(squads.ToPlayerResponseIEnumerable());
         }
         
         [HttpPost]
@@ -132,8 +125,7 @@ namespace TF47_API.Controllers.SquadXml
             }
 
             return CreatedAtAction(nameof(GetSquad), new { SquadId = squad.SquadId },
-                new SquadResponse(squad.SquadId, squad.Title, squad.Name, squad.Nick, squad.Website, squad.Mail, squad.XmlUrl,squad.PictureUrl,
-                    null));
+                squad.ToSquadResponse());
         }
         
         [HttpPut("{squadId:int}")]

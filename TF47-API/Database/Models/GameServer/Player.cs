@@ -19,6 +19,9 @@ namespace TF47_API.Database.Models.GameServer
 
         public DateTime? FirstVisit { get; set; } = null;
         public DateTime? LastVisit { get; set; } = null;
+
+        public int NumberConnections { get; set; } = 0;
+        
         public Playtime PlayerPlaytime { get; set; } = null;
 
         public ICollection<Kill> PlayerKills { get; set; }

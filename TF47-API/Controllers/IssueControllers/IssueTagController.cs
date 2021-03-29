@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
 using TF47_API.Database.Models.Services;
+using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
 
@@ -58,7 +59,7 @@ namespace TF47_API.Controllers.IssueControllers
             }
 
             return CreatedAtAction(nameof(GetIssueTag), new {issueTagId = issueTag.IssueTagId}, 
-                new IssueTagResponse(issueTag.IssueTagId, issueTag.TagName, issueTag.Color));
+                issueTag.ToIssueTagResponse());
         }
         
         [Authorize]
@@ -86,7 +87,7 @@ namespace TF47_API.Controllers.IssueControllers
                     null, 500, "Failed to update");
             }
 
-            return Ok(new IssueTagResponse(issueTag.IssueTagId, issueTag.TagName, issueTag.Color));
+            return Ok(issueTag.ToIssueTagResponse());
         }
 
         [HttpGet("{issueTagId:int}")]
@@ -97,19 +98,15 @@ namespace TF47_API.Controllers.IssueControllers
 
             if (issueTag == null) return Ok();
 
-            return Ok(new IssueTagResponse(issueTag.IssueTagId, issueTag.TagName, issueTag.Color));
+            return Ok(issueTag.ToIssueTagResponse());
         }
 
         [HttpGet("")]
         public async Task<IActionResult> GetIssueTags()
         {
-            return await Task.Run(() =>
-            {
-                var issueTags = _database.IssueTags
-                    .Where(x => x.IssueTagId > 0)
-                    .Select(x => new IssueTagResponse(x.IssueTagId, x.TagName, x.Color));
-                return Ok(issueTags);
-            });
+            var issueTags = await _database.IssueTags
+                .ToListAsync();
+            return Ok(issueTags.AsEnumerable().ToIssueTagResponseIEnumerable());
         }
         
         [Authorize]

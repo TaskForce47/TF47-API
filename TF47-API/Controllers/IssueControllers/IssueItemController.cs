@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
 using TF47_API.Database.Models.Services;
+using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
 using TF47_API.Services;
@@ -56,8 +57,7 @@ namespace TF47_API.Controllers.IssueControllers
             await _database.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetIssueItem), new {issueItemId = issueItem.IssueId},
-                new IssueItemResponse(issueItem.IssueId, issueItem.Author.UserId, issueItem.Author.Username,
-                    issueItem.Message, issueItem.TimeCreated, issueItem.TimeLastEdited));
+                issueItem.ToIssueItemResponse());
         }
 
         [HttpGet("{issueItemId:int}")]
@@ -66,10 +66,8 @@ namespace TF47_API.Controllers.IssueControllers
         {
             var issueItem = await _database.IssueItems
                 .AsNoTracking()
-                .Select(x => new IssueItemResponse(x.IssueItemId, x.Author.UserId, x.Author.Username, x.Message,
-                    x.TimeCreated, x.TimeLastEdited))
                 .FirstOrDefaultAsync(x => x.IssueItemId == issueItemId);
-            return Ok(issueItem);
+            return Ok(issueItem.ToIssueItemResponse());
         }
         
         [Authorize]
@@ -92,8 +90,7 @@ namespace TF47_API.Controllers.IssueControllers
 
             await _database.SaveChangesAsync();
 
-            return Ok(new IssueItemResponse(issueItem.IssueId, issueItem.Author.UserId, issueItem.Author.Username,
-                issueItem.Message, issueItem.TimeCreated, issueItem.TimeLastEdited));
+            return Ok(issueItem.ToIssueItemResponse());
         }
         
         [Authorize]
@@ -106,7 +103,7 @@ namespace TF47_API.Controllers.IssueControllers
             
             try
             {
-                _database.Remove(issueItemId);
+                _database.Remove(issueItem);
                 await _database.SaveChangesAsync();
             }
             catch (Exception ex)

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
 using TF47_API.Database.Models.Services;
+using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
 using TF47_API.Services;
@@ -78,10 +79,7 @@ namespace TF47_API.Controllers.IssueControllers
 
 
             }
-            return CreatedAtAction(nameof(GetIssue), new {issueId = newIssue.IssueId},
-                new IssueResponse(newIssue.IssueId, newIssue.Title, newIssue.IsClosed, newIssue.IssueCreator.UserId,
-                    newIssue.IssueCreator.Username, newIssue.TimeCreated, newIssue.TimeLastUpdated, null,
-                    issueTags.Select(x => new IssueTagResponse(x.IssueTagId, x.TagName, x.Color))));
+            return CreatedAtAction(nameof(GetIssue), new {issueId = newIssue.IssueId}, newIssue.ToIssueResponse());
         }
 
         [HttpGet("{issueId:int}")]
@@ -90,14 +88,9 @@ namespace TF47_API.Controllers.IssueControllers
         {
             var issue = await _database.Issues
                 .AsNoTracking()
-                .Select(x => new IssueResponse(x.IssueId, x.Title, x.IsClosed, x.IssueCreator.UserId,
-                    x.IssueCreator.Username, x.TimeCreated, x.TimeLastUpdated,
-                    x.IssueItems.Select(y => new IssueItemResponse(y.IssueItemId, y.Author.UserId, y
-                        .Author.Username, y.Message, y.TimeCreated, y.TimeLastEdited)),
-                    x.IssueTags.Select(y => new IssueTagResponse(y.IssueTagId, y.TagName, y.Color))))
                 .FirstOrDefaultAsync(x => x.IssueId == issueId);
 
-            return Ok(issue);
+            return Ok(issue.ToIssueResponse());
         }
         
         [Authorize]
@@ -123,9 +116,7 @@ namespace TF47_API.Controllers.IssueControllers
             //_database.Update(issue);
             await _database.SaveChangesAsync();
 
-            return Ok(new IssueResponse(issue.IssueId, issue.Title, issue.IsClosed, issue.IssueCreator.UserId,
-                issue.IssueCreator.Username, issue.TimeCreated, 
-                issue.TimeLastUpdated, null, null));
+            return Ok(issue.ToIssueResponse());
         }
         
         [Authorize]

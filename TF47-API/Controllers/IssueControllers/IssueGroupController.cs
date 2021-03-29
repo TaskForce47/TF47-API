@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
 using TF47_API.Database.Models.Services;
+using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
 using TF47_API.Services;
@@ -61,8 +62,7 @@ namespace TF47_API.Controllers.IssueControllers
             }
 
             return CreatedAtAction(nameof(GetIssueGroup), new {issueGroupId = newIssueGroup.IssueGroupId},
-                new IssueGroupResponse(newIssueGroup.IssueGroupId, newIssueGroup.GroupName,
-                    newIssueGroup.GroupDescription, newIssueGroup.TimeGroupCreated, null));
+                newIssueGroup.ToIssueGroupResponse());
         }
 
         [HttpGet("{issueGroupId}/")]
@@ -73,37 +73,23 @@ namespace TF47_API.Controllers.IssueControllers
                 .AsNoTracking()
                 .Include(x => x.Issues)
                 .ThenInclude(x => x.IssueItems)
-                .Select(x =>
-                    new IssueGroupResponse(x.IssueGroupId, x.GroupName, x.GroupDescription, x.TimeGroupCreated, 
-                        x.Issues.Select(y => new IssueResponse(y.IssueId, y.Title, y.IsClosed, 
-                            y.IssueCreator.UserId, y.IssueCreator.Username, y.TimeCreated, y.TimeLastUpdated, 
-                            y.IssueItems
-                                .Select(z => new IssueItemResponse(z.IssueItemId, z.Author.UserId,
-                                z.Author.Username, z.Message, z.TimeCreated, z.TimeLastEdited)), 
-                            y.IssueTags
-                                .Select(z => new IssueTagResponse(z.IssueTagId, z.TagName, z.Color))))))
                 .FirstOrDefaultAsync(x => x.IssueGroupId == issueGroupId);
-            return Ok(issueGroup);
+
+            return Ok(issueGroup.ToIssueGroupResponse());
         }
 
         [HttpGet("")]
         [ProducesResponseType(typeof(IssueGroupResponse[]), 200)]
         public async Task<IActionResult> GetIssueGroups()
         {
-            var issueGroups = await _database.IssueGroups
-                .AsNoTracking()
-                .Include(x => x.Issues)
-                .ThenInclude(x => x.IssueItems)
-                .Select(x =>
-                    new IssueGroupResponse(x.IssueGroupId, x.GroupName, x.GroupDescription, x.TimeGroupCreated, 
-                        x.Issues.Select(y => new IssueResponse(y.IssueId, y.Title, y.IsClosed, 
-                            y.IssueCreator.UserId, y.IssueCreator.Username, y.TimeCreated, y.TimeLastUpdated, 
-                            y.IssueItems
-                                .Select(z => new IssueItemResponse(z.IssueItemId, z.Author.UserId,
-                                    z.Author.Username, z.Message, z.TimeCreated, z.TimeLastEdited)), 
-                            y.IssueTags
-                                .Select(z => new IssueTagResponse(z.IssueTagId, z.TagName, z.Color))))))
-                .ToArrayAsync();
+            var issueGroups = await Task.Run(() =>
+            {
+                return _database.IssueGroups
+                    .AsNoTracking()
+                    .Include(x => x.Issues)
+                    .ThenInclude(x => x.IssueItems)
+                    .ToIssueGroupResponseIEnumerable();
+            });
             return Ok(issueGroups);
         }
     }
