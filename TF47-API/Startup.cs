@@ -57,6 +57,7 @@ namespace TF47_API
                             "https://gadget.taskforce47.com:8080");
                         builder.AllowCredentials();
                         builder.AllowAnyMethod();
+                        builder.AllowAnyHeader();
                     });
             });
             services.AddControllers();
