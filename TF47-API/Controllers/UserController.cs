@@ -52,15 +52,33 @@ namespace TF47_API.Controllers
         [ProducesResponseType(typeof(UserResponse[]), 200)]
         public async Task<IActionResult> GetDetailUsers()
         {
-            var userResponses = await _database.Users
+            var userResponses =  _database.Users
                 .AsNoTracking()
-                .Include(x => x.WrittenNotes)
-                .Include(x => x.WrittenChangelogs)
                 .Include(x => x.Groups)
-                .ThenInclude(y => y.GroupPermission)
+                .ThenInclude(y => y.GroupPermission);
+
+            var notesResponse = await _database.Notes
+                .AsNoTracking()
+                .Include(x => x.Player)
+                .Include(x => x.Writer)
+                .Where(x => userResponses.Any(y => y.UserId == x.WriterId))
                 .ToListAsync();
 
-            return Ok(userResponses.AsEnumerable().ToUserResponseIEnumerable(true));
+            var changelogResponse = await _database.Changelogs
+                .AsNoTracking()
+                .Include(x => x.Author)
+                .Where(x => userResponses.Any(y => y.UserId == x.AuthorId))
+                .ToListAsync();
+
+            var userList = userResponses.ToList();
+            
+            foreach (var user in userList)
+            {
+                user.WrittenNotes = notesResponse.Where(x => x.WriterId == user.UserId).ToList();
+                user.WrittenChangelogs = changelogResponse.Where(x => x.AuthorId == user.UserId).ToList();
+            }
+            
+            return Ok(userList.ToUserResponseIEnumerable(true));
         }
         
         
@@ -72,17 +90,39 @@ namespace TF47_API.Controllers
 
             if (user == null)
                 return BadRequest("You must be logged in to query this endpoint");
-
-            var userDetail = await _database.Users
+            
+            var notesResponse = await _database.Notes
                 .AsNoTracking()
-                .Include(x => x.ApiKeys)
-                .Include(x => x.WrittenNotes)
-                .Include(x => x.WrittenChangelogs)
-                .Include(x => x.Groups)
-                .ThenInclude(y => y.GroupPermission)
-                .FirstOrDefaultAsync(x => x.UserId == user.UserId);
+                .Include(x => x.Player)
+                .Include(x => x.Writer)
+                .Where(x => x.WriterId == user.UserId)
+                .ToListAsync();
+            var apiKeyResponse = await _database.ApiKeys
+                .AsNoTracking()
+                .Include(x => x.Owner)
+                .Where(x => x.OwnerId == user.UserId)
+                .ToListAsync();
 
-            return Ok(userDetail.ToUserResponse());
+            var changelogResponse = await _database.Changelogs
+                .AsNoTracking()
+                .Include(x => x.Author)
+                .Where(x => x.AuthorId == user.UserId)
+                .ToListAsync();
+
+            var userGroups = await _database.Groups
+                .AsNoTracking()
+                .Include(x => x.GroupPermission)
+                .Include(x => x.Users)
+                .Where(x => x.Users.Any(x => x.UserId == user.UserId))
+                .ToListAsync();
+
+
+            user.WrittenNotes = notesResponse;
+            user.WrittenChangelogs = changelogResponse;
+            user.ApiKeys = apiKeyResponse;
+            user.Groups = userGroups;
+            
+            return Ok(user.ToUserResponse());
         }
         
         [HttpGet("{userid:guid}/")]
