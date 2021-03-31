@@ -2,5 +2,5 @@
 
 namespace TF47_API.Dto.RequestModels
 {
-    public record CreateMissionRequest(string MissionName, MissionType MissionType, long CampaignId);
+    public record CreateMissionRequest(string Name, string Description, MissionType MissionType, long CampaignId);
 }

@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
-using TF47_API.Database.Models;
 using TF47_API.Database.Models.GameServer;
 using TF47_API.Dto;
+using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.Response;
 
@@ -17,7 +15,7 @@ namespace TF47_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MissionController : ControllerBase
+    public class MissionController : Controller
     {
         private readonly ILogger<MissionController> _logger;
         private readonly DatabaseContext _database;
@@ -28,107 +26,127 @@ namespace TF47_API.Controllers
             _database = database;
         }
 
-        [HttpGet("getAll")]
-        public async Task<IActionResult> GetMissions()
-        {
-            return await Task.Run(() =>
-            {
-                return Ok(
-                    _database.Missions
-                        .Include(x => x.Campaign)
-                        .Select(x => new MissionResponse
-                        {
-                            MissionId = x.MissionId,
-                            CampaignId = x.Campaign.CampaignId,
-                            CampaignName = x.Campaign.Name,
-                            MissionName = x.Name,
-                            MissionType = x.MissionType
-                        }));
-            });
-        }
-
-        [HttpGet("{id}/get")]
-        public async Task<IActionResult> GetMission(uint id)
+        [HttpGet("{missionId}")]
+        [ProducesResponseType(typeof(MissionResponse), 200)]
+        public async Task<IActionResult> GetMission(long missionId)
         {
             var mission = await _database.Missions
+                .AsNoTracking()
                 .Include(x => x.Campaign)
-                .FirstOrDefaultAsync(x => x.MissionId == id);
+                .FirstOrDefaultAsync(x => x.MissionId == missionId);
 
-            if (mission == null) return NotFound("Mission does not exist");
-            
-            return Ok(new MissionResponse
-            {
-                MissionId = mission.MissionId,
-                CampaignId = mission.Campaign.CampaignId,
-                CampaignName = mission.Campaign.Name,
-                MissionName = mission.Name,
-                MissionType = mission.MissionType
-            });
+            if (mission == null) return BadRequest("Mission id provided does not exist");
+
+            return Ok(mission.ToMissionResponse());
         }
 
-        [HttpPut("create")]
+        [HttpGet]
+        [ProducesResponseType(typeof(MissionResponse[]), 200)]
+        public async Task<IActionResult> GetMissions()
+        {
+            var missions = await _database.Missions
+                .AsNoTracking()
+                .Include(x => x.Campaign)
+                .ToListAsync();
+
+            return Ok(missions.ToMissionResponsesIEnumerable());
+        }
+        
+        [Authorize]
+        [HttpPost]
+        [ProducesResponseType(typeof(MissionResponse), 201)]
         public async Task<IActionResult> CreateMission([FromBody] CreateMissionRequest request)
         {
             var campaign = await _database.Campaigns.FirstOrDefaultAsync(x => x.CampaignId == request.CampaignId);
-            if (campaign == null) return NotFound("Campaign does not exist");
 
-            var mission = new Mission
+            if (campaign == null) return BadRequest("Campaign provided does not exist");
+
+            var newMission = new Mission
             {
+                Name = request.Name,
+                Description = request.Description,
                 Campaign = campaign,
-                MissionType = request.MissionType,
-                Name = request.MissionName
+                CampaignId = campaign.CampaignId,
+                MissionType = request.MissionType
             };
 
-            await _database.Missions.AddAsync(mission);
-            await _database.SaveChangesAsync();
-            return Ok(mission);
-        }
-
-        [HttpDelete("{id}/delete")]
-        public async Task<IActionResult> DeleteMission(uint id)
-        {
-            var mission = await _database.Missions.FirstOrDefaultAsync(x => x.MissionId == id);
-            if (mission == null) return NotFound("Mission does not exist");
-
-            _database.Remove(mission);
-            await _database.SaveChangesAsync();
-            return Ok();
-        }
-
-        [HttpPut("{id}/update")]
-        public async Task<IActionResult> UpdateMission(uint id, [FromBody] UpdateMissionRequest request)
-        {
-            var mission = await _database.Missions.FirstOrDefaultAsync(x => x.MissionId == id);
-            if (mission == null) return NotFound("Mission does not exist");
-
-            if (request.CampaignId != null)
+            try
             {
-                var campaign = await _database.Campaigns.FirstOrDefaultAsync(x => x.CampaignId == request.CampaignId);
-                if (campaign == null) return NotFound("Campaign does not exist");
-
-                mission.Campaign = campaign;
+                await _database.AddAsync(newMission);
+                await _database.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed to insert new mission: {message}", ex.Message);
+                return Problem("Failed to insert new mission object into database", null, 500,
+                    "Failed to create mission");
             }
 
-            if (request.MissionType != null)
-                mission.MissionType = request.MissionType.Value;
-            if (! string.IsNullOrEmpty(request.MissionName))
-                mission.Name = request.MissionName;
-
-            await _database.SaveChangesAsync();
-            return Ok(mission);
+            return CreatedAtAction(nameof(GetMission), new {MissionId = newMission.MissionId},
+                newMission.ToMissionResponse());
         }
 
-        [HttpGet("{id}/getSessions")]
-        public async Task<IActionResult> GetSessions(uint id)
+        [Authorize]
+        [HttpPut("{missionId:int}")]
+        [ProducesResponseType(typeof(MissionResponse), 200)]
+        public async Task<IActionResult> UpdateMission(long missionId, [FromBody] UpdateMissionRequest request)
         {
             var mission = await _database.Missions
-                .Include(x => x.Sessions)
-                .FirstOrDefaultAsync(x => x.MissionId == id);
-            if (mission == null) return NotFound("Mission does not exist");
+                .FirstOrDefaultAsync(x => x.MissionId == missionId);
 
-            return Ok(mission.Sessions);
+            if (mission == null) return BadRequest("MissionId provided does not exist");
+
+            if (string.IsNullOrWhiteSpace(request.Name))
+                mission.Name = request.Name;
+            if (string.IsNullOrWhiteSpace(request.Description))
+                mission.Description = request.Description;
+            if (request.MissionType.HasValue)
+                mission.MissionType = request.MissionType.Value;
+            if (request.CampaignId.HasValue && mission.CampaignId != request.CampaignId)
+            {
+                var campaign = await _database.Campaigns.FirstOrDefaultAsync(x => x.CampaignId == request.CampaignId);
+                if (campaign == null) return BadRequest("Campaign provided does not exist");
+
+                mission.Campaign = campaign;
+                mission.CampaignId = campaign.CampaignId;
+            }
+
+            try
+            {
+                await _database.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed to update mission {missionId}: {message}", missionId, ex.Message);
+                return Problem("Failed to update mission. Maybe it has been removed or updated by another user.", null,
+                    500, "Failed to update mission");
+            }
+
+            return Ok(mission.ToMissionResponse());
         }
         
-        
+        [Authorize]
+        [HttpDelete("{missionId:int}")]
+        [ProducesResponseType(null, 200)]
+        public async Task<IActionResult> DeleteMission(long missionId)
+        {
+            var mission = await _database.Missions.FirstOrDefaultAsync(x => x.MissionId == missionId);
+
+            if (mission == null) return BadRequest("Mission provided does not exist");
+
+            try
+            {
+                _database.Missions.Remove(mission);
+                await _database.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed to remove mission {missionId}: {message}", missionId, ex.Message);
+                return Problem("Failed to remove mission. Maybe it has been removed by someone else.", null, 500,
+                    "Failed to remove mission");
+            }
+
+            return Ok();
+        }
     }
 }

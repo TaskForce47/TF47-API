@@ -15,7 +15,7 @@ namespace TF47_API.SignalR
         {
 
         }
-
+        
         public async Task SendHello()
         {
             await Clients.Caller.SendAsync("hello", "This comes from the server", CancellationToken.None);
