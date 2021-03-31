@@ -5,36 +5,47 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace TF47_API.SignalR
 {
     public class ShoutboxHub : Hub
     {
         private readonly IServiceProvider _serviceProvider;
-        private List<object> _chatHistory;
-        private SemaphoreSlim _lock;
+        private readonly ILogger<ShoutboxHub> _logger;
+        private readonly List<object> _chatHistory;
+        private readonly SemaphoreSlim _lock;
 
-        public ShoutboxHub(IServiceProvider serviceProvider)
+        public ShoutboxHub(IServiceProvider serviceProvider, ILogger<ShoutboxHub> logger)
         {
             _serviceProvider = serviceProvider;
+            _logger = logger;
             _chatHistory = new List<object>();
             _lock = new SemaphoreSlim(1);
+            _logger.LogInformation("Shoutbox SignalR Hub started!");
         }
 
-        public async Task GetHistory(CancellationToken cancellationToken)
+        public override Task OnConnectedAsync()
         {
-            await _lock.WaitAsync(cancellationToken);
-            await Clients.Caller.SendAsync("history", _chatHistory, cancellationToken);
+            _logger.LogInformation($"{Context.ConnectionId} connected");
+            return base.OnConnectedAsync();
+        }
+
+        public async Task GetHistory()
+        {
+            await _lock.WaitAsync();
+            _logger.LogInformation($"{Context.ConnectionId} requested chat history");
+            await Clients.Caller.SendAsync("history", _chatHistory);
             _lock.Release();
         }
 
-        public async Task SendMessage(string message, CancellationToken cancellationToken)
+        public async Task SendMessage(string message)
         {
             var user = Context.User?.FindFirst(ClaimTypes.Name);
 
             if (user == null)
             {
-                await Clients.Caller.SendAsync("error", "not authorized", cancellationToken: cancellationToken);
+                await Clients.Caller.SendAsync("error", "not authorized");
                 return;
             }
 
@@ -44,11 +55,13 @@ namespace TF47_API.SignalR
                 Message = message
             };
             
-            await _lock.WaitAsync(cancellationToken);
+            _logger.LogInformation($"User {newMessage.User} send message {newMessage.Message}");
+            
+            await _lock.WaitAsync();
             _chatHistory.Add(newMessage);
             _lock.Release();
 
-            await Clients.All.SendAsync("message", newMessage, cancellationToken: cancellationToken);
+            await Clients.All.SendAsync("message", newMessage);
         }
     }
 }
