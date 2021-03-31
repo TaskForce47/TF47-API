@@ -153,6 +153,7 @@ namespace TF47_API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<TestHub>("/hub");
+                endpoints.MapHub<ShoutboxHub>("/shoutbox");
                 endpoints.MapControllers();
             });
         }
