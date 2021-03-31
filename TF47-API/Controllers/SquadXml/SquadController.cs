@@ -81,7 +81,10 @@ namespace TF47_API.Controllers.SquadXml
             var users = await _database.Users
                 .AsNoTracking()
                 .Include(x => x.MemberOfSquads)
-                .Where(x => x.MemberOfSquads.Any(y => y.SquadId != squadId))
+                .Where(x => !x.MemberOfSquads
+                    .Select(y => y.SquadId)
+                    .Contains(squadId))
+                .Distinct()
                 .ToListAsync();
             return Ok(users.ToSimpleUserResponseIEnumerable());
         }
