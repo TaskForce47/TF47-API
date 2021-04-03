@@ -2,8 +2,5 @@
 
 namespace TF47_API.Dto
 {
-    public class UpdateSessionRequest : CreateSessionRequest
-    {
-        public DateTime? SessionEnded { get; set; }
-    }
+    public record UpdateSessionRequest(long? MissionId, string WorldName, DateTime? TimeCreated, DateTime? TimeEnded);
 }

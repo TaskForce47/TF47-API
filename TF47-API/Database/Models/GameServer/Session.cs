@@ -20,8 +20,8 @@ namespace TF47_API.Database.Models.GameServer
         public string WorldName { get; set; }
 
         public MissionType MissionType { get; set; }
-        public DateTime SessionCreated { get; set; }
-        public DateTime? SessionEnded { get; set; } = null;
+        public DateTime TimeCreated { get; set; }
+        public DateTime? TimeEnded { get; set; } = null;
 
         public ICollection<Kill> Kills { get; set; }
         public ICollection<Playtime> PlayTimes { get; set; }
