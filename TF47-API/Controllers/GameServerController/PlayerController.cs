@@ -8,6 +8,7 @@ using TF47_API.Database.Models.GameServer;
 using TF47_API.Dto;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
+using TF47_API.Dto.ResponseModels;
 
 namespace TF47_API.Controllers.GameServerController
 {
@@ -27,6 +28,7 @@ namespace TF47_API.Controllers.GameServerController
         }
 
         [HttpGet("{playerUid}")]
+        [ProducesResponseType(typeof(PlayerResponse), 200)]
         public async Task<IActionResult> GetPlayer(string playerUid)
         {
             var player = await _database.Players
@@ -37,17 +39,46 @@ namespace TF47_API.Controllers.GameServerController
 
             return Ok(player.ToPlayerResponse());
         }
+        
+        [HttpGet("{playerUid}/details")]
+        [ProducesResponseType(typeof(PlayerResponseWithDetails), 200)]
+        public async Task<IActionResult> GetPlayerWithDetails(string playerUid)
+        {
+            var response = await _database.Players
+                .AsNoTracking()
+                .Include(x => x.PlayerChats)
+                .Include(x => x.PlayerNotes)
+                .FirstOrDefaultAsync(x => x.PlayerUid == playerUid);
+
+            return Ok(response.ToPlayerResponseWithDetails());
+        }
+        
 
         [HttpGet]
+        [ProducesResponseType(typeof(PlayerResponse[]), 200)]
         public async Task<IActionResult> GetPlayers()
         {
             var players = await _database.Players
                 .AsNoTracking()
                 .ToListAsync();
-            return Ok(players);
+            return Ok(players.ToPlayerResponseIEnumerable());
+        }
+        
+        [HttpGet("details")]
+        [ProducesResponseType(typeof(PlayerResponseWithDetails[]), 200)]
+        public async Task<IActionResult> GetPlayersDetails()
+        {
+            var response = await _database.Players
+                .AsNoTracking()
+                .Include(x => x.PlayerChats)
+                .Include(x => x.PlayerNotes)
+                .ToListAsync();
+
+            return Ok(response.ToPlayerResponseWithDetailsIEnumerable());
         }
 
         [HttpPatch("{playerUid}")]
+        [ProducesResponseType(typeof(PlayerResponse), 200)]
         public async Task<IActionResult> UpdatePlayerName(string playerUid, [FromBody] UpdatePlayerNameRequest request)
         {
             var player = await _database.Players.FirstOrDefaultAsync(x => x.PlayerUid == playerUid);
@@ -69,6 +100,7 @@ namespace TF47_API.Controllers.GameServerController
         }
         
         [HttpPost]
+        [ProducesResponseType(typeof(PlayerResponse), 201)]
         public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerRequest request)
         {
             var player = await _database.Players.FirstOrDefaultAsync(x => x.PlayerUid == request.PlayerUid);

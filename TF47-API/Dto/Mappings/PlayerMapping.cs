@@ -8,12 +8,19 @@ namespace TF47_API.Dto.Mappings
 {
     public static class PlayerMapping
     {
-        public static PlayerResponse ToPlayerResponse(this Player player)
+        public static PlayerResponse ToPlayerResponse(this Player data)
         {
-            return player == null
+            return data == null
                 ? null
-                : new PlayerResponse(player.PlayerUid, player.PlayerName, player.TimeFirstVisit, player.TimeLastVisit,
-                    player.NumberConnections);
+                : new PlayerResponse(data.PlayerUid, data.PlayerName, data.TimeFirstVisit, data.TimeLastVisit,
+                    data.NumberConnections);
+        }
+
+        public static PlayerResponseWithDetails ToPlayerResponseWithDetails(this Player data)
+        {
+            if (data == null) return null;
+            return  new PlayerResponseWithDetails(data.PlayerUid, data.PlayerName, data.TimeFirstVisit, data.TimeLastVisit, data.NumberConnections,
+                data.PlayerChats.ToChatResponseIEnumerable(), data.PlayerNotes.ToNoteResponseIEnumerable());
         }
         
         public static IEnumerable<PlayerResponse> ToPlayerResponseIEnumerable(this IEnumerable<Player> data)
@@ -24,9 +31,7 @@ namespace TF47_API.Dto.Mappings
         public static IEnumerable<PlayerResponseWithDetails> ToPlayerResponseWithDetailsIEnumerable(
             this IEnumerable<Player> data)
         {
-            return data?.Select(x =>
-                new PlayerResponseWithDetails(x.PlayerUid, x.PlayerName, x.TimeFirstVisit, x.TimeLastVisit, x.NumberConnections,
-                    x.PlayerChats.ToChatResponseIEnumerable(), x.PlayerNotes.ToNoteResponseIEnumerable()));
+            return data?.Select(x => x.ToPlayerResponseWithDetails());
         }
     }
 }
