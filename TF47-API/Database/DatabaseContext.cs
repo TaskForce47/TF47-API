@@ -66,7 +66,7 @@ namespace TF47_API.Database
                 entity.HasMany(x => x.PlayerDeaths).WithOne(x => x.Victim).HasForeignKey(x => x.VictimId);
                 entity.HasMany(x => x.PlayerChats).WithOne(x => x.Player).HasForeignKey(x => x.ChatId);
                 entity.HasMany(x => x.PlayerNotes).WithOne(x => x.Player).HasForeignKey(x => x.PlayerId);
-                entity.HasOne(x => x.PlayerPlaytime).WithOne(x => x.Player);
+                entity.HasMany(x => x.PlayerPlaytime).WithOne(x => x.Player).HasForeignKey(x => x.PlayerId);
             });
             builder.Entity<Session>(entity =>
             {
@@ -95,7 +95,7 @@ namespace TF47_API.Database
             });
             builder.Entity<Playtime>(entity =>
             {
-                entity.HasOne(x => x.Player).WithOne(x => x.PlayerPlaytime);
+                entity.HasOne(x => x.Player).WithMany(x => x.PlayerPlaytime).HasForeignKey(x => x.PlayerId);
                 entity.HasOne(x => x.Session).WithMany(x => x.PlayTimes).HasForeignKey(x => x.SessionId);
             });
             builder.Entity<Whitelist>(entity => { entity.Property(x => x.WhitelistId).ValueGeneratedOnAdd(); });
