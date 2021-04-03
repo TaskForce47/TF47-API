@@ -91,10 +91,9 @@ namespace TF47_API.Controllers
             var apiKeys = await _database.ApiKeys
                 .AsNoTracking()
                 .Include(x => x.Owner)
-                .Where(x => x.OwnerId == user.UserId)
                 .ToListAsync();
 
-            return Ok(apiKeys.ToApiKeyResponseIEnumerable(false));
+            return Ok(apiKeys.ToApiKeyResponseIEnumerable(true));
         }
         
         [HttpGet("{userId:guid}/me")]
