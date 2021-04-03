@@ -27,12 +27,12 @@ namespace TF47_API.Controllers
     {
         private readonly ILogger<ApiKeyController> _logger;
         private readonly DatabaseContext _database;
-        private readonly UserProviderService _userProviderService;
+        private readonly IUserProviderService _userProviderService;
 
         public ApiKeyController(
             ILogger<ApiKeyController> logger, 
             DatabaseContext database,
-            UserProviderService userProviderService)
+            IUserProviderService userProviderService)
         {
             _logger = logger;
             _database = database;
