@@ -53,7 +53,7 @@ namespace TF47_API.Controllers.IssueControllers
                 IsEdited = false,
                 Message = request.Message,
                 TimeCreated = DateTime.Now,
-                TimeLastEdited = DateTime.Now
+                TimeLastEdited = null
             };
 
             await _database.IssueItems.AddAsync(issueItem);

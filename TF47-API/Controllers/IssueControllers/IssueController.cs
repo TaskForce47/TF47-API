@@ -59,7 +59,7 @@ namespace TF47_API.Controllers.IssueControllers
                 IssueGroup = issueGroup,
                 IssueTags = issueTags,
                 TimeCreated = DateTime.Now,
-                TimeLastUpdated = DateTime.Now,
+                TimeLastUpdated = null,
                 Title = request.Title
             };
 
