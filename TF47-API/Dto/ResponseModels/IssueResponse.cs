@@ -12,6 +12,6 @@ namespace TF47_API.Dto.ResponseModels
     public record IssueTagResponse(long IssueTagId, string TagName, string Color);
 
     public record IssueResponse(long IssueId, long IssueGroupId,string Title, bool IsClosed, Guid IssueCreator, string CreatorName,
-        DateTime TimeCreated, DateTime TimeLastUpdated, IEnumerable<IssueItemResponse> IssueItems, 
+        DateTime TimeCreated, DateTime? TimeLastUpdated, IEnumerable<IssueItemResponse> IssueItems, 
         IEnumerable<IssueTagResponse> IssueTags);
 }

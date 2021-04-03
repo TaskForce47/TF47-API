@@ -15,7 +15,7 @@ namespace TF47_API.Database.Models.Services
         public bool IsClosed { get; set; }
         public User IssueCreator { get; set; }
         public DateTime TimeCreated { get; set; }
-        public DateTime TimeLastUpdated { get; set; }
+        public DateTime? TimeLastUpdated { get; set; }
 
         public ICollection<IssueItem> IssueItems { get; set; }
         public ICollection<IssueTag> IssueTags { get; set; }
