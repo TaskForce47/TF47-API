@@ -31,6 +31,7 @@ namespace TF47_API.Middleware
                 {
                     httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
                     {
+                        new Claim(ClaimTypes.Name, "Api"),
                         new Claim(ClaimTypes.Role, "Api")
                     }));
                 }

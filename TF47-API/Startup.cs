@@ -21,6 +21,7 @@ using TF47_API.Database;
 using TF47_API.Database.Models;
 using TF47_API.Database.Models.GameServer;
 using TF47_API.Database.Models.Services;
+using TF47_API.Middleware;
 using TF47_API.Services;
 using TF47_API.Services.ApiToken;
 using TF47_API.Services.Authentication;
@@ -147,6 +148,7 @@ namespace TF47_API
             app.UseCors(CustomOrigins);
             //app.UseGrpcWeb();
 
+            app.UseApiTokenAuthentication();
             app.UseAuthentication();
             app.UseAuthorization();
 
