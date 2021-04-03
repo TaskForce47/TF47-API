@@ -44,6 +44,9 @@ namespace TF47_API.Controllers
         public async Task<IActionResult> CreateApiKey(CreateApiKeyRequest request)
         {
             var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
+
+            _database.Attach(user);
+            
             var newApikey = new ApiKey
             {
                 Description = request.Description,
