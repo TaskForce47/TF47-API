@@ -94,7 +94,7 @@ namespace TF47_API.Controllers.SquadXml
         [ProducesResponseType(typeof(SquadMemberResponse[]), 200)]
         public async Task<IActionResult> GetSquadsSelf()
         {
-            var user = await _userProviderService.GetDatabaseUser(HttpContext);
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
 
             var squads = _database.Squads
                 .AsNoTracking()

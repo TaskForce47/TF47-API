@@ -126,7 +126,7 @@ namespace TF47_API.Controllers.SquadXml
         [HttpPut("{squadMemberId:int}/me")]
         public async Task<IActionResult> UpdateSquadMemberSelf(long squadMemberId, UpdateSquadMemberRequest request)
         {
-            var user = await _userProviderService.GetDatabaseUser(HttpContext);
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
             var squadMember = await _database.SquadMembers
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.SquadMemberId == squadMemberId);
@@ -182,7 +182,7 @@ namespace TF47_API.Controllers.SquadXml
         [HttpDelete("{squadMemberId:int}/me")]
         public async Task<IActionResult> RemoveSquadMemberSelf(long squadMemberId)
         {
-            var user = await _userProviderService.GetDatabaseUser(HttpContext);
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
             var squadMember = await _database.SquadMembers.FindAsync(squadMemberId);
             
             if (squadMember == null) return BadRequest("Requested squadMember does not exist");

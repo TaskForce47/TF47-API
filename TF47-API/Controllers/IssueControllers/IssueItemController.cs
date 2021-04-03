@@ -40,7 +40,7 @@ namespace TF47_API.Controllers.IssueControllers
         public async Task<IActionResult> CreateIssueItem([FromBody] CreateIssueItemRequest request)
         {
             var issue =  await _database.Issues.FirstOrDefaultAsync(x => x.IssueId == request.IssueId);
-            var user = await _userProviderService.GetDatabaseUser(HttpContext);
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
 
             _database.Attach(user);
             
@@ -79,7 +79,7 @@ namespace TF47_API.Controllers.IssueControllers
         public async Task<IActionResult> UpdateIssueItem(int issueItemId, [FromBody] UpdateIssueItemRequest request)
         {
             var issueItem = await _database.IssueItems.FindAsync(issueItemId);
-            var user = await _userProviderService.GetDatabaseUser(HttpContext);
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
 
             if (issueItem == null)
                 return BadRequest("IssueItem does not exist");

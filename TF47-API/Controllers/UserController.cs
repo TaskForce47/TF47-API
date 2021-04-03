@@ -86,7 +86,7 @@ namespace TF47_API.Controllers
         [ProducesResponseType(typeof(UserResponse), 200)]
         public async Task<IActionResult> GetUserDetail()
         {
-            var user = await _userProviderService.GetDatabaseUser(HttpContext);
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
 
             if (user == null)
                 return BadRequest("You must be logged in to query this endpoint");
@@ -152,7 +152,7 @@ namespace TF47_API.Controllers
             var result = (DiscordUserResponse)await _discordAuthenticationService.HandleCallbackAsync(HttpContext);
             if (result == null) return Redirect(_configuration["Redirections:LinkFailed"]);
 
-            var user = await _userProviderService.GetDatabaseUser(HttpContext);
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
             user.DiscordId = result.Id;
             user.Email = result.Email;
 

@@ -43,7 +43,7 @@ namespace TF47_API.Controllers.IssueControllers
             var issueTags = await _database.IssueTags
                 .Where(x => request.Tags.Contains(x.IssueTagId))
                 .ToListAsync();
-            var user = await _userProviderService.GetDatabaseUser(HttpContext);
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
             
             if (issueGroup == null)
             {

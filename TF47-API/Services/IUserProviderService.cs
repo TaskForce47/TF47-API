@@ -6,6 +6,6 @@ namespace TF47_API.Services
 {
     public interface IUserProviderService
     {
-        Task<User> GetDatabaseUser(HttpContext context);
+        Task<User> GetDatabaseUserAsync(HttpContext context);
     }
 }

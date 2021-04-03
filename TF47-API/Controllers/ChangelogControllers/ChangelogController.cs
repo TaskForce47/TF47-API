@@ -64,7 +64,7 @@ namespace TF47_API.Controllers.ChangelogControllers
         [HttpPost]
         public async Task<IActionResult> CreateChangelog([FromBody] CreateChangelogRequest request)
         {
-            var user = await _userProviderService.GetDatabaseUser(HttpContext);
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
             var changelog = new Changelog
             {
                 Author = user,

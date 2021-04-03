@@ -41,7 +41,7 @@ namespace TF47_API.Controllers
             var player = await _database.Players.FirstOrDefaultAsync(x => x.PlayerUid == request.PlayerUid);
             if (player == null) return BadRequest("Provided UserUid does not exist");
 
-            var writer = await _userProviderService.GetDatabaseUser(HttpContext);
+            var writer = await _userProviderService.GetDatabaseUserAsync(HttpContext);
             _database.Attach(writer);
 
             var newNote = new Note
@@ -78,7 +78,7 @@ namespace TF47_API.Controllers
                 .FirstOrDefaultAsync(x => x.NoteId == noteId);
             if (playerNote == null) return BadRequest("Requested note does not exist");
             
-            var user = await _userProviderService.GetDatabaseUser(HttpContext);
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
             _database.Attach(user);
 
             if (user.UserId != playerNote.WriterId)
