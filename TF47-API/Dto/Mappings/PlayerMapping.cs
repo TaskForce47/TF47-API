@@ -12,7 +12,7 @@ namespace TF47_API.Dto.Mappings
         {
             return player == null
                 ? null
-                : new PlayerResponse(player.PlayerUid, player.PlayerName, player.FirstVisit, player.LastVisit,
+                : new PlayerResponse(player.PlayerUid, player.PlayerName, player.TimeFirstVisit, player.TimeLastVisit,
                     player.NumberConnections);
         }
         
@@ -25,7 +25,7 @@ namespace TF47_API.Dto.Mappings
             this IEnumerable<Player> data)
         {
             return data?.Select(x =>
-                new PlayerResponseWithDetails(x.PlayerUid, x.PlayerName, x.FirstVisit, x.LastVisit, x.NumberConnections,
+                new PlayerResponseWithDetails(x.PlayerUid, x.PlayerName, x.TimeFirstVisit, x.TimeLastVisit, x.NumberConnections,
                     x.PlayerChats.ToChatResponseIEnumerable(), x.PlayerNotes.ToNoteResponseIEnumerable()));
         }
     }

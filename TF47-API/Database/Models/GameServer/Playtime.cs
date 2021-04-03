@@ -7,11 +7,9 @@ namespace TF47_API.Database.Models.GameServer
     [Table("GameServerPlaytimes")]
     public class Playtime
     {
-        
-        public Player Player { get; set; }
         [Key]
         public string PlayerId { get; set; }
-
+        public Player Player { get; set; }
         public Session Session { get; set; }
         public long SessionId { get; set; }
 

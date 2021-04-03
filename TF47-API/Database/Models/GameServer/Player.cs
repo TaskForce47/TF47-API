@@ -17,12 +17,12 @@ namespace TF47_API.Database.Models.GameServer
         [MaxLength(100)]
         public string PlayerName { get; set; }
 
-        public DateTime? FirstVisit { get; set; } = null;
-        public DateTime? LastVisit { get; set; } = null;
+        public DateTime? TimeFirstVisit { get; set; } = null;
+        public DateTime? TimeLastVisit { get; set; } = null;
 
         public int NumberConnections { get; set; } = 0;
         
-        public Playtime PlayerPlaytime { get; set; } = null;
+        public ICollection<Playtime> PlayerPlaytime { get; set; }
 
         public ICollection<Kill> PlayerKills { get; set; }
         public ICollection<Kill> PlayerDeaths { get; set; }
