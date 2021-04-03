@@ -77,14 +77,16 @@ namespace TF47_API.Controllers.GameServerController
             return Ok(response.ToPlayerResponseWithDetailsIEnumerable());
         }
 
-        [HttpPatch("{playerUid}")]
+        [HttpPatch("{playerUid}/refresh")]
         [ProducesResponseType(typeof(PlayerResponse), 200)]
         public async Task<IActionResult> UpdatePlayerName(string playerUid, [FromBody] UpdatePlayerNameRequest request)
         {
             var player = await _database.Players.FirstOrDefaultAsync(x => x.PlayerUid == playerUid);
             if (player == null) return BadRequest("PlayerUid provided does not exist");
-
+            
             player.PlayerName = request.PlayerName;
+            player.TimeLastVisit = DateTime.Now;
+            player.NumberConnections++;
             try
             {
                 await _database.SaveChangesAsync();
