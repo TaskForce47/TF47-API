@@ -13,12 +13,12 @@ namespace TF47_API.Dto.Mappings
 
             if (hideApiKey)
             {
-                return new ApiKeyResponse(data.ApiKeyId, data.OwnerId, data.Owner.Username, null,
+                return new ApiKeyResponse(data.ApiKeyId, data.Description,data.OwnerId, data.Owner.Username, null,
                     data.TimeCreated, data.ValidUntil);
             }
             else
             {
-                return new ApiKeyResponse(data.ApiKeyId, data.OwnerId, data.Owner.Username, data.ApiKeyValue,
+                return new ApiKeyResponse(data.ApiKeyId, data.Description, data.OwnerId, data.Owner.Username, data.ApiKeyValue,
                     data.TimeCreated, data.ValidUntil);
             }
         }

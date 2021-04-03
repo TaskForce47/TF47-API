@@ -13,6 +13,8 @@ namespace TF47_API.Database.Models.Services
         [Key]
         public long ApiKeyId { get; set; }
         [MaxLength(200)]
+        public string Description { get; set; }
+        [MaxLength(200)]
         public string ApiKeyValue { get; set; }
         public User Owner { get; set; }
         public Guid OwnerId { get; set; }
