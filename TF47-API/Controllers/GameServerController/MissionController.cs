@@ -26,7 +26,7 @@ namespace TF47_API.Controllers
             _database = database;
         }
 
-        [HttpGet("{missionId}")]
+        [HttpGet("{missionId:int}")]
         [ProducesResponseType(typeof(MissionResponse), 200)]
         public async Task<IActionResult> GetMission(long missionId)
         {
@@ -127,7 +127,7 @@ namespace TF47_API.Controllers
         
         [Authorize]
         [HttpDelete("{missionId:int}")]
-        [ProducesResponseType(null, 200)]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> DeleteMission(long missionId)
         {
             var mission = await _database.Missions.FirstOrDefaultAsync(x => x.MissionId == missionId);

@@ -40,7 +40,7 @@ namespace TF47_API.Controllers
             return Ok(campaigns.ToCampaignResponseIEnumerable());
         }
 
-        [HttpGet("{campaignId:int")]
+        [HttpGet("{campaignId:int}")]
         [ProducesResponseType(typeof(CampaignResponse), 200)]
         public async Task<IActionResult> GetCampaign(long campaignId)
         {
@@ -83,7 +83,7 @@ namespace TF47_API.Controllers
         }
 
         [Authorize]
-        [HttpPut("{campaignId")]
+        [HttpPut("{campaignId:int}")]
         public async Task<IActionResult> UpdateCampaign(long campaignId, [FromBody] UpdateCampaignRequest request)
         {
             var campaign = await _database.Campaigns.FirstOrDefaultAsync(x => x.CampaignId == campaignId);
@@ -112,7 +112,7 @@ namespace TF47_API.Controllers
         
         
         [Authorize]
-        [HttpDelete("{campaignId}")]
+        [HttpDelete("{campaignId:int}")]
         public async Task<IActionResult> DeleteCampaign(long campaignId)
         {
             var campaign = await _database.Campaigns

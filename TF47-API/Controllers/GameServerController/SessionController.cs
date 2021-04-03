@@ -140,7 +140,7 @@ namespace TF47_API.Controllers.ChangelogControllers
 
         [Authorize]
         [HttpDelete("{sessionId:int}")]
-        [ProducesResponseType(null, 200)]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> DeleteSession(long sessionId)
         {
             var session = await _database.Sessions.FirstOrDefaultAsync(x => x.SessionId == sessionId);
