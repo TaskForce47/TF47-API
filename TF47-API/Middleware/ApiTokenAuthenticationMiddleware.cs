@@ -29,11 +29,12 @@ namespace TF47_API.Middleware
 
                 if (isAuthenticated)
                 {
-                    httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+                    var claimsIdentity = new ClaimsIdentity(new List<Claim>
                     {
                         new Claim(ClaimTypes.Name, "Api"),
                         new Claim(ClaimTypes.Role, "Api")
-                    }));
+                    }, "ApiToken");
+                    httpContext.User = new ClaimsPrincipal(claimsIdentity);
                 }
             }
 
