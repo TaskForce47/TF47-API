@@ -25,6 +25,7 @@ using TF47_API.Middleware;
 using TF47_API.Services;
 using TF47_API.Services.ApiToken;
 using TF47_API.Services.Authentication;
+using TF47_API.Services.Authorization;
 using TF47_API.Services.Mail;
 using TF47_API.Services.OAuth;
 using TF47_API.Services.SquadManager;
@@ -113,6 +114,7 @@ namespace TF47_API
             services.AddSingleton<ISquadManagerService, SquadManagerService>();
             services.AddSingleton<ISteamAuthenticationService, SteamAuthenticationService>();
             services.AddSingleton<IDiscordAuthenticationService, DiscordAuthenticationService>();
+            services.AddSingleton<IGroupPermissionCache, GroupPermissionCache>();
             services.AddSingleton<ApiTokenCache>();
             services.AddHttpClient();
         }
