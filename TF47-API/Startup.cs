@@ -163,6 +163,7 @@ namespace TF47_API
             {
                 endpoints.MapHub<TestHub>("/hub");
                 endpoints.MapHub<ShoutboxHub>("/shoutbox");
+                endpoints.MapHub<NotificationHub>("/notification");
                 endpoints.MapControllers();
             });
         }

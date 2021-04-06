@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
@@ -13,6 +14,7 @@ using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
 using TF47_API.Filters;
 using TF47_API.Services;
+using TF47_API.SignalR;
 
 namespace TF47_API.Controllers.ChangelogControllers
 {
@@ -23,15 +25,18 @@ namespace TF47_API.Controllers.ChangelogControllers
         private readonly ILogger<ChangelogController> _logger;
         private readonly DatabaseContext _database;
         private readonly IUserProviderService _userProviderService;
+        private readonly IHubContext<NotificationHub> _notificationHub;
 
         public ChangelogController(
             ILogger<ChangelogController> logger, 
             DatabaseContext database,
-            IUserProviderService userProviderService)
+            IUserProviderService userProviderService,
+            IHubContext<NotificationHub> notificationHub)
         {
             _logger = logger;
             _database = database;
             _userProviderService = userProviderService;
+            _notificationHub = notificationHub;
         }
         
         [HttpGet]
@@ -86,6 +91,11 @@ namespace TF47_API.Controllers.ChangelogControllers
                     ex.Message);
                 return Problem("Failed to save new changelog to database", null, 500, "Cannot create changelog");
             }
+
+#pragma warning disable 4014
+            _notificationHub.Clients.All.SendAsync("ChangelogCreated", changelog.ToChangelogResponse());
+#pragma warning restore 4014
+            
             return CreatedAtAction(nameof(GetChangelog), new {changelogId = changelog.ChangelogId},
                 changelog.ToChangelogResponse());
         }
