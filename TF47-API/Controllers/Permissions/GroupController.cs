@@ -112,10 +112,6 @@ namespace TF47_API.Controllers
         [ProducesResponseType(typeof(GroupResponse), 201)]
         public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
         {
-            var permissions = await _database.Permissions
-                .Where(x => request.Permissions.Contains(x.PermissionId))
-                .ToListAsync() ?? new List<Permission>();
-
             var newGroup = new Group
             {
                 BackgroundColor = request.BackgroundColor,
@@ -123,8 +119,15 @@ namespace TF47_API.Controllers
                 Description = request.Description,
                 IsVisible = request.IsVisible,
                 Name = request.Name,
-                Permissions = permissions
             };
+
+            if (request.Permissions != null)
+            {
+                var permissions = await _database.Permissions
+                    .Where(x => request.Permissions.Contains(x.PermissionId))
+                    .ToListAsync();
+                newGroup.Permissions = permissions;
+            }
             
             try
             {
