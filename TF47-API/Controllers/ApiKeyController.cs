@@ -16,6 +16,7 @@ using TF47_API.Database.Models.Services;
 using TF47_API.Dto;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.ResponseModels;
+using TF47_API.Filters;
 using TF47_API.Services;
 
 namespace TF47_API.Controllers
@@ -38,7 +39,8 @@ namespace TF47_API.Controllers
             _database = database;
             _userProviderService = userProviderService;
         }
-
+        
+        [RequirePermission("apikey:create")]
         [HttpPost]
         [ProducesResponseType(typeof(ApiKeyResponse[]), 201)]
         public async Task<IActionResult> CreateApiKey(CreateApiKeyRequest request)
@@ -82,6 +84,7 @@ namespace TF47_API.Controllers
                 newApikey.ToApiKeyResponse());
         }
         
+        [RequirePermission("apikey:view")]
         [HttpGet]
         [ProducesResponseType(typeof(ApiKeyResponse[]), 200)]
         public async Task<IActionResult> GetApiKeys()
@@ -109,6 +112,7 @@ namespace TF47_API.Controllers
             return Ok(apiKeys.ToApiKeyResponseIEnumerable(true));
         }
         
+        [RequirePermission("apikey:view")]
         [HttpGet("{apiKeyId:int}")]
         [ProducesResponseType(typeof(ApiKeyResponse), 200)]
         public async Task<IActionResult> CreateApiKey(long apiKeyId)
@@ -121,6 +125,7 @@ namespace TF47_API.Controllers
             return Ok(apiKeys.ToApiKeyResponse(true));
         }
         
+        [RequirePermission("apikey:edit")]
         [HttpPut("{apiKeyId:int}")]
         [ProducesResponseType(typeof(ApiKeyResponse), 200)]
         public async Task<IActionResult> UpdateApiKey(long apiKeyId, UpdateApiKeyRequest request)
@@ -149,6 +154,7 @@ namespace TF47_API.Controllers
             return Ok(apiKey.ToApiKeyResponse());
         }
         
+        [RequirePermission("apikey:remove")]
         [HttpDelete("{apiKeyId:int}")]
         [ProducesResponseType(200)]
         public async Task<IActionResult> RemoveApiKey(long apiKeyId)

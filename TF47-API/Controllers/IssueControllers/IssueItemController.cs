@@ -10,6 +10,7 @@ using TF47_API.Database.Models.Services;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
+using TF47_API.Filters;
 using TF47_API.Services;
 
 namespace TF47_API.Controllers.IssueControllers
@@ -34,6 +35,7 @@ namespace TF47_API.Controllers.IssueControllers
 
         }
         
+        [RequirePermission("issue:create")]
         [Authorize]
         [HttpPost("")]
         [ProducesResponseType(typeof(IssueItemResponse), 200)]
@@ -96,6 +98,7 @@ namespace TF47_API.Controllers.IssueControllers
             return Ok(issueItem.ToIssueItemResponse());
         }
         
+        [RequirePermission("issue:delete")]
         [Authorize]
         [HttpDelete("{issueItemId:int}")]
         public async Task<IActionResult> DeleteIssueItem(long issueItemId)

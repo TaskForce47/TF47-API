@@ -10,6 +10,7 @@ using TF47_API.Database.Models.Services;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
+using TF47_API.Filters;
 using TF47_API.Services;
 
 namespace TF47_API.Controllers.IssueControllers
@@ -32,6 +33,7 @@ namespace TF47_API.Controllers.IssueControllers
             _userProviderService = userProviderService;
         }
         
+        [RequirePermission("issue:create")]
         [Authorize]
         [HttpPost("")]
         [ProducesResponseType(typeof(IssueGroupResponse), 201)]

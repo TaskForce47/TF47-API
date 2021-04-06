@@ -11,6 +11,7 @@ using TF47_API.Database.Models.Services;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
+using TF47_API.Filters;
 using TF47_API.Services;
 using TF47_API.Services.SquadManager;
 using CreateSquadMemberRequest = TF47_API.Dto.RequestModels.CreateSquadMemberRequest;
@@ -39,6 +40,7 @@ namespace TF47_API.Controllers.SquadXml
             _userProviderService = userProviderService;
         }
         
+        [RequirePermission("squad:addmember")]
         [HttpPost]
         [ProducesResponseType(typeof(SquadMemberResponse), 201)]
         public async Task<IActionResult> CreateSquadMember([FromBody] CreateSquadMemberRequest request)
@@ -91,6 +93,7 @@ namespace TF47_API.Controllers.SquadXml
             return Ok(squadMember.ToSquadMemberResponse());
         }
         
+        [RequirePermission("squad:updatemember")]
         [HttpPut("{squadMemberId:int}")]
         [ProducesResponseType(typeof(SquadMemberResponse), 200)]
         public async Task<IActionResult> UpdateSquadMember(long squadMemberId, UpdateSquadMemberRequest request)
@@ -156,6 +159,7 @@ namespace TF47_API.Controllers.SquadXml
             return Ok(squadMember.ToSquadMemberResponse());
         }
         
+        [RequirePermission("issue:removemember")]
         [HttpDelete("{squadMemberId:int}")]
         public async Task<IActionResult> RemoveSquadMember(long squadMemberId)
         {

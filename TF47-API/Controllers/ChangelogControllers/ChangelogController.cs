@@ -11,6 +11,7 @@ using TF47_API.Database.Models.Services;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
+using TF47_API.Filters;
 using TF47_API.Services;
 
 namespace TF47_API.Controllers.ChangelogControllers
@@ -60,6 +61,7 @@ namespace TF47_API.Controllers.ChangelogControllers
             return Ok(changelog.ToChangelogResponse());
         }
         
+        [RequirePermission("changelog:create")]
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateChangelog([FromBody] CreateChangelogRequest request)
@@ -88,6 +90,7 @@ namespace TF47_API.Controllers.ChangelogControllers
                 changelog.ToChangelogResponse());
         }
         
+        [RequirePermission("changelog:update")]
         [Authorize]
         [HttpPut("{changelogId:int}")]
         public async Task<IActionResult> UpdateChangelog(int changelogId, [FromBody] UpdateChangelogRequest request)
@@ -118,6 +121,7 @@ namespace TF47_API.Controllers.ChangelogControllers
         }
         
 
+        [RequirePermission("changelog:remove")]
         [Authorize]
         [HttpDelete("{changelogId:int}")]
         public async Task<IActionResult> DeleteChangelog(int changelogId)

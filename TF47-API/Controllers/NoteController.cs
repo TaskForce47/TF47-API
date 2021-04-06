@@ -11,6 +11,7 @@ using TF47_API.Dto;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
+using TF47_API.Filters;
 using TF47_API.Services;
 
 namespace TF47_API.Controllers
@@ -33,7 +34,8 @@ namespace TF47_API.Controllers
             _database = database;
             _userProviderService = userProviderService;
         }
-
+        
+        [RequirePermission("note:create")]
         [HttpPost("")]
         [ProducesResponseType(typeof(NoteResponse), 200)]
         public async Task<IActionResult> CreateNote([FromBody] CreateNoteRequest request)
@@ -69,6 +71,7 @@ namespace TF47_API.Controllers
             return CreatedAtAction(nameof(GetNote), new {NoteId = newNote.NoteId}, newNote.ToNoteResponse());
         }
 
+        [RequirePermission("note:update")]
         [HttpPut("{noteId:int}")]
         [ProducesResponseType(typeof(NoteResponse), 200)]
         public async Task<IActionResult> UpdateNote(long noteId, [FromBody] UpdateNoteRequest request)
@@ -105,7 +108,7 @@ namespace TF47_API.Controllers
             return Ok(playerNote.ToNoteResponse());
         }
         
-        
+        [RequirePermission("note:view")]
         [HttpGet("{noteId:int}")]
         [ProducesResponseType(typeof(NoteResponse), 200)]
         public async Task<IActionResult> GetNote(long noteId)
@@ -121,6 +124,7 @@ namespace TF47_API.Controllers
             return Ok(playerNote.ToNoteResponse());
         }
         
+        [RequirePermission("note:view")]
         [HttpGet("")]
         [ProducesResponseType(typeof(NoteResponse[]), 200)]
         public async Task<IActionResult> GetNotesPlayer()
@@ -137,6 +141,7 @@ namespace TF47_API.Controllers
             return Ok(playerNotes.AsEnumerable().ToNoteResponseIEnumerable());
         }
         
+        [RequirePermission("note:view")]
         [HttpGet("player/{playerUid}")]
         [ProducesResponseType(typeof(NoteResponse[]), 200)]
         public async Task<IActionResult> GetNotesPlayer(string playerUid)
@@ -152,7 +157,8 @@ namespace TF47_API.Controllers
 
             return Ok(playerNotes.AsEnumerable().ToNoteResponseIEnumerable());
         }
-
+        
+        [RequirePermission("note:delete")]
         [HttpDelete("{noteId:int}")]
         [ProducesResponseType(200)]
         public async Task<IActionResult> DeleteNote(long noteId)

@@ -12,6 +12,7 @@ using TF47_API.Database.Models.Services;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
+using TF47_API.Filters;
 
 namespace TF47_API.Controllers.IssueControllers
 {
@@ -31,6 +32,8 @@ namespace TF47_API.Controllers.IssueControllers
             _database = database;
         }
         
+        [RequirePermission("issue:create")]
+        [Authorize]
         [HttpPost("")]
         [ProducesResponseType(typeof(IssueTagResponse), 201)]
         public async Task<IActionResult> CreateIssueTag(CreateIssueTagRequest request)
@@ -62,6 +65,7 @@ namespace TF47_API.Controllers.IssueControllers
                 issueTag.ToIssueTagResponse());
         }
         
+        [RequirePermission("issue:update")]
         [Authorize]
         [HttpPut("{issueTagId:int}")]
         [ProducesResponseType(typeof(IssueTagResponse), 200)]
@@ -109,7 +113,7 @@ namespace TF47_API.Controllers.IssueControllers
             return Ok(issueTags.AsEnumerable().ToIssueTagResponseIEnumerable());
         }
         
-        [Authorize]
+        [RequirePermission("issue:delete")]
         [HttpDelete("{issueTagId:int}")]
         public async Task<IActionResult> RemoveIssueTag(int issueTagId)
         {
