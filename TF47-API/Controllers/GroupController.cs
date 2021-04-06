@@ -113,9 +113,9 @@ namespace TF47_API.Controllers
         }
 
         [RequirePermission("group:edit")]
-        [HttpPatch("{groupId:int}")]
+        [HttpPut("{groupId:int}")]
         [ProducesResponseType(typeof(GroupResponse), 200)]
-        public async Task<IActionResult> UpdateGroupRequest(long groupId, UpdateGroupRequest request)
+        public async Task<IActionResult> UpdateGroupRequest(long groupId, [FromBody] UpdateGroupRequest request)
         {
             var group = _database.Groups
                 .FirstOrDefault(x => x.GroupId == groupId);
