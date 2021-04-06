@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -113,21 +114,17 @@ namespace TF47_API.Controllers
         {
             var permissions = await _database.Permissions
                 .Where(x => request.Permissions.Contains(x.PermissionId))
-                .ToListAsync();
-            
+                .ToListAsync() ?? new List<Permission>();
+
             var newGroup = new Group
             {
                 BackgroundColor = request.BackgroundColor,
                 TextColor = request.TextColor,
                 Description = request.Description,
                 IsVisible = request.IsVisible,
-                Name = request.Name
+                Name = request.Name,
+                Permissions = permissions
             };
-
-            if (permissions != null)
-            {
-                newGroup.Permissions = permissions;
-            }
             
             try
             {
