@@ -6,23 +6,16 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using TF47_API.Database;
-using TF47_API.Database.Models;
-using TF47_API.Database.Models.GameServer;
-using TF47_API.Database.Models.Services;
+using TF47_API.Grpc;
 using TF47_API.Middleware;
 using TF47_API.Services;
 using TF47_API.Services.ApiToken;
@@ -161,6 +154,7 @@ namespace TF47_API
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapGrpcService<GreeterService>();
                 endpoints.MapHub<TestHub>("/hub");
                 endpoints.MapHub<ShoutboxHub>("/shoutbox");
                 endpoints.MapHub<NotificationHub>("/notification");

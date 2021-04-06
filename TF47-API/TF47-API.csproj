@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="EFCore.NamingConventions" Version="5.0.2" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.36.0" />
     <PackageReference Include="MailKit" Version="2.11.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.4" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.4" />
@@ -70,6 +71,16 @@
     <_ContentIncludedByDefault Remove="wwwroot\squadxml\1\logo.png" />
     <_ContentIncludedByDefault Remove="wwwroot\squadxml\1\squad.dtd" />
     <_ContentIncludedByDefault Remove="wwwroot\squadxml\1\squad.xml" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Grpc" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Protobuf Include="Protos\greet.proto">
+      <Generator>MSBuild:Compile</Generator>
+    </Protobuf>
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
