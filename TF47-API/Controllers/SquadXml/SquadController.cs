@@ -14,6 +14,7 @@ using TF47_API.Database.Models.Services;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
+using TF47_API.Filters;
 using TF47_API.Services;
 using TF47_API.Services.SquadManager;
 
@@ -41,7 +42,7 @@ namespace TF47_API.Controllers.SquadXml
             _squadManagerService = squadManagerService;
             _userProviderService = userProviderService;
         }
-    
+        
         [HttpGet("{squadId:int}")]
         [ProducesResponseType(typeof(SquadResponse), 200)]
         public async Task<IActionResult> GetSquad(long squadId)
@@ -89,7 +90,6 @@ namespace TF47_API.Controllers.SquadXml
             return Ok(users.ToSimpleUserResponseIEnumerable());
         }
         
-        [Authorize]
         [HttpGet("me")]
         [ProducesResponseType(typeof(SquadMemberResponse[]), 200)]
         public async Task<IActionResult> GetSquadsSelf()
@@ -106,6 +106,7 @@ namespace TF47_API.Controllers.SquadXml
             return Ok(squads.ToPlayerResponseIEnumerable());
         }
         
+        [RequirePermission("squad:create")]
         [HttpPost]
         [ProducesResponseType(typeof(SquadResponse), 201)]
         public async Task<IActionResult> AddSquad([FromBody] CreateSquadRequest request, CancellationToken cancellationToken)
@@ -143,6 +144,7 @@ namespace TF47_API.Controllers.SquadXml
                 squad.ToSquadResponse());
         }
         
+        [RequirePermission("squad:update")]
         [HttpPut("{squadId:int}")]
         [ProducesResponseType(typeof(SquadResponse), 200)]
         public async Task<IActionResult> UpdateSquad(long squadId, [FromBody] UpdateSquadRequest request, CancellationToken cancellationToken)
@@ -185,6 +187,7 @@ namespace TF47_API.Controllers.SquadXml
                 squad.XmlUrl, squad.PictureUrl, null));
         }
         
+        [RequirePermission("squad:update")]
         [HttpPut("{squadId:int}/uploadLogo")]
         public async Task<IActionResult> UploadSquadLogo(long squadId, IFormFile file,
             CancellationToken cancellationToken)
@@ -222,6 +225,7 @@ namespace TF47_API.Controllers.SquadXml
             return BadRequest("Something is invalid");
         }
         
+        [RequirePermission("squad:delete")]
         [HttpDelete("{squadId:int}")]
         public async Task<IActionResult> RemoveSquad(long squadId, CancellationToken cancellationToken)
         {
@@ -254,6 +258,7 @@ namespace TF47_API.Controllers.SquadXml
             return Ok();
         }
         
+        [RequirePermission("squad:regenerate")]
         [HttpPost("{squadid}/rebuild")]
         public async Task<IActionResult> RebuildSquadXml(long squadid, CancellationToken cancellationToken)
         {
