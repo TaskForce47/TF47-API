@@ -13,6 +13,7 @@ namespace TF47_API.Database.Models.Services
         public long IssueItemId { get; set; }
         [MaxLength(20000)]
         public User Author { get; set; }
+        [MaxLength(2000)]
         public string Message { get; set; }
         public DateTime TimeCreated { get; set; }
         public bool IsEdited { get; set; }

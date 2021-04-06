@@ -21,10 +21,10 @@ namespace TF47_API.Database.Models.Services
         [MaxLength(2000)]
         public string Description { get; set; }
         [Required]
-        [MaxLength(6)]
+        [MaxLength(7)]
         public string TextColor { get; set; }
         [Required]
-        [MaxLength(6)]
+        [MaxLength(7)]
         public string BackgroundColor { get; set; }
         [Required]
         public bool IsVisible { get; set; }

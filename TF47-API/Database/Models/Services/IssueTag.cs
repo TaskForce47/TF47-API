@@ -16,7 +16,7 @@ namespace TF47_API.Database.Models.Services
         public long IssueTagId { get; set; }
         [MaxLength(100)]
         public string TagName { get; set; }
-        [MaxLength(20)]
+        [MaxLength(7)]
         public string Color { get; set; }
 
         public ICollection<Issue> Issues { get; set; }
