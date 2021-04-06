@@ -9,7 +9,7 @@ using TF47_API.Dto.ResponseModels;
 
 namespace TF47_API.Controllers
 {
-    
+    [Route("api/[controller]")]
     public class PermissionController : Controller
     {
         private readonly DatabaseContext _database;
