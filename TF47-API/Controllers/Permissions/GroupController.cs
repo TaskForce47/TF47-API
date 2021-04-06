@@ -44,6 +44,7 @@ namespace TF47_API.Controllers
         {
             var result = await _database.Groups
                 .AsNoTracking()
+                .Include(x => x.Users)
                 .Include(x => x.Permissions)
                 .ToListAsync();
             return Ok(result.ToGroupResponseIEnumerable());
@@ -56,6 +57,7 @@ namespace TF47_API.Controllers
 
             var result = await _database.Groups
                 .AsNoTracking()
+                .Include(x => x.Users)
                 .Include(x => x.Permissions)
                 .FirstOrDefaultAsync(x => x.GroupId == groupId);
 
@@ -118,6 +120,7 @@ namespace TF47_API.Controllers
         public async Task<IActionResult> UpdateGroupRequest(long groupId, [FromBody] UpdateGroupRequest request)
         {
             var group = _database.Groups
+                .Include(x => x.Users)
                 .FirstOrDefault(x => x.GroupId == groupId);
 
             if (group == null) return BadRequest("GroupId provided does not exist");
