@@ -33,7 +33,7 @@ namespace TF47_API.Controllers
         }
         
         [HttpGet("")]
-        [ProducesResponseType(typeof(GroupResponse[]), 200)]
+        [ProducesResponseType(typeof(PermissionController[]), 200)]
         public async Task<IActionResult> GetPermissions()
         {
             var result = await _database.Permissions
