@@ -159,7 +159,7 @@ namespace TF47_API.Controllers.SquadXml
             return Ok(squadMember.ToSquadMemberResponse());
         }
         
-        [RequirePermission("issue:removemember")]
+        [RequirePermission("squad:removemember")]
         [HttpDelete("{squadMemberId:int}")]
         public async Task<IActionResult> RemoveSquadMember(long squadMemberId)
         {
