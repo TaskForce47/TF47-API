@@ -28,6 +28,7 @@ namespace TF47_API.Services.Authorization
             _serviceProvider = serviceProvider;
             _permissionCache = new Dictionary<string, ICollection<string>>();
             _updateLock = false;
+            RefreshCache().Wait();
         }
 
         public async Task RefreshCache()
