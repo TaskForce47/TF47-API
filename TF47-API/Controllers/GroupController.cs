@@ -18,6 +18,7 @@ using TF47_API.Services.Authorization;
 namespace TF47_API.Controllers
 {
     [Authorize]
+    [Route("api/[controller]")]
     public class GroupController : Controller
     {
         private readonly ILogger<GroupController> _logger;
@@ -64,6 +65,7 @@ namespace TF47_API.Controllers
         }
 
         [HttpGet("me")]
+        [ProducesResponseType(typeof(GroupResponse[]), 200)]
         public async Task<IActionResult> GetGroupsSelf()
         {
             var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
@@ -78,6 +80,7 @@ namespace TF47_API.Controllers
         
         [RequirePermission("group:create")]
         [HttpPost]
+        [ProducesResponseType(typeof(GroupResponse), 201)]
         public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
         {
             var permissions = await _database.Permissions
@@ -106,11 +109,12 @@ namespace TF47_API.Controllers
 
             await _groupPermissionCache.RefreshCache();
             
-            return Ok(newGroup.ToGroupResponse());
+            return CreatedAtAction(nameof(GetGroup), new { GroupId = newGroup.GroupId }, newGroup.ToGroupResponse());
         }
 
         [RequirePermission("group:edit")]
         [HttpPatch("{groupId:int}")]
+        [ProducesResponseType(typeof(GroupResponse), 200)]
         public async Task<IActionResult> UpdateGroupRequest(long groupId, UpdateGroupRequest request)
         {
             var group = _database.Groups
@@ -152,6 +156,7 @@ namespace TF47_API.Controllers
 
         [RequirePermission("group:delete")]
         [HttpDelete("{groupId:int}")]
+        [ProducesResponseType( 200)]
         public async Task<IActionResult> DeleteGroup(long groupId)
         {
             var group = _database.Groups.FirstOrDefault(x => x.GroupId == groupId);
@@ -174,6 +179,7 @@ namespace TF47_API.Controllers
         
         [RequirePermission("group:adduser")]
         [HttpPost("{groupId:int}/addUser/{userId:Guid}")]
+        [ProducesResponseType(typeof(GroupResponse), 200)]
         public async Task<IActionResult> AddUser(long groupId, Guid userId)
         {
             var group = _database.Groups
@@ -206,6 +212,7 @@ namespace TF47_API.Controllers
         
         [RequirePermission("group:removeuser")]
         [HttpDelete("{groupId:int}/removeUser/{userId:Guid}")]
+        [ProducesResponseType(200)]
         public async Task<IActionResult> DeleteUser(long groupId, Guid userId)
         {
             var group = _database.Groups
