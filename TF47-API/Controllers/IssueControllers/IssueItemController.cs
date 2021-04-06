@@ -98,7 +98,7 @@ namespace TF47_API.Controllers.IssueControllers
             return Ok(issueItem.ToIssueItemResponse());
         }
         
-        [RequirePermission("issue:delete")]
+        [RequirePermission("issue:remove")]
         [Authorize]
         [HttpDelete("{issueItemId:int}")]
         public async Task<IActionResult> DeleteIssueItem(long issueItemId)

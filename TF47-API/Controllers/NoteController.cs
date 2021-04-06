@@ -158,7 +158,7 @@ namespace TF47_API.Controllers
             return Ok(playerNotes.AsEnumerable().ToNoteResponseIEnumerable());
         }
         
-        [RequirePermission("note:delete")]
+        [RequirePermission("note:remove")]
         [HttpDelete("{noteId:int}")]
         [ProducesResponseType(200)]
         public async Task<IActionResult> DeleteNote(long noteId)

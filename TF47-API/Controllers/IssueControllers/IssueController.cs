@@ -116,7 +116,7 @@ namespace TF47_API.Controllers.IssueControllers
             return Ok(issue.AsEnumerable().ToIssueResponseIEnumerable());
         }
         
-        
+        [RequirePermission("issue:update")]
         [Authorize]
         [HttpPut("{issueId:int}")]
         [ProducesResponseType(typeof(IssueResponse), 200)]

@@ -114,7 +114,7 @@ namespace TF47_API.Controllers
             return CreatedAtAction(nameof(GetGroup), new { GroupId = newGroup.GroupId }, newGroup.ToGroupResponse());
         }
 
-        [RequirePermission("group:edit")]
+        [RequirePermission("group:update")]
         [HttpPut("{groupId:int}")]
         [ProducesResponseType(typeof(GroupResponse), 200)]
         public async Task<IActionResult> UpdateGroupRequest(long groupId, [FromBody] UpdateGroupRequest request)

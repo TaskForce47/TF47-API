@@ -125,7 +125,7 @@ namespace TF47_API.Controllers
             return Ok(apiKeys.ToApiKeyResponse(true));
         }
         
-        [RequirePermission("apikey:edit")]
+        [RequirePermission("apikey:update")]
         [HttpPut("{apiKeyId:int}")]
         [ProducesResponseType(typeof(ApiKeyResponse), 200)]
         public async Task<IActionResult> UpdateApiKey(long apiKeyId, UpdateApiKeyRequest request)
