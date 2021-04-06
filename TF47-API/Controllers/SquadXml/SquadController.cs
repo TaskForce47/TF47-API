@@ -225,7 +225,7 @@ namespace TF47_API.Controllers.SquadXml
             return BadRequest("Something is invalid");
         }
         
-        [RequirePermission("squad:delete")]
+        [RequirePermission("squad:remove")]
         [HttpDelete("{squadId:int}")]
         public async Task<IActionResult> RemoveSquad(long squadId, CancellationToken cancellationToken)
         {
