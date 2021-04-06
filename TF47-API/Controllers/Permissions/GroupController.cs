@@ -121,9 +121,14 @@ namespace TF47_API.Controllers
                 TextColor = request.TextColor,
                 Description = request.Description,
                 IsVisible = request.IsVisible,
-                Name = request.Name,
-                Permissions = permissions
+                Name = request.Name
             };
+
+            if (permissions != null)
+            {
+                newGroup.Permissions = permissions;
+            }
+            
             try
             {
                 await _database.Groups.AddAsync(newGroup);
