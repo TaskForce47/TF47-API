@@ -19,5 +19,18 @@ namespace TF47_API.Dto.Mappings
         {
             return data?.Select(x => x.ToGroupResponse());
         }
+
+        public static SimpleGroupResponse ToSimpleGroupResponse(this Group data)
+        {
+            return data == null
+                ? null
+                : new SimpleGroupResponse(data.GroupId, data.Name, data.Description, data.TextColor,
+                    data.BackgroundColor, data.IsVisible, data.Permissions.ToPermissionResponseIEnumerable());
+        }
+
+        public static IEnumerable<SimpleGroupResponse> ToSimpleGroupResponseIEnumerable(this IEnumerable<Group> data)
+        {
+            return data?.Select(x => x.ToSimpleGroupResponse());
+        }
     }
 }

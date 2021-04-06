@@ -5,4 +5,8 @@ namespace TF47_API.Dto.ResponseModels
 {
     public record GroupResponse(long GroupId, string Name, string Description, string TextColor, string BackgroundColor,
         bool IsVisible, IEnumerable<UserResponse> GroupMembers, IEnumerable<PermissionResponse> Permissions);
+
+    public record SimpleGroupResponse(long GroupId, string Name, string Description, string TextColor,
+        string BackgroundColor,
+        bool IsVisible, IEnumerable<PermissionResponse> Permissions);
 }

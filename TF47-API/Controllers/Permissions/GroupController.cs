@@ -67,17 +67,43 @@ namespace TF47_API.Controllers
         }
 
         [HttpGet("me")]
-        [ProducesResponseType(typeof(GroupResponse[]), 200)]
+        [ProducesResponseType(typeof(SimpleGroupResponse[]), 200)]
         public async Task<IActionResult> GetGroupsSelf()
         {
             var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
             var result = await _database.Groups
                 .AsNoTracking()
-                .Include(x => x.Users)
                 .Include(x => x.Permissions)
                 .Where(x => x.Users.Any(y => y.UserId == user.UserId))
                 .ToListAsync();
-            return Ok(result.ToGroupResponseIEnumerable());
+            return Ok(result.ToSimpleGroupResponseIEnumerable());
+        }
+        
+        [HttpGet("{groupId:int}/nonMember")]
+        [ProducesResponseType(typeof(SimpleUserResponse[]), 200)]
+        public async Task<IActionResult> GetUsersNotMemberOfGroup(long groupId)
+        {
+            var result = await _database.Users
+                .AsNoTracking()
+                .Include(x => x.Groups)
+                .Where(x => !x.Groups
+                    .Select(y => y.GroupId).Contains(groupId))
+                .Distinct()
+                .ToListAsync();
+            return Ok(result.ToSimpleUserResponseIEnumerable());
+        }
+        
+        [HttpGet("user/{userId:Guid}")]
+        [ProducesResponseType(typeof(SimpleGroupResponse[]), 200)]
+        public async Task<IActionResult> GetUserGroups(Guid userId)
+        {
+            var result = await _database.Users
+                .Include(x => x.Groups)
+                .ThenInclude(x => x.Permissions)
+                .Where(x => x.UserId == userId)
+                .ToListAsync();
+
+            return Ok(result.ToSimpleUserResponseIEnumerable());
         }
         
         [RequirePermission("group:create")]
@@ -157,7 +183,7 @@ namespace TF47_API.Controllers
             return Ok(group.ToGroupResponse());
         }
 
-        [RequirePermission("group:delete")]
+        [RequirePermission("group:remove")]
         [HttpDelete("{groupId:int}")]
         [ProducesResponseType( 200)]
         public async Task<IActionResult> DeleteGroup(long groupId)
