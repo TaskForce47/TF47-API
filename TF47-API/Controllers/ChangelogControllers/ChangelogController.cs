@@ -136,7 +136,7 @@ namespace TF47_API.Controllers.ChangelogControllers
         [RequirePermission("changelog:remove")]
         [Authorize]
         [HttpDelete("{changelogId:int}")]
-        public async Task<IActionResult> DeleteChangelog(int changelogId)
+        public async Task<IActionResult> DeleteChangelog(long changelogId)
         {
             var changelog = await _database.Changelogs.FindAsync(changelogId);
             if (changelog == null)
