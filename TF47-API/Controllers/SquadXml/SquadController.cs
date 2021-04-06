@@ -258,7 +258,7 @@ namespace TF47_API.Controllers.SquadXml
             return Ok();
         }
         
-        [RequirePermission("squad:regenerate")]
+        [RequirePermission("squad:rebuild")]
         [HttpPost("{squadid}/rebuild")]
         public async Task<IActionResult> RebuildSquadXml(long squadid, CancellationToken cancellationToken)
         {
