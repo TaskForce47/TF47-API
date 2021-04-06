@@ -62,6 +62,7 @@ namespace TF47_API
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
             });
             services.AddSignalR();
+            services.AddGrpc();
 
             services.AddSwaggerGen(c =>
             {
@@ -114,6 +115,7 @@ namespace TF47_API
             services.AddSingleton<IDiscordAuthenticationService, DiscordAuthenticationService>();
             services.AddSingleton<IGroupPermissionCache, GroupPermissionCache>();
             services.AddSingleton<ApiTokenCache>();
+            services.AddSingleton<GreeterService>();
             services.AddHttpClient();
         }
 
