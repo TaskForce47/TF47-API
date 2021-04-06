@@ -7,23 +7,19 @@ namespace TF47_API.Dto.Mappings
 {
     public static class UserMapping
     {
-        public static UserResponse ToUserResponse(this User data, bool hideApiKey = false)
+        public static UserResponse ToUserResponse(this User data)
         {
             return data == null
                 ? null
                 : new UserResponse(data.UserId, data.Banned, data.Email,
                     data.Username, data.AllowEmails, data.CountryCode,
                     data.DiscordId, data.ProfilePicture, data.ProfileUrl, data.SteamId,
-                    data.FirstTimeSeen, data.LastTimeSeen,
-                    data.WrittenNotes.ToNoteResponseIEnumerable(),
-                    data.WrittenChangelogs.ToChangelogResponseIEnumerable(), 
-                    data.Groups.ToGroupResponseIEnumerable(),
-                    data.ApiKeys.ToApiKeyResponseIEnumerable(hideApiKey));
+                    data.FirstTimeSeen, data.LastTimeSeen);
         }
 
-        public static IEnumerable<UserResponse> ToUserResponseIEnumerable(this IEnumerable<User> data, bool hideApiKey = false)
+        public static IEnumerable<UserResponse> ToUserResponseIEnumerable(this IEnumerable<User> data)
         {
-            return data?.Select(x => ToUserResponse(x, hideApiKey));
+            return data?.Select(x => x.ToUserResponse());
         }
 
         public static SimpleUserResponse ToSimpleUserResponse(this User data)
