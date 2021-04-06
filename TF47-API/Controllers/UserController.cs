@@ -55,7 +55,7 @@ namespace TF47_API.Controllers
             var userResponses =  _database.Users
                 .AsNoTracking()
                 .Include(x => x.Groups)
-                .ThenInclude(y => y.GroupPermission);
+                .ThenInclude(y => y.Permissions);
 
             var notesResponse = await _database.Notes
                 .AsNoTracking()
@@ -111,7 +111,7 @@ namespace TF47_API.Controllers
 
             var userGroups = await _database.Groups
                 .AsNoTracking()
-                .Include(x => x.GroupPermission)
+                .Include(x => x.Permissions)
                 .Include(x => x.Users)
                 .Where(x => x.Users.Any(x => x.UserId == user.UserId))
                 .ToListAsync();
@@ -131,7 +131,7 @@ namespace TF47_API.Controllers
             //var userGuid = Guid.Parse(userId);
             var userDetails = await _database.Users
                 .Include(x => x.Groups)
-                .ThenInclude(z => z.GroupPermission)
+                .ThenInclude(z => z.Permissions)
                 .FirstOrDefaultAsync(x => x.UserId == userId);
 
             if (userDetails == null) return BadRequest("Requested user details not found");

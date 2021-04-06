@@ -28,7 +28,7 @@ namespace TF47_API.Database.Models.Services
         public string BackgroundColor { get; set; }
         [Required]
         public bool IsVisible { get; set; }
-        public GroupPermission GroupPermission { get; set; }
+        public ICollection<Permission> Permissions { get; set; }
         public ICollection<User> Users { get; set; }
     }
 

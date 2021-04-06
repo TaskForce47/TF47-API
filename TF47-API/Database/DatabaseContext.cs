@@ -15,6 +15,7 @@ using TF47_API.Database.Models;
 using TF47_API.Database.Models.GameServer;
 using TF47_API.Database.Models.GameServer.AAR;
 using TF47_API.Database.Models.Services;
+using TF47_API.Database.Models.Services.Enums;
 
 namespace TF47_API.Database
 {
@@ -36,7 +37,7 @@ namespace TF47_API.Database
 
         public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Group> Groups { get; set; }
-        public virtual DbSet<GroupPermission> GroupPermissions { get; set; }
+        public virtual DbSet<Permission> Permissions { get; set; }
         public virtual DbSet<IssueGroup> IssueGroups { get; set; }
         public virtual DbSet<Issue> Issues { get; set; }
         public virtual DbSet<IssueItem> IssueItems { get; set; }
@@ -54,7 +55,7 @@ namespace TF47_API.Database
         {
             builder.HasPostgresEnum<Side>();
             builder.HasPostgresEnum<VehicleType>();
-            builder.HasPostgresEnum<VehicleType>();
+            builder.HasPostgresEnum<PermissionType>();
 
             builder.Entity<Player>(entity =>
             {
@@ -128,14 +129,13 @@ namespace TF47_API.Database
             builder.Entity<Group>(entity =>
             {
                 entity.Property(x => x.GroupId).ValueGeneratedOnAdd();
-                entity.HasOne(x => x.GroupPermission)
-                    .WithOne(x => x.Group);
+                entity.HasMany(x => x.Permissions).WithMany(x => x.GroupPermissions)
+                    .UsingEntity(y => y.ToTable(
+                        "ServiceGroupPermissions"));
             });
-            builder.Entity<GroupPermission>(entity =>
+            builder.Entity<Permission>(entity =>
             {
-                entity.Property(x => x.GroupPermissionId).ValueGeneratedOnAdd();
-                entity.HasOne(x => x.Group).WithOne(x => x.GroupPermission)
-                    .HasForeignKey<GroupPermission>(x => x.GroupId);
+                entity.Property(x => x.PermissionId).ValueGeneratedOnAdd();
             });
             builder.Entity<IssueGroup>(entity =>
             {

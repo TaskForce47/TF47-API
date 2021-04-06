@@ -12,14 +12,12 @@ namespace TF47_API.Dto.Mappings
             return data == null
                 ? null
                 : new GroupResponse(data.GroupId, data.Name, data.Description, data.TextColor,
-                    data.BackgroundColor, data.IsVisible, new GroupPermissionsResponse(data.GroupPermission.GroupId,
-                        data.GroupPermission.PermissionsDiscord, data.GroupPermission.PermissionsTeamspeak,
-                        data.GroupPermission.PermissionsGadget));
+                    data.BackgroundColor, data.IsVisible, data.Permissions.ToPermissionResponseIEnumerable());
         }
 
         public static IEnumerable<GroupResponse> ToGroupResponseIEnumerable(this IEnumerable<Group> data)
         {
-            return data?.Select(x => ToGroupResponse(x));
+            return data?.Select(x => x.ToGroupResponse());
         }
     }
 }
