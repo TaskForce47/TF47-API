@@ -99,6 +99,20 @@ namespace TF47_API.Controllers
             return Ok(apiKeys.ToApiKeyResponseIEnumerable(true));
         }
         
+        [RequirePermission("apikey:view")]
+        [HttpGet("user/{userId:Guid}")]
+        [ProducesResponseType(typeof(ApiKeyResponse[]), 200)]
+        public async Task<IActionResult> GetApiKeysUser(Guid userId)
+        {
+            var apiKeys = await _database.ApiKeys
+                .AsNoTracking()
+                .Include(x => x.Owner)
+                .Where(x => x.OwnerId == userId)
+                .ToListAsync();
+            
+            return Ok(apiKeys.ToApiKeyResponseIEnumerable(true));
+        }
+        
         [HttpGet("me")]
         [ProducesResponseType(typeof(ApiKeyResponse[]), 200)]
         public async Task<IActionResult> GetApiKeysUser()
@@ -110,7 +124,7 @@ namespace TF47_API.Controllers
                 .Where(x => x.OwnerId == userId)
                 .ToListAsync();
             
-            return Ok(apiKeys.ToApiKeyResponseIEnumerable(true));
+            return Ok(apiKeys.ToApiKeyResponseIEnumerable(false));
         }
         
         [RequirePermission("apikey:view")]
