@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,12 @@ namespace TF47_API.Services
                 .FirstAsync(x =>
                 x.UserId == userId);
             return user;
+        }
+
+        public Guid? GetUserIdByClaimsAsync(HttpContext context)
+        {
+            if (context.User.Claims.Any(claim => claim.Type == "UserId")) return null;
+            return Guid.Parse(context.User.Claims.First(claim => claim.Type == "UserId").Value);
         }
     }
 }
