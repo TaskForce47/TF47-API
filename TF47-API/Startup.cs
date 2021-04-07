@@ -63,6 +63,7 @@ namespace TF47_API
             });
             services.AddSignalR();
             services.AddGrpc();
+            services.AddGrpcReflection();
 
             services.AddSwaggerGen(c =>
             {
@@ -157,6 +158,10 @@ namespace TF47_API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<GreeterService>();
+                if (env.IsDevelopment())
+                {
+                    endpoints.MapGrpcReflectionService();
+                }
                 endpoints.MapHub<TestHub>("/hub");
                 endpoints.MapHub<ShoutboxHub>("/shoutbox");
                 endpoints.MapHub<NotificationHub>("/notification");
