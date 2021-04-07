@@ -98,13 +98,14 @@ namespace TF47_API.Controllers
         [ProducesResponseType(typeof(SimpleGroupResponse[]), 200)]
         public async Task<IActionResult> GetUserGroups(Guid userId)
         {
-            var result = await _database.Users
-                .Include(x => x.Groups)
-                .ThenInclude(x => x.Permissions)
-                .Where(x => x.UserId == userId)
+            var result = await _database.Groups
+                .AsNoTracking()
+                .Include(x => x.Users)
+                .Include(x => x.Permissions)
+                .Where(x => x.Users.Any(y => y.UserId == userId))
                 .ToListAsync();
 
-            return Ok(result.ToSimpleUserResponseIEnumerable());
+            return Ok(result.ToSimpleGroupResponseIEnumerable());
         }
         
         [RequirePermission("group:create")]
