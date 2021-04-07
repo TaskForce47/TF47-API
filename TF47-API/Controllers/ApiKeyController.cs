@@ -99,10 +99,11 @@ namespace TF47_API.Controllers
             return Ok(apiKeys.ToApiKeyResponseIEnumerable(true));
         }
         
-        [HttpGet("{userId:guid}/me")]
+        [HttpGet("me")]
         [ProducesResponseType(typeof(ApiKeyResponse[]), 200)]
-        public async Task<IActionResult> GetApiKeysUser(Guid userId)
+        public async Task<IActionResult> GetApiKeysUser()
         {
+            var userId = _userProviderService.GetUserIdByClaimsAsync(HttpContext);
             var apiKeys = await _database.ApiKeys
                 .AsNoTracking()
                 .Include(x => x.Owner)
