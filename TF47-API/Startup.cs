@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using TF47_API.Database;
-using TF47_API.Grpc;
 using TF47_API.Middleware;
 using TF47_API.Services;
 using TF47_API.Services.ApiToken;
@@ -62,8 +61,6 @@ namespace TF47_API
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
             });
             services.AddSignalR();
-            services.AddGrpc();
-            services.AddGrpcReflection();
 
             services.AddSwaggerGen(c =>
             {
@@ -116,7 +113,6 @@ namespace TF47_API
             services.AddSingleton<IDiscordAuthenticationService, DiscordAuthenticationService>();
             services.AddSingleton<IGroupPermissionCache, GroupPermissionCache>();
             services.AddSingleton<ApiTokenCache>();
-            services.AddSingleton<GreeterService>();
             services.AddHttpClient();
         }
 
@@ -157,14 +153,10 @@ namespace TF47_API
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<GreeterService>();
-                if (env.IsDevelopment())
-                {
-                    endpoints.MapGrpcReflectionService();
-                }
                 endpoints.MapHub<TestHub>("/hub");
                 endpoints.MapHub<ShoutboxHub>("/shoutbox");
                 endpoints.MapHub<NotificationHub>("/notification");
+                endpoints.MapHub<EchelonHub>("/echelon");
                 endpoints.MapControllers();
             });
         }
