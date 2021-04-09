@@ -23,6 +23,12 @@ namespace TF47_API.Filters
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
+            if (context.HttpContext.Request.Headers.Any(x => x.Key == "TF47ApiKey"))
+            {
+                await next();
+                return;
+            }
+            
             var groupPermissionCache = context.HttpContext.RequestServices.GetRequiredService<IGroupPermissionCache>();
 
             var roles = context.HttpContext.User.Claims
