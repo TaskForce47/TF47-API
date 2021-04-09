@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -97,13 +98,14 @@ namespace TF47_API.Controllers
         [ProducesResponseType(typeof(SimpleGroupResponse[]), 200)]
         public async Task<IActionResult> GetUserGroups(Guid userId)
         {
-            var result = await _database.Users
-                .Include(x => x.Groups)
-                .ThenInclude(x => x.Permissions)
-                .Where(x => x.UserId == userId)
+            var result = await _database.Groups
+                .AsNoTracking()
+                .Include(x => x.Users)
+                .Include(x => x.Permissions)
+                .Where(x => x.Users.Any(y => y.UserId == userId))
                 .ToListAsync();
 
-            return Ok(result.ToSimpleUserResponseIEnumerable());
+            return Ok(result.ToSimpleGroupResponseIEnumerable());
         }
         
         [RequirePermission("group:create")]
@@ -111,10 +113,6 @@ namespace TF47_API.Controllers
         [ProducesResponseType(typeof(GroupResponse), 201)]
         public async Task<IActionResult> CreateGroup([FromBody] CreateGroupRequest request)
         {
-            var permissions = await _database.Permissions
-                .Where(x => request.Permissions.Contains(x.PermissionId))
-                .ToListAsync();
-            
             var newGroup = new Group
             {
                 BackgroundColor = request.BackgroundColor,
@@ -122,8 +120,16 @@ namespace TF47_API.Controllers
                 Description = request.Description,
                 IsVisible = request.IsVisible,
                 Name = request.Name,
-                Permissions = permissions
             };
+
+            if (request.Permissions != null)
+            {
+                var permissions = await _database.Permissions
+                    .Where(x => request.Permissions.Contains(x.PermissionId))
+                    .ToListAsync();
+                newGroup.Permissions = permissions;
+            }
+            
             try
             {
                 await _database.Groups.AddAsync(newGroup);
