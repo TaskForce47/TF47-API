@@ -134,7 +134,19 @@ namespace TF47_API.Controllers.ChangelogControllers
             if (session == null) return BadRequest("Session Id provided does not exist");
             
             session.TimeEnded = DateTime.Now;
-            
+
+            try
+            {
+                await _database.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed to end session: {sessionId}, {message}", sessionId, ex.Message);
+                return Problem(
+                    "Failed to end session. Most likely the session has been already altered or has been deleted", null,
+                    500, "Failed to update session");
+            }
+
             return Ok(session.ToSessionResponse());
         }
 
