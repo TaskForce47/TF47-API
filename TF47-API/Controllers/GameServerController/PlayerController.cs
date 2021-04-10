@@ -77,7 +77,7 @@ namespace TF47_API.Controllers.GameServerController
             return Ok(response.ToPlayerResponseWithDetailsIEnumerable());
         }
 
-        [HttpPatch("{playerUid}/refresh")]
+        [HttpPut("{playerUid}/refresh")]
         [ProducesResponseType(typeof(PlayerResponse), 200)]
         public async Task<IActionResult> UpdatePlayerName(string playerUid, [FromBody] UpdatePlayerNameRequest request)
         {
