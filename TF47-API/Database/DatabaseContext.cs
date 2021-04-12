@@ -107,6 +107,11 @@ namespace TF47_API.Database
                 entity.HasOne(x => x.Player).WithMany(x => x.PlayerChats).HasForeignKey(x => x.PlayerId);
             });
             builder.Entity<Note>(entity => { entity.Property(x => x.NoteId).ValueGeneratedOnAdd(); });
+            builder.Entity<ReplayItem>(entity =>
+            {
+                entity.Property(x => x.ReplayItemId).ValueGeneratedOnAdd();
+                entity.HasOne(x => x.Session).WithMany(x => x.ReplayItems).HasForeignKey(x => x.SessionId);
+            });
             builder.Entity<User>(entity =>
             {
                 entity.Property(x => x.UserId).ValueGeneratedOnAdd();
