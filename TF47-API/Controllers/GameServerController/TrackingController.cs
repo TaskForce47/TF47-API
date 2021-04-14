@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
 using TF47_API.Database.Models.GameServer.AAR;
+using TF47_API.Dto.RequestModels;
 
 namespace TF47_API.Controllers.GameServerController
 {
@@ -54,7 +57,49 @@ namespace TF47_API.Controllers.GameServerController
             return Ok();
         }
 
-        public record CreateReplayItemRequest(long TrackingId, string Type, string Data, float GameTickTime,
-            string GameTime);
+        [HttpPost("{sessionId:int}/batch")]
+        public async Task<IActionResult> CreatePlayItemsBatch(long sessionId,
+            [FromBody] CreateReplayItemRequest[] request)
+        {
+            var session = await _database.Sessions.FindAsync(sessionId);
+
+            var replayItems = new List<ReplayItem>();
+            foreach (var createReplayItemRequest in request)
+            {
+                var replayItem = new ReplayItem
+                {
+                    Data = createReplayItemRequest.Data,
+                    GameTime = createReplayItemRequest.GameTime,
+                    GameTickTime = createReplayItemRequest.GameTickTime,
+                    TrackingId = createReplayItemRequest.TrackingId,
+                    Type = createReplayItemRequest.Type,
+                    Session = session
+                };
+                replayItems.Add(replayItem);
+            }
+            
+            try
+            {
+                await _database.ReplayItems.AddRangeAsync(replayItems);
+                await _database.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Failed to insert replay item: {message}", ex.Message);
+                return Problem("Failed to create replay item", null, 500, "Failed to create replay item");
+            }
+
+            return Ok();
+        }
+
+        [HttpGet("{sessionId:int}")]
+        public async Task<IActionResult> GetReplayItems(long sessionId)
+        {
+            var result = await _database.ReplayItems
+                .Where(x => x.SessionId == sessionId)
+                .ToListAsync();
+
+            return Ok(result);
+        }
     }
 }
