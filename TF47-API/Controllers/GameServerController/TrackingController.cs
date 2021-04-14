@@ -12,7 +12,6 @@ using TF47_API.Dto.RequestModels;
 
 namespace TF47_API.Controllers.GameServerController
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TrackingController : Controller
@@ -28,6 +27,7 @@ namespace TF47_API.Controllers.GameServerController
             _database = database;
         }
 
+        [Authorize]
         [HttpPost("{sessionId:int}")]
         public async Task<IActionResult> CreateReplayItem(long sessionId, [FromBody] CreateReplayItemRequest request)
         {
@@ -57,6 +57,7 @@ namespace TF47_API.Controllers.GameServerController
             return Ok();
         }
 
+        [Authorize]
         [HttpPost("{sessionId:int}/batch")]
         public async Task<IActionResult> CreatePlayItemsBatch(long sessionId,
             [FromBody] CreateReplayItemRequest[] request)
@@ -92,6 +93,7 @@ namespace TF47_API.Controllers.GameServerController
             return Ok();
         }
 
+        [Authorize]
         [HttpGet("{sessionId:int}")]
         public async Task<IActionResult> GetReplayItems(long sessionId)
         {
