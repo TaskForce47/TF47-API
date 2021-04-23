@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -8,10 +9,14 @@ using TF47_API.Database;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
+using TF47_API.Filters;
 using TF47_API.Services;
 
 namespace TF47_API.Controllers.GameServerController
 {
+    [Authorize]
+    [Route("api/[controller]")]
+    [ApiController]
     public class WhitelistController : Controller
     {
         private readonly ILogger<WhitelistController> _logger;
@@ -27,7 +32,8 @@ namespace TF47_API.Controllers.GameServerController
             _database = database;
             _userProviderService = userProviderService;
         }
-
+        
+        [AllowAnonymous]
         [HttpGet("whitelists")]
         [ProducesResponseType(typeof(WhitelistResponse), 200)]
         public async Task<IActionResult> GetWhitelists()
@@ -37,7 +43,8 @@ namespace TF47_API.Controllers.GameServerController
                 .ToListAsync();
             return Ok(response.ToWhitelistResponseIEnumerable());
         }
-
+        
+        [RequirePermission("whitelist:view")]
         [HttpGet("user/{playerUid}")]
         [ProducesResponseType(typeof(UserWhitelistingResponse), 200)]
         public async Task<IActionResult> GetWhitelistingsUser(string playerUid)
@@ -52,7 +59,8 @@ namespace TF47_API.Controllers.GameServerController
             
             return Ok(user.ToPlayerWhitelistingResponse());
         }
-
+        
+        [RequirePermission("whitelist:view")]
         [HttpGet("users")]
         [ProducesResponseType(typeof(UserWhitelistingResponse[]), 200)]
         public async Task<IActionResult> GetAllWhitelistings()
@@ -64,6 +72,7 @@ namespace TF47_API.Controllers.GameServerController
             return Ok(users.ToPlayerWhitelistingResponseIEnumerable());
         }
 
+        [RequirePermission("whitelist:create")]
         [HttpPost("userWhitelisting")]
         public async Task<IActionResult> WhitelistUser([FromBody] CreateUserWhitelistingRequest request)
         {
@@ -85,6 +94,7 @@ namespace TF47_API.Controllers.GameServerController
             return Ok();
         }
         
+        [RequirePermission("whitelist:create")]
         [HttpPost("userWhitelistingBatch")]
         public async Task<IActionResult> WhitelistUserBatch([FromBody] CreateUserWhitelistingRequest[] requests)
         {
@@ -116,6 +126,7 @@ namespace TF47_API.Controllers.GameServerController
             return Ok();
         }
 
+        [RequirePermission("whitelist:remove")]
         [HttpDelete("removeWhitelisting")]
         public async Task<IActionResult> RemoveWhitelisting([FromBody] RemoveUserWhitelistingRequest request)
         {
