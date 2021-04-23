@@ -157,9 +157,14 @@ namespace TF47_API.Controllers
 
             if (group == null) return BadRequest("GroupId provided does not exist");
 
-            var permissions = await _database.Permissions
-                .Where(x => request.Permissions.Contains(x.PermissionId))
-                .ToListAsync();
+            if (request.Permissions != null)
+            {
+                var permissions = await _database.Permissions
+                    .Where(x => request.Permissions.Contains(x.PermissionId))
+                    .ToListAsync();
+                
+                group.Permissions = permissions;
+            }
 
             if (!string.IsNullOrWhiteSpace(request.Description))
                 group.Description = request.Description;
@@ -172,7 +177,7 @@ namespace TF47_API.Controllers
             if (request.IsVisible.HasValue)
                 group.IsVisible = request.IsVisible.Value;
 
-            group.Permissions = permissions;
+            
 
             try
             {

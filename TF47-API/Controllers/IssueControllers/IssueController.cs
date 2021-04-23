@@ -88,7 +88,7 @@ namespace TF47_API.Controllers.IssueControllers
 
         [HttpGet("{issueId:int}")]
         [ProducesResponseType(typeof(IssueResponse), 200)]
-        public async Task<IActionResult> GetIssue(int issueId)
+        public async Task<IActionResult> GetIssue(long issueId)
         {
             var issue = await _database.Issues
                 .AsNoTracking()
@@ -120,7 +120,7 @@ namespace TF47_API.Controllers.IssueControllers
         [Authorize]
         [HttpPut("{issueId:int}")]
         [ProducesResponseType(typeof(IssueResponse), 200)]
-        public async Task<IActionResult> UpdateIssue(int issueId, [FromBody] UpdateIssueRequest request)
+        public async Task<IActionResult> UpdateIssue(long issueId, [FromBody] UpdateIssueRequest request)
         {
             var issue = await _database.Issues.FindAsync(issueId);
             if (issue == null) return BadRequest("Issue does not exist");

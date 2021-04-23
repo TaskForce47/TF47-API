@@ -78,7 +78,7 @@ namespace TF47_API.Controllers.IssueControllers
         [Authorize]
         [HttpPut("{issueItemId:int}")]
         [ProducesResponseType(typeof(IssueItemResponse), 200)]
-        public async Task<IActionResult> UpdateIssueItem(int issueItemId, [FromBody] UpdateIssueItemRequest request)
+        public async Task<IActionResult> UpdateIssueItem(long issueItemId, [FromBody] UpdateIssueItemRequest request)
         {
             var issueItem = await _database.IssueItems.FindAsync(issueItemId);
             var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);

@@ -69,7 +69,7 @@ namespace TF47_API.Controllers.IssueControllers
         [Authorize]
         [HttpPut("{issueTagId:int}")]
         [ProducesResponseType(typeof(IssueTagResponse), 200)]
-        public async Task<IActionResult> UpdateIssueTag(int issueTagId, [FromBody] UpdateIssueTagRequest request)
+        public async Task<IActionResult> UpdateIssueTag(long issueTagId, [FromBody] UpdateIssueTagRequest request)
         {
             var issueTag = await _database.IssueTags.FindAsync(issueTagId);
             if (issueTag == null) return BadRequest("Issue tag does not exist");
@@ -96,7 +96,7 @@ namespace TF47_API.Controllers.IssueControllers
 
         [HttpGet("{issueTagId:int}")]
         [ProducesResponseType(typeof(IssueTagResponse), 200)]
-        public async Task<IActionResult> GetIssueTag(int issueTagId)
+        public async Task<IActionResult> GetIssueTag(long issueTagId)
         {
             var issueTag = await _database.IssueTags.FindAsync(issueTagId);
 
@@ -115,7 +115,7 @@ namespace TF47_API.Controllers.IssueControllers
         
         [RequirePermission("issue:delete")]
         [HttpDelete("{issueTagId:int}")]
-        public async Task<IActionResult> RemoveIssueTag(int issueTagId)
+        public async Task<IActionResult> RemoveIssueTag(long issueTagId)
         {
             var issueTag = await _database.IssueTags.FindAsync(issueTagId);
 
