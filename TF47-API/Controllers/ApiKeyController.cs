@@ -117,12 +117,12 @@ namespace TF47_API.Controllers
         [ProducesResponseType(typeof(ApiKeyResponse[]), 200)]
         public async Task<IActionResult> GetApiKeysUser()
         {
-            var userId = _userProviderService.GetUserIdByClaimsAsync(HttpContext).Value;
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
 
             var apiKeys = await _database.ApiKeys
                 .AsNoTracking()
                 .Include(x => x.Owner)
-                .Where(x => x.OwnerId == userId)
+                .Where(x => x.OwnerId == user.UserId)
                 .ToListAsync();
             
             return Ok(apiKeys.ToApiKeyResponseIEnumerable(false));
