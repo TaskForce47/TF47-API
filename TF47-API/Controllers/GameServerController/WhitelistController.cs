@@ -67,7 +67,9 @@ namespace TF47_API.Controllers.GameServerController
         [HttpPost("userWhitelisting")]
         public async Task<IActionResult> WhitelistUser([FromBody] CreateUserWhitelistingRequest request)
         {
-            var whitelist = await _database.Whitelists.FirstOrDefaultAsync(x => x.WhitelistId == request.WhitelistId);
+            var whitelist = await _database.Whitelists
+                .Include(x => x.Players)
+                .FirstOrDefaultAsync(x => x.WhitelistId == request.WhitelistId);
             if (whitelist == null)
                 return BadRequest("Whitelist Id provided does not exist");
 
@@ -91,7 +93,9 @@ namespace TF47_API.Controllers.GameServerController
                 foreach (var request in requests)
                 {
                     var whitelist =
-                        await _database.Whitelists.FirstOrDefaultAsync(x => x.WhitelistId == request.WhitelistId);
+                        await _database.Whitelists
+                            .Include(x => x.Players)
+                            .FirstOrDefaultAsync(x => x.WhitelistId == request.WhitelistId);
                     if (whitelist == null)
                         throw new Exception("Whitelist Id provided does not exist");
 
