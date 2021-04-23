@@ -28,7 +28,7 @@ namespace TF47_API.Controllers.GameServerController
             _userProviderService = userProviderService;
         }
 
-        [HttpGet]
+        [HttpGet("whitelists")]
         [ProducesResponseType(typeof(WhitelistResponse), 200)]
         public async Task<IActionResult> GetWhitelists()
         {
@@ -112,7 +112,7 @@ namespace TF47_API.Controllers.GameServerController
             return Ok();
         }
 
-        [HttpDelete]
+        [HttpDelete("removeWhitelisting")]
         public async Task<IActionResult> RemoveWhitelisting([FromBody] RemoveUserWhitelistingRequest request)
         {
             var whitelist = await _database.Whitelists.FirstOrDefaultAsync(x => x.WhitelistId == request.WhitelistId);
