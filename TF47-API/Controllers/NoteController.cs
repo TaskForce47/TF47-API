@@ -82,7 +82,6 @@ namespace TF47_API.Controllers
             if (playerNote == null) return BadRequest("Requested note does not exist");
             
             var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
-            _database.Attach(user);
 
             if (user.UserId != playerNote.WriterId)
                 return BadRequest("You cannot edit this note! Only the user who created the note can edit it.");
