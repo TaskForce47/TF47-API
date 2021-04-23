@@ -33,6 +33,7 @@ namespace TF47_API.Database
         public virtual DbSet<Kill> Kills { get; set; }
         public virtual DbSet<Chat> Chats { get; set; }
         public virtual DbSet<Note> Notes { get; set; }
+        public virtual DbSet<Whitelist> Whitelists { get; set; }
         public virtual DbSet<ReplayItem> ReplayItems { get; set; }
 
         public virtual DbSet<User> Users { get; set; }
