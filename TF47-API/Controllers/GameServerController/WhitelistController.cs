@@ -53,7 +53,7 @@ namespace TF47_API.Controllers.GameServerController
             return Ok(user.ToPlayerWhitelistingResponse());
         }
 
-        [HttpGet]
+        [HttpGet("users")]
         [ProducesResponseType(typeof(UserWhitelistingResponse[]), 200)]
         public async Task<IActionResult> GetAllWhitelistings()
         {
