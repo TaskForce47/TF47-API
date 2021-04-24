@@ -194,6 +194,52 @@ namespace TF47_API.Controllers
             return Ok(group.ToGroupResponse());
         }
 
+        [RequirePermission("group:update")]
+        [HttpPut("{groupId:int}/addPermission/{permissionId:int}")]
+        [ProducesResponseType(typeof(GroupResponse), 200)]
+        public async Task<IActionResult> GroupAddPermission(long groupId, long permissionId)
+        {
+            var group = await _database.Groups
+                .Include(x => x.Permissions)
+                .FirstOrDefaultAsync(x => x.GroupId == groupId);
+            if (group == null) return BadRequest("Group Id provided does not exist");
+            
+            var permission = await _database.Permissions.FirstOrDefaultAsync(x => x.PermissionId == permissionId);
+            if (permission == null) return BadRequest("Group PermissionId provided does not exist");
+
+            if (group.Permissions.Any(x => x.PermissionId == permissionId))
+                return Ok(group.ToGroupResponse());
+            
+            group.Permissions.Add(permission);
+            
+            await _database.SaveChangesAsync();
+            await _groupPermissionCache.RefreshCache();
+            return Ok(group.ToGroupResponse());
+        }
+    
+        [RequirePermission("group:update")]
+        [HttpPut("{groupId:int}/removePermission/{permissionId:int}")]
+        [ProducesResponseType(typeof(GroupResponse), 200)]
+        public async Task<IActionResult> RemovePermission(long groupId, long permissionId)
+        {
+            var group = await _database.Groups
+                .Include(x => x.Permissions)
+                .FirstOrDefaultAsync(x => x.GroupId == groupId);
+            if (group == null) return BadRequest("Group Id provided does not exist");
+            
+            var permission = await _database.Permissions.FirstOrDefaultAsync(x => x.PermissionId == permissionId);
+            if (permission == null) return BadRequest("Group PermissionId provided does not exist");
+
+            if (@group.Permissions.All(x => x.PermissionId != permissionId))
+                return Ok(group.ToGroupResponse());
+            
+            group.Permissions.Remove(permission);
+            
+            await _database.SaveChangesAsync();
+            await _groupPermissionCache.RefreshCache();
+            return Ok(group.ToGroupResponse());
+        }
+        
         [RequirePermission("group:remove")]
         [HttpDelete("{groupId:int}")]
         [ProducesResponseType( 200)]
