@@ -9,6 +9,8 @@ using TF47_API.Database;
 using TF47_API.Database.Models.Services;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
+using TF47_API.Dto.ResponseModels;
+using TF47_API.Filters;
 
 namespace TF47_API.Controllers
 {
@@ -28,7 +30,9 @@ namespace TF47_API.Controllers
             _database = database;
         }
 
+        [AllowAnonymous]
         [HttpGet("{donationId:int}")]
+        [ProducesResponseType(typeof(DonationResponse), 200)]
         public async Task<IActionResult> GetDonation(long donationId)
         {
             var donation = await _database.Donations.FirstOrDefaultAsync(x => x.DonationId == donationId);
@@ -37,7 +41,9 @@ namespace TF47_API.Controllers
             return Ok(donation.ToDonationResponse());
         }
 
+        [AllowAnonymous]
         [HttpGet("statistics/{year:int}/{month:int}")]
+        [ProducesResponseType(typeof(DonationResponse[]), 200)]
         public async Task<IActionResult> GetDonationOfMonth(int year, int month)
         {
             var donations = await _database.Donations
@@ -48,7 +54,9 @@ namespace TF47_API.Controllers
             return Ok(donations.ToDonationResponseIEnumerable());
         }
 
+        [AllowAnonymous]
         [HttpGet("statistics/{year:int}")]
+        [ProducesResponseType(typeof(DonationResponse[]), 200)]
         public async Task<IActionResult> GetDonationsOfYear(int year)
         {
             var donations = await _database.Donations
@@ -59,7 +67,9 @@ namespace TF47_API.Controllers
             return Ok(donations.ToDonationResponseIEnumerable());
         }
 
+        [AllowAnonymous]
         [HttpGet("statistics/topDonators/{limit:int}")]
+        [ProducesResponseType(typeof(DonationResponse[]), 200)]
         public async Task<IActionResult> GetTopDonatorListDescending(int limit = 10)
         {
             var topDonators = await _database.Donations
@@ -81,7 +91,9 @@ namespace TF47_API.Controllers
             return Ok(topDonators);
         }
 
+        [RequirePermission("donation:create")]
         [HttpPost]
+        [ProducesResponseType(typeof(DonationResponse), 201)]
         public async Task<IActionResult> CreateDonation([FromBody] CreateDonationRequest request)
         {
             var donation = new Donation
@@ -98,7 +110,9 @@ namespace TF47_API.Controllers
                 donation.ToDonationResponse());
         }
 
+        [RequirePermission("donation:update")]
         [HttpPut("{donationId:int}")]
+        [ProducesResponseType(typeof(DonationResponse), 200)]
         public async Task<IActionResult> UpdateDonation(long donationId, [FromBody] UpdateDonationRequest request)
         {
             var donation = await _database.Donations.FirstOrDefaultAsync(x => x.DonationId == donationId);
@@ -121,7 +135,9 @@ namespace TF47_API.Controllers
             return Ok(donation.ToDonationResponse());
         }
 
+        [RequirePermission("donation:remove")]
         [HttpDelete("{donationId:int}")]
+        [ProducesResponseType( 200)]
         public async Task<IActionResult> RemoveDonation(long donationId)
         {
             var donation = await _database.Donations
