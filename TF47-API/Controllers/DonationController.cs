@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
 using TF47_API.Database.Models.Services;
+using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 
 namespace TF47_API.Controllers
@@ -33,7 +34,7 @@ namespace TF47_API.Controllers
             var donation = await _database.Donations.FirstOrDefaultAsync(x => x.DonationId == donationId);
             if (donation == null) return BadRequest("Donation Id provided does not exist");
 
-            return Ok();
+            return Ok(donation.ToDonationResponse());
         }
 
         [HttpGet("statistics/{year:int}/{month:int}")]
@@ -44,7 +45,7 @@ namespace TF47_API.Controllers
                 .Where(x => x.TimeOfDonation.Year == year && x.TimeOfDonation.Month == month)
                 .ToListAsync();
 
-            return Ok();
+            return Ok(donations.ToDonationResponseIEnumerable());
         }
 
         [HttpGet("statistics/{year:int}")]
@@ -53,10 +54,9 @@ namespace TF47_API.Controllers
             var donations = await _database.Donations
                 .AsNoTracking()
                 .Where(x => x.TimeOfDonation.Year == year)
-                .GroupBy(x => x.TimeOfDonation.Month)
                 .ToListAsync();
 
-            return Ok();
+            return Ok(donations.ToDonationResponseIEnumerable());
         }
 
         [HttpGet("statistics/topDonators/{limit:int}")]
@@ -94,7 +94,8 @@ namespace TF47_API.Controllers
             await _database.Donations.AddAsync(donation);
             await _database.SaveChangesAsync();
 
-            return Ok();
+            return CreatedAtAction(nameof(GetDonation), new {DonationId = donation.DonationId},
+                donation.ToDonationResponse());
         }
 
         [HttpPut("{donationId:int}")]
@@ -117,7 +118,7 @@ namespace TF47_API.Controllers
             }
 
             await _database.SaveChangesAsync();
-            return Ok();
+            return Ok(donation.ToDonationResponse());
         }
 
         [HttpDelete("{donationId:int}")]
