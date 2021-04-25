@@ -47,6 +47,7 @@ namespace TF47_API.Database
         public virtual DbSet<Changelog> Changelogs { get; set; }
         public virtual DbSet<Squad> Squads { get; set; }
         public virtual DbSet<SquadMember> SquadMembers { get; set; }
+        public virtual DbSet<Donation> Donations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -191,6 +192,13 @@ namespace TF47_API.Database
                     .HasForeignKey(x => x.SquadId);
                 entity.HasOne(x => x.User)
                     .WithMany(x => x.MemberOfSquads)
+                    .HasForeignKey(x => x.UserId);
+            });
+            builder.Entity<Donation>(entity =>
+            {
+                entity.Property(x => x.DonationId).ValueGeneratedOnAdd();
+                entity.HasOne(x => x.User)
+                    .WithMany(x => x.Donations)
                     .HasForeignKey(x => x.UserId);
             });
         }
