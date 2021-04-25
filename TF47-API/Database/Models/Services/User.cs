@@ -37,5 +37,6 @@ namespace TF47_API.Database.Models.Services
         public ICollection<Changelog> WrittenChangelogs { get; set; }
         public ICollection<ApiKey> ApiKeys { get; set; }
         public ICollection<SquadMember> MemberOfSquads { get; set; }
+        public ICollection<Donation> Donations { get; set; }
     }
 }
