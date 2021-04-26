@@ -149,7 +149,9 @@ namespace TF47_API.Controllers.GameServerController
         [HttpPut("removeWhitelisting")]
         public async Task<IActionResult> RemoveWhitelisting([FromBody] RemoveUserWhitelistingRequest request)
         {
-            var whitelist = await _database.Whitelists.FirstOrDefaultAsync(x => x.WhitelistId == request.WhitelistId);
+            var whitelist = await _database.Whitelists
+                .Include(x => x.Players)
+                .FirstOrDefaultAsync(x => x.WhitelistId == request.WhitelistId);
             if (whitelist == null) return BadRequest("Whitelist Id provided does not exist");
             var user = await _database.Players.FirstOrDefaultAsync(x => x.PlayerUid == request.PlayerUid);
             if (user == null) return BadRequest("User Uid provided does not exist");
