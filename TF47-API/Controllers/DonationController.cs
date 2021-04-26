@@ -49,6 +49,7 @@ namespace TF47_API.Controllers
             var donations = await _database.Donations
                 .AsNoTracking()
                 .Where(x => x.TimeOfDonation.Year == year && x.TimeOfDonation.Month == month)
+                .OrderBy(x => x.TimeOfDonation)
                 .ToListAsync();
 
             return Ok(donations.ToDonationResponseIEnumerable());
@@ -62,6 +63,7 @@ namespace TF47_API.Controllers
             var donations = await _database.Donations
                 .AsNoTracking()
                 .Where(x => x.TimeOfDonation.Year == year)
+                .OrderBy(x => x.TimeOfDonation)
                 .ToListAsync();
 
             return Ok(donations.ToDonationResponseIEnumerable());
