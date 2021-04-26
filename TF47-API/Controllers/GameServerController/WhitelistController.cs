@@ -146,7 +146,7 @@ namespace TF47_API.Controllers.GameServerController
         }
 
         [RequirePermission("whitelist:remove")]
-        [HttpDelete("removeWhitelisting")]
+        [HttpPut("removeWhitelisting")]
         public async Task<IActionResult> RemoveWhitelisting([FromBody] RemoveUserWhitelistingRequest request)
         {
             var whitelist = await _database.Whitelists.FirstOrDefaultAsync(x => x.WhitelistId == request.WhitelistId);
