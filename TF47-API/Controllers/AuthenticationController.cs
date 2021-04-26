@@ -53,16 +53,6 @@ namespace TF47_API.Controllers
         {
             if (HttpContext.User.Identity == null || !HttpContext.User.Identity.IsAuthenticated)
             {
-                HttpContext.Response.Cookies.Append("tf47_redirect_cookie", HttpContext.Request.Host.ToString(), new CookieOptions
-                {
-                    Domain = HttpContext.Request.Host.Host,
-                    Expires = DateTimeOffset.Now + TimeSpan.FromMinutes(5),
-                    HttpOnly = true,
-                    IsEssential = true,
-                    Path = "/",
-                    Secure = true
-                });
-                
                 var challenge =
                     _steamAuthenticationService.CreateChallenge(HttpContext, "api/Authentication/login/callback/steam");
                 return Redirect(challenge);
@@ -91,8 +81,7 @@ namespace TF47_API.Controllers
                     ExpiresUtc = DateTime.UtcNow.AddDays(4)
                 });
 
-            var redirectPath = HttpContext.Request.Cookies.First(x => x.Key == "tf47_redirect_cookie");
-            return Redirect(redirectPath.Value);
+            return Redirect(_configuration["Redirections:AuthenticationSuccessful"]);
         }
 
         [HttpGet("logout")]
@@ -100,7 +89,7 @@ namespace TF47_API.Controllers
         {
             if (HttpContext.User.Identity != null && HttpContext.User.Identity.IsAuthenticated)
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return Redirect(HttpContext.Request.Host.ToString());
+            return Redirect(_configuration["Redirections:LogoutSuccessful"]);
         }
     }
 }

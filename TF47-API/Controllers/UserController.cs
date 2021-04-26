@@ -89,15 +89,6 @@ namespace TF47_API.Controllers
         [HttpGet("link/Discord")]
         public IActionResult LinkDiscord()
         {
-            HttpContext.Response.Cookies.Append("tf47_redirect_cookie", HttpContext.Request.Host.ToString(), new CookieOptions
-            {
-                Domain = HttpContext.Request.Host.Host,
-                Expires = DateTimeOffset.Now + TimeSpan.FromMinutes(5),
-                HttpOnly = true,
-                IsEssential = true,
-                Path = "/",
-                Secure = true
-            });
             var challenge = _discordAuthenticationService.CreateChallenge(HttpContext, "api/User/link/callback/discord");
             return Redirect(challenge);
         }
@@ -106,18 +97,14 @@ namespace TF47_API.Controllers
         public async Task<IActionResult> HandleDiscordCallback()
         {
             var result = (DiscordUserResponse)await _discordAuthenticationService.HandleCallbackAsync(HttpContext);
-            
-            var redirectPath = HttpContext.Request.Cookies.First(x => x.Key == "tf47_redirect_cookie");
-            if (result == null) return Redirect(redirectPath.Value);
+            if (result == null) return Redirect(_configuration["Redirections:LinkFailed"]);
 
             var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
             user.DiscordId = result.Id;
             user.Email = result.Email;
 
             await _database.SaveChangesAsync();
-            
-           
-            return Redirect(redirectPath.Value);
+            return Redirect(_configuration["Redirections:LinkSuccessful"]);
         }
 
     }
