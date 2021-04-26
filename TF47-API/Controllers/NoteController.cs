@@ -19,7 +19,7 @@ namespace TF47_API.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class NoteController : Controller
+    public class NoteController : ControllerBase
     {
         private readonly ILogger<NoteController> _logger;
         private readonly DatabaseContext _database;
@@ -78,6 +78,7 @@ namespace TF47_API.Controllers
         {
             var playerNote = await _database.Notes
                 .Include(x => x.Writer)
+                .Include(x => x.Player)
                 .FirstOrDefaultAsync(x => x.NoteId == noteId);
             if (playerNote == null) return BadRequest("Requested note does not exist");
             
