@@ -92,7 +92,7 @@ namespace TF47_API.Controllers.GameServerController
         }
 
         [RequirePermission("whitelist:create")]
-        [HttpPost("userWhitelisting")]
+        [HttpPut("userWhitelisting")]
         public async Task<IActionResult> WhitelistUser([FromBody] CreateUserWhitelistingRequest request)
         {
             var whitelist = await _database.Whitelists
@@ -114,7 +114,7 @@ namespace TF47_API.Controllers.GameServerController
         }
         
         [RequirePermission("whitelist:create")]
-        [HttpPost("userWhitelistingBatch")]
+        [HttpPut("userWhitelistingBatch")]
         public async Task<IActionResult> WhitelistUserBatch([FromBody] CreateUserWhitelistingRequest[] requests)
         {
             try
