@@ -18,7 +18,7 @@ namespace TF47_API.Services.Authorization
         private readonly IServiceProvider _serviceProvider;
 
         private bool _updateLock;
-        private Dictionary<string, ICollection<string>> _permissionCache;
+        private readonly Dictionary<string, ICollection<string>> _permissionCache;
         
         public GroupPermissionCache(
             ILogger<GroupPermissionCache> logger,

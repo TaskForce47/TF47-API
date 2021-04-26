@@ -23,7 +23,7 @@ namespace TF47_API.Filters
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            if (context.HttpContext.Request.Headers.Any(x => x.Key == "TF47ApiKey"))
+            if (context.HttpContext.Request.Headers.Any(x => x.Key == "TF47AuthKey"))
             {
                 await next();
                 return;
