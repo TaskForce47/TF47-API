@@ -62,7 +62,7 @@ namespace TF47_API.Controllers.GameServerController
         
         [RequirePermission("whitelist:view")]
         [HttpGet("users")]
-        [ProducesResponseType(typeof(UserWhitelistingResponse[]), 200)]
+        [ProducesResponseType(typeof(WhitelistResponse[]), 200)]
         public async Task<IActionResult> GetAllWhitelistings()
         {
             var users = await _database.Players
@@ -70,6 +70,25 @@ namespace TF47_API.Controllers.GameServerController
                 .Include(x => x.PlayerWhitelistings)
                 .ToListAsync();
             return Ok(users.ToPlayerWhitelistingResponseIEnumerable());
+        }
+
+        [RequirePermission("whitelist:view")]
+        [HttpGet("user/{playerUid}/nonMember")]
+        [ProducesResponseType(typeof(WhitelistResponse[]), 200)]
+        public async Task<IActionResult> GetWhitelistsUserNonMember(string playerUid)
+        {
+            var user = await _database.Players
+                .AsNoTracking()
+                .Include(x => x.PlayerWhitelistings)
+                .FirstOrDefaultAsync(x => x.PlayerUid == playerUid);
+            if (user == null) return BadRequest("User Uid provided does not exist");
+
+            var whitelists = await _database.Whitelists
+                .AsNoTracking()
+                .Where(x => !user.PlayerWhitelistings.Contains(x))
+                .ToListAsync();
+
+            return Ok(whitelists.ToWhitelistResponseIEnumerable());
         }
 
         [RequirePermission("whitelist:create")]
