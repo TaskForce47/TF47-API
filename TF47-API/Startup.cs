@@ -50,6 +50,7 @@ namespace TF47_API
                             "https://test.taskforce47.com",
                             "https://beta.taskforce47.com",
                             "https://api.taskforce47.com",
+                            "https://gadget.taskforce47.com",
                             "https://gadget.taskforce47.com:8080");
                         builder.AllowCredentials();
                         builder.AllowAnyMethod();
