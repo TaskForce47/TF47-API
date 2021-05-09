@@ -104,9 +104,9 @@ namespace TF47_API.Controllers.SquadXml
 
             if (squadMember == null) return BadRequest("Requested squadMember does not exist");
 
-            if (string.IsNullOrWhiteSpace(request.Mail))
+            if (! string.IsNullOrWhiteSpace(request.Mail))
                 squadMember.Mail = request.Mail;
-            if (string.IsNullOrWhiteSpace(request.Remark))
+            if (! string.IsNullOrWhiteSpace(request.Remark))
                 squadMember.Remark = request.Remark;
 
             try
@@ -137,9 +137,9 @@ namespace TF47_API.Controllers.SquadXml
             if (squadMember == null) return BadRequest("Requested squadMember does not exist");
             if (squadMember.UserId != user.UserId) return BadRequest("You can only edit your own profile");
 
-            if (string.IsNullOrWhiteSpace(request.Mail))
+            if (! string.IsNullOrWhiteSpace(request.Mail))
                 squadMember.Mail = request.Mail;
-            if (string.IsNullOrWhiteSpace(request.Remark))
+            if (! string.IsNullOrWhiteSpace(request.Remark))
                 squadMember.Remark = request.Remark;
 
             try
