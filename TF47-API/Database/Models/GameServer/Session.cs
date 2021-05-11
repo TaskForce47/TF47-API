@@ -23,9 +23,12 @@ namespace TF47_API.Database.Models.GameServer
         public DateTime TimeCreated { get; set; }
         public DateTime? TimeEnded { get; set; } = null;
 
+        public bool SessionFinished { get; set; } = true;
+
         public ICollection<Kill> Kills { get; set; }
         public ICollection<Playtime> PlayTimes { get; set; }
         public ICollection<Chat> Chats { get; set; }
         public ICollection<ReplayItem> ReplayItems { get; set; }
+        public ICollection<Ticket> TicketChanges { get; set; }
     }
 }

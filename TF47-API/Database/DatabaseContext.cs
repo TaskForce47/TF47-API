@@ -34,6 +34,7 @@ namespace TF47_API.Database
         public virtual DbSet<Chat> Chats { get; set; }
         public virtual DbSet<Note> Notes { get; set; }
         public virtual DbSet<Whitelist> Whitelists { get; set; }
+        public virtual DbSet<Ticket> Tickets { get; set; }
         public virtual DbSet<ReplayItem> ReplayItems { get; set; }
 
         public virtual DbSet<User> Users { get; set; }
@@ -102,6 +103,13 @@ namespace TF47_API.Database
                 entity.HasOne(x => x.Session).WithMany(x => x.PlayTimes).HasForeignKey(x => x.SessionId);
             });
             builder.Entity<Whitelist>(entity => { entity.Property(x => x.WhitelistId).ValueGeneratedOnAdd(); });
+
+            builder.Entity<Ticket>(entity =>
+            {
+                entity.Property(x => x.TicketId).ValueGeneratedOnAdd();
+                entity.HasOne(x => x.Session).WithMany(x => x.TicketChanges).HasForeignKey(x => x.SessionId);
+            });
+            
             builder.Entity<Chat>(entity =>
             {
                 entity.Property(x => x.ChatId).ValueGeneratedOnAdd();
