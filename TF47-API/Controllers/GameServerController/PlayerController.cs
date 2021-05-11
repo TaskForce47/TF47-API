@@ -111,7 +111,7 @@ namespace TF47_API.Controllers.GameServerController
 
             player = new Player
             {
-                NumberConnections = 1,
+                NumberConnections = 0,
                 PlayerUid = request.PlayerUid,
                 PlayerName = request.PlayerName,
                 TimeFirstVisit = DateTime.Now,
