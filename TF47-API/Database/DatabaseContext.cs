@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MimeKit.Encodings;
 using Npgsql;
+using TF47_API.Controllers.Gallery;
 using TF47_API.Database.Models;
 using TF47_API.Database.Models.GameServer;
 using TF47_API.Database.Models.GameServer.AAR;
@@ -49,7 +50,11 @@ namespace TF47_API.Database
         public virtual DbSet<Squad> Squads { get; set; }
         public virtual DbSet<SquadMember> SquadMembers { get; set; }
         public virtual DbSet<Donation> Donations { get; set; }
-
+        public virtual DbSet<Gallery> Galleries { get; set; }
+        public virtual DbSet<GalleryImage> GalleryImages { get; set; }
+        public virtual DbSet<GalleryImageComment> GalleryImageComments { get; set; }
+        public virtual DbSet<GalleryImageReaction> GalleryImageReactions { get; set; }
+        
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
         }
@@ -208,6 +213,41 @@ namespace TF47_API.Database
                 entity.HasOne(x => x.User)
                     .WithMany(x => x.Donations)
                     .HasForeignKey(x => x.UserId);
+            });
+            builder.Entity<Gallery>(entity =>
+            {
+                entity.Property(x => x.GalleryId).ValueGeneratedOnAdd();
+                entity.HasMany(x => x.GalleryImages)
+                    .WithOne(x => x.Gallery)
+                    .HasForeignKey(x => x.GalleryId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+            builder.Entity<GalleryImage>(entity =>
+            {
+                entity.Property(x => x.GalleryImageId).ValueGeneratedOnAdd();
+                entity.HasMany(x => x.GalleryImageComments)
+                    .WithOne(x => x.GalleryImage)
+                    .HasForeignKey(x => x.GalleryImageId)
+                    .OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(x => x.GalleryImageReactions)
+                    .WithOne(x => x.GalleryImage)
+                    .HasForeignKey(x => x.GalleryImageId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            builder.Entity<GalleryImageComment>(entity =>
+            {
+                entity.Property(x => x.GalleryImageCommentId).ValueGeneratedOnAdd();
+                entity.HasOne(x => x.User)
+                    .WithMany(x => x.GalleryComments)
+                    .HasForeignKey(x => x.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+            });
+            builder.Entity<GalleryImageReaction>(entity =>
+            {
+                entity.Property(x => x.GalleryImageReactionId).ValueGeneratedOnAdd();
+                entity.HasMany(x => x.UsersReactions)
+                    .WithMany(x => x.GalleryReactions)
+                    .UsingEntity(y => y.ToTable("ServiceGalleryImageReactionUsers"));
             });
         }
     }

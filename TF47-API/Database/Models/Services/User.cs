@@ -38,5 +38,7 @@ namespace TF47_API.Database.Models.Services
         public ICollection<ApiKey> ApiKeys { get; set; }
         public ICollection<SquadMember> MemberOfSquads { get; set; }
         public ICollection<Donation> Donations { get; set; }
+        public ICollection<GalleryImageComment> GalleryComments { get; set; }
+        public ICollection<GalleryImageReaction> GalleryReactions { get; set; }
     }
 }
