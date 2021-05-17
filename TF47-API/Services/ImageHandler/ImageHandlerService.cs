@@ -54,7 +54,12 @@ namespace TF47_API.Services
                 var galleryImage = new GalleryImage {ImageFileName = stringEncodedHash};
                 var physicalImage = await Image.LoadAsync(inputStream);
 
-                if (physicalImage.Height < 800 || physicalImage.Width < 600) return (GalleryUploadStatus.WrongSize, null);
+                if (physicalImage.Height < 400 || physicalImage.Width < 300)
+                {
+                    _logger.LogInformation(
+                        $"Uploaded image did not meat the required size specifications, width: {physicalImage.Width} height: {physicalImage.Height}");
+                    return (GalleryUploadStatus.WrongSize, null);
+                }
                 
                 await physicalImage.SaveAsPngAsync(imagePath, new PngEncoder(), cancellationToken: cancellationToken);
                 return (GalleryUploadStatus.Success, galleryImage);
