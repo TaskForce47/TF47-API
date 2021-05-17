@@ -209,6 +209,8 @@ namespace TF47_API.Controllers.Gallery
             if (upvote == null)
                 galleryImage.UpVotes.Add(user);
 
+            await _database.SaveChangesAsync();
+            
             return Ok();
         }
         
@@ -235,6 +237,8 @@ namespace TF47_API.Controllers.Gallery
             var downVote = galleryImage.DownVotes.FirstOrDefault(x => x.UserId == user.UserId);
             if (downVote == null)
                 galleryImage.DownVotes.Add(user);
+
+            await _database.SaveChangesAsync();
 
             return Ok();
         }
