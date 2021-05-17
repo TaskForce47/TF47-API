@@ -94,7 +94,8 @@ namespace TF47_API
                     Port = int.Parse(Configuration["Credentials:Database:Port"]),
                     Username = Configuration["Credentials:Database:Username"],
                     Password = Configuration["Credentials:Database:Password"],
-                    Database = Configuration["Credentials:Database:Database"]
+                    Database = Configuration["Credentials:Database:Database"],
+                    IncludeErrorDetails = true
                 };
                 //Console.WriteLine(builder.ToString());
                 options.UseNpgsql(builder.ToString());
