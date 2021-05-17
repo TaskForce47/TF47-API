@@ -184,5 +184,59 @@ namespace TF47_API.Controllers.Gallery
                 new {GalleryImageCommentId = galleryImageComment.GalleryImageCommentId},
                 galleryImageComment.ToGalleryImageCommentResponse());
         }
+
+        [Authorize]
+        [HttpPut("{galleryImageId:long}/voteup")]
+        public async Task<IActionResult> VoteUp(long galleryImageId)
+        {
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
+            _database.Attach(user);
+            var galleryImage = await _database.GalleryImages
+                .AsSplitQuery()
+                .Include(x => x.Uploader)
+                .Include(x => x.GalleryImageComments)
+                .Include(x => x.UpVotes)
+                .Include(x => x.DownVotes)
+                .FirstOrDefaultAsync(x => x.GalleryImageId == galleryImageId);
+
+            if (galleryImage == null) return BadRequest("GalleryImageId provided does not exist");
+
+            var downVote = galleryImage.DownVotes.FirstOrDefault(x => x.UserId == user.UserId);
+            if (downVote != null)
+                galleryImage.DownVotes.Remove(downVote);
+            
+            var upvote = galleryImage.UpVotes.FirstOrDefault(x => x.UserId == user.UserId);
+            if (upvote == null)
+                galleryImage.UpVotes.Add(user);
+
+            return Ok();
+        }
+        
+        [Authorize]
+        [HttpPut("{galleryImageId:long}/votedown")]
+        public async Task<IActionResult> VoteDown(long galleryImageId)
+        {
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
+            _database.Attach(user);
+            var galleryImage = await _database.GalleryImages
+                .AsSplitQuery()
+                .Include(x => x.Uploader)
+                .Include(x => x.GalleryImageComments)
+                .Include(x => x.UpVotes)
+                .Include(x => x.DownVotes)
+                .FirstOrDefaultAsync(x => x.GalleryImageId == galleryImageId);
+
+            if (galleryImage == null) return BadRequest("GalleryImageId provided does not exist");
+
+            var upvote = galleryImage.UpVotes.FirstOrDefault(x => x.UserId == user.UserId);
+            if (upvote != null)
+                galleryImage.UpVotes.Remove(upvote);
+            
+            var downVote = galleryImage.DownVotes.FirstOrDefault(x => x.UserId == user.UserId);
+            if (downVote == null)
+                galleryImage.DownVotes.Add(user);
+
+            return Ok();
+        }
     }
 }
