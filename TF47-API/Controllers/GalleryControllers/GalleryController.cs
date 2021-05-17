@@ -81,6 +81,7 @@ namespace TF47_API.Controllers.Gallery
             return Ok(gallery.ToGalleryResponse());
         }
 
+        [HttpDelete("{galleryId:long}")]
         public async Task<IActionResult> RemoveGallery(long galleryId)
         {
             var gallery = await _database.Galleries
