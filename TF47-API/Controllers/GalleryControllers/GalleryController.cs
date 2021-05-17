@@ -98,7 +98,7 @@ namespace TF47_API.Controllers.Gallery
         }
         
         [HttpPut("{galleryId:long}/uploadImage")]
-        public async Task<IActionResult> UploadImage(long galleryId, [FromBody] CreateGalleryImageRequest request, IFormFile file)
+        public async Task<IActionResult> UploadImage(long galleryId, IFormFile file, [FromBody] CreateGalleryImageRequest request)
         {
             var gallery = await _database.Galleries
                 .FirstOrDefaultAsync(x => x.GalleryId == galleryId);
