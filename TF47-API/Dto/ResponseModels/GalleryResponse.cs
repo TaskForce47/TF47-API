@@ -14,5 +14,5 @@ namespace TF47_API.Dto.ResponseModels
     public record GalleryImageCommentResponse(long GalleryImageCommentId, string Comment, string Username,
         Guid UserId, bool IsEdited, DateTime? TimeLastEdited, DateTime TimeCreated);
 
-    public record UserInfo(Guid UserId, string Username);
+    public record UserInfo(Guid? UserId, string Username);
 }

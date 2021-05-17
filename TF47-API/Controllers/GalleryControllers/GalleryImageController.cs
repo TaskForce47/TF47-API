@@ -43,6 +43,7 @@ namespace TF47_API.Controllers.Gallery
             var galleryImages = await _database.GalleryImages
                 .AsNoTracking()
                 .AsSplitQuery()
+                .Include(x => x.Uploader)
                 .Include(x => x.GalleryImageComments)
                 .Include(x => x.UpVotes)
                 .Include(x => x.DownVotes)
@@ -56,6 +57,7 @@ namespace TF47_API.Controllers.Gallery
             var galleryImage = await _database.GalleryImages
                 .AsNoTracking()
                 .AsSplitQuery()
+                .Include(x => x.Uploader)
                 .Include(x => x.GalleryImageComments)
                 .Include(x => x.UpVotes)
                 .Include(x => x.DownVotes)
@@ -74,6 +76,7 @@ namespace TF47_API.Controllers.Gallery
             var galleryImages = await _database.GalleryImages
                 .AsNoTracking()
                 .AsSplitQuery()
+                .Include(x => x.Uploader)
                 .Include(x => x.GalleryImageComments)
                 .Include(x => x.UpVotes)
                 .Include(x => x.DownVotes)
@@ -93,6 +96,7 @@ namespace TF47_API.Controllers.Gallery
             var galleryImages = await _database.GalleryImages
                 .AsNoTracking()
                 .AsSplitQuery()
+                .Include(x => x.Uploader)
                 .Include(x => x.GalleryImageComments)
                 .Include(x => x.UpVotes)
                 .Include(x => x.DownVotes)

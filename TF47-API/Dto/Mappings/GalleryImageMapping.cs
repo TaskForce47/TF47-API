@@ -11,10 +11,10 @@ namespace TF47_API.Dto.Mappings
         {
             var imageAddress = $"{Settings.BaseUrl}/gallery/{data.ImageFileName}.png";
             return new GalleryImageResponse(data.GalleryImageId, data.Name, data.Description,
-                new UserInfo(data.Uploader.UserId, data.Uploader?.Username), imageAddress,
+                new UserInfo(data.Uploader?.UserId, data.Uploader?.Username), imageAddress,
                 data.TimeCreated, data.GalleryImageComments.ToGalleryImageCommentResponseIEnumerable(),
-                data.UpVotes?.Select(x => new UserInfo(x.UserId, x.Username)),
-                data.DownVotes?.Select(x => new UserInfo(x.UserId, x.Username)));
+                data.UpVotes?.Select(x => new UserInfo(x?.UserId, x?.Username)),
+                data.DownVotes?.Select(x => new UserInfo(x?.UserId, x?.Username)));
         }
 
         public static IEnumerable<GalleryImageResponse> ToGalleryImageResponseIEnumerable(
