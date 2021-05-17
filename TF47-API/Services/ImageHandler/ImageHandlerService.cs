@@ -32,6 +32,9 @@ namespace TF47_API.Services
             _database = database;
             _configuration = configuration;
             _galleryFolder = PathCombiner.Combine(Environment.CurrentDirectory, "wwwroot", "gallery");
+
+            if (!Directory.Exists(_galleryFolder))
+                Directory.CreateDirectory(_galleryFolder);
         }
         
         public async Task<(GalleryUploadStatus, GalleryImage)> UploadImageAsync(Stream inputStream, CancellationToken cancellationToken)
