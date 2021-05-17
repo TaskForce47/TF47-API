@@ -9,7 +9,7 @@ namespace TF47_API.Dto.Mappings
     {
         public static GalleryImageResponse ToGalleryImageResponse(this GalleryImage data)
         {
-            var imageAddress = $"{Settings.BaseUrl}/images/{data.ImageFileName}.png";
+            var imageAddress = $"{Settings.BaseUrl}/gallery/{data.ImageFileName}.png";
             return new GalleryImageResponse(data.GalleryImageId, data.Name, data.Description,
                 new UserInfo(data.Uploader.UserId, data.Uploader?.Username), imageAddress,
                 data.TimeCreated, data.GalleryImageComments.ToGalleryImageCommentResponseIEnumerable(),
