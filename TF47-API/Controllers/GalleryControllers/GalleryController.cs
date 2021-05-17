@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
+using TF47_API.Database.Models.Services;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Services;
@@ -21,15 +23,18 @@ namespace TF47_API.Controllers.Gallery
         private readonly ILogger<GalleryController> _logger;
         private readonly DatabaseContext _database;
         private readonly ImageHandlerService _imageHandlerService;
+        private readonly IUserProviderService _userProviderService;
 
         public GalleryController(
             ILogger<GalleryController> logger,
             DatabaseContext database,
-            ImageHandlerService imageHandlerService)
+            ImageHandlerService imageHandlerService,
+            IUserProviderService userProviderService)
         {
             _logger = logger;
             _database = database;
             _imageHandlerService = imageHandlerService;
+            _userProviderService = userProviderService;
         }
 
         [HttpGet("{galleryId:long}")]
@@ -97,12 +102,15 @@ namespace TF47_API.Controllers.Gallery
             return Ok();
         }
         
+        [Authorize]
         [HttpPut("{galleryId:long}/uploadImage")]
         public async Task<IActionResult> UploadImage(long galleryId, IFormFile file, [FromForm] CreateGalleryImageRequest request)
         {
             var gallery = await _database.Galleries
                 .FirstOrDefaultAsync(x => x.GalleryId == galleryId);
 
+            var uploader = await _userProviderService.GetDatabaseUserAsync(HttpContext);
+            
             if (gallery == null) return BadRequest("GalleryId provided does not exist");
             
             if (file.ContentType is not ("image/png" or "image/jpeg")) 
@@ -115,10 +123,14 @@ namespace TF47_API.Controllers.Gallery
             switch (galleryUploadStatus)    
             {
                 case GalleryUploadStatus.Success:
+                    newImage.Uploader = uploader;
                     newImage.Name = request.Name;
                     newImage.Description = request.Description;
                     newImage.TimeCreated = DateTime.Now;
                     newImage.Gallery = gallery;
+                    newImage.DownVotes = new List<User>();
+                    newImage.UpVotes = new List<User>();
+                    newImage.GalleryImageComments = new List<GalleryImageComment>();
 
                     await _database.GalleryImages.AddAsync(newImage);
                     await _database.SaveChangesAsync();
