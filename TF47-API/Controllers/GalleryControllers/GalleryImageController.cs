@@ -17,22 +17,24 @@ using TF47_API.Services;
 
 namespace TF47_API.Controllers.Gallery
 {
-    [Authorize]
     [Route("api/[controller]")]
     public class GalleryImageController : ControllerBase
     {
         private readonly ILogger<GalleryImageController> _logger;
         private readonly DatabaseContext _database;
         private readonly ImageHandlerService _imageHandlerService;
+        private readonly IUserProviderService _userProviderService;
 
         public GalleryImageController(
             ILogger<GalleryImageController> logger,
             DatabaseContext database, 
-            ImageHandlerService imageHandlerService)
+            ImageHandlerService imageHandlerService,
+            IUserProviderService userProviderService)
         {
             _logger = logger;
             _database = database;
             _imageHandlerService = imageHandlerService;
+            _userProviderService = userProviderService;
         }
 
         [HttpGet]
@@ -42,8 +44,8 @@ namespace TF47_API.Controllers.Gallery
                 .AsNoTracking()
                 .AsSplitQuery()
                 .Include(x => x.GalleryImageComments)
-                .Include(x => x.GalleryImageReactions)
-                .ThenInclude(x => x.UsersReactions)
+                .Include(x => x.UpVotes)
+                .Include(x => x.DownVotes)
                 .ToListAsync();
             return Ok(galleryImages.ToGalleryImageResponseIEnumerable());
         }
@@ -55,8 +57,8 @@ namespace TF47_API.Controllers.Gallery
                 .AsNoTracking()
                 .AsSplitQuery()
                 .Include(x => x.GalleryImageComments)
-                .Include(x => x.GalleryImageReactions)
-                .ThenInclude(x => x.UsersReactions)
+                .Include(x => x.UpVotes)
+                .Include(x => x.DownVotes)
                 .FirstOrDefaultAsync(x => x.GalleryImageId == galleryImageId);
 
             if (galleryImage == null) return BadRequest("GalleryImageId provided does not exist");
@@ -73,8 +75,8 @@ namespace TF47_API.Controllers.Gallery
                 .AsNoTracking()
                 .AsSplitQuery()
                 .Include(x => x.GalleryImageComments)
-                .Include(x => x.GalleryImageReactions)
-                .ThenInclude(x => x.UsersReactions)
+                .Include(x => x.UpVotes)
+                .Include(x => x.DownVotes)
                 .Skip(skip)
                 .Take(max)
                 .OrderByDescending(x => x.GalleryImageId)
@@ -92,8 +94,8 @@ namespace TF47_API.Controllers.Gallery
                 .AsNoTracking()
                 .AsSplitQuery()
                 .Include(x => x.GalleryImageComments)
-                .Include(x => x.GalleryImageReactions)
-                .ThenInclude(x => x.UsersReactions)
+                .Include(x => x.UpVotes)
+                .Include(x => x.DownVotes)
                 .Where(x => x.GalleryId == galleryId)
                 .Skip(skip)
                 .Take(max)
@@ -102,13 +104,16 @@ namespace TF47_API.Controllers.Gallery
 
             return Ok(galleryImages.ToGalleryImageResponseIEnumerable());
         }
-
+    
+        [Authorize]
         [HttpPut("{galleryImageId:long}")]
         public async Task<IActionResult> UpdateImage(long galleryImageId, [FromBody] UpdateGalleryImageRequest request)
         {
             var galleryImage = await _database.GalleryImages
                 .FirstOrDefaultAsync(x => x.GalleryImageId == galleryImageId);
 
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
+            
             if (galleryImage == null) return BadRequest("GalleryImageId provided does not exist");
 
             if (request.GalleryId.HasValue)
@@ -118,6 +123,7 @@ namespace TF47_API.Controllers.Gallery
                 if (gallery == null)
                     return BadRequest("New GalleryId provided in body does not exist");
                 galleryImage.Gallery = gallery;
+                galleryImage.Uploader = user;
             }
 
             if (!string.IsNullOrWhiteSpace(request.Name))
@@ -128,7 +134,7 @@ namespace TF47_API.Controllers.Gallery
             await _database.SaveChangesAsync();
             
             return Ok(galleryImage.ToGalleryImageResponse());
-        } 
+        }
 
         [HttpDelete("{galleryImageId:long}")]
         public async Task<IActionResult> RemoveImage(long galleryImageId)
@@ -146,6 +152,32 @@ namespace TF47_API.Controllers.Gallery
             _database.Remove(galleryImage);
             await _database.SaveChangesAsync();
             return Ok();
+        }
+
+        [Authorize]
+        [HttpPost("{galleryImageId:long}/createComment")]
+        public async Task<IActionResult> CreateComment(long galleryImageId, CreateGalleryImageCommentRequest request)
+        {
+            var galleryImage = await _database.GalleryImages
+                .FirstOrDefaultAsync(x => x.GalleryImageId == galleryImageId);
+
+            if (galleryImage == null) return BadRequest("GalleryImageId provided does not exist");
+            
+            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
+            var galleryImageComment = new GalleryImageComment
+            {
+                Comment = request.Comment,
+                GalleryImage = galleryImage,
+                IsEdited = false,
+                TimeCreated = DateTime.Now,
+                User = user
+            };
+            await _database.GalleryImageComments.AddAsync(galleryImageComment);
+            await _database.SaveChangesAsync();
+
+            return CreatedAtRoute("GetGalleryImageComment",
+                new {GalleryImageCommentId = galleryImageComment.GalleryImageCommentId},
+                galleryImageComment.ToGalleryImageCommentResponse());
         }
     }
 }
