@@ -33,9 +33,15 @@ namespace TF47_API.Database.Models.Services
         public string ImageFileName { get; set; }
         public Gallery Gallery { get; set; }
         public long GalleryId { get; set; }
+        public bool CanVote { get; set; }
+        
+        public User Uploader { get; set; }
+        public Guid UploaderId { get; set; }
+        
+        public ICollection<User> UpVotes { get; set; }
+        public ICollection<User> DownVotes { get; set; }
         
         public ICollection<GalleryImageComment> GalleryImageComments { get; set; }
-        public ICollection<GalleryImageReaction> GalleryImageReactions { get; set; }
     }
 
     [Table("GalleryImageComments")]
@@ -52,21 +58,6 @@ namespace TF47_API.Database.Models.Services
 
         public User User { get; set; }
         public Guid UserId { get; set; }
-        
-        public DateTime TimeCreated { get; set; } = DateTime.Now;
-    }
-
-    [Table("GalleryImageReactions")]
-    public class GalleryImageReaction
-    {
-        public long GalleryImageReactionId { get; set; }
-        public string EncodedReaction { get; set; }
-        
-        public GalleryImage GalleryImage { get; set; }
-        public long GalleryImageId { get; set; }
-        
-        public ICollection<User> UsersReactions { get; set; }
-        
         public DateTime TimeCreated { get; set; } = DateTime.Now;
     }
 }

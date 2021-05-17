@@ -53,8 +53,7 @@ namespace TF47_API.Database
         public virtual DbSet<Gallery> Galleries { get; set; }
         public virtual DbSet<GalleryImage> GalleryImages { get; set; }
         public virtual DbSet<GalleryImageComment> GalleryImageComments { get; set; }
-        public virtual DbSet<GalleryImageReaction> GalleryImageReactions { get; set; }
-        
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
         }
@@ -229,10 +228,16 @@ namespace TF47_API.Database
                     .WithOne(x => x.GalleryImage)
                     .HasForeignKey(x => x.GalleryImageId)
                     .OnDelete(DeleteBehavior.Cascade);
-                entity.HasMany(x => x.GalleryImageReactions)
-                    .WithOne(x => x.GalleryImage)
-                    .HasForeignKey(x => x.GalleryImageId)
+                entity.HasOne(x => x.Uploader)
+                    .WithMany(x => x.UploadedGalleryImages)
+                    .HasForeignKey(x => x.UploaderId)
                     .OnDelete(DeleteBehavior.Cascade);
+                entity.HasMany(x => x.UpVotes)
+                    .WithMany(x => x.GalleryImageUpVotes)
+                    .UsingEntity(y => y.ToTable("ServiceGalleryImageUserUpVotes"));
+                entity.HasMany(x => x.DownVotes)
+                    .WithMany(x => x.GalleryImageDownVotes)
+                    .UsingEntity(y => y.ToTable("ServiceGalleryImageUserDownVotes"));
             });
             builder.Entity<GalleryImageComment>(entity =>
             {
@@ -241,13 +246,6 @@ namespace TF47_API.Database
                     .WithMany(x => x.GalleryComments)
                     .HasForeignKey(x => x.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
-            });
-            builder.Entity<GalleryImageReaction>(entity =>
-            {
-                entity.Property(x => x.GalleryImageReactionId).ValueGeneratedOnAdd();
-                entity.HasMany(x => x.UsersReactions)
-                    .WithMany(x => x.GalleryReactions)
-                    .UsingEntity(y => y.ToTable("ServiceGalleryImageReactionUsers"));
             });
         }
     }
