@@ -108,6 +108,7 @@ namespace TF47_API
             services.AddTransient<MailService>();
             services.AddTransient<IUserProviderService, UserProviderService>();
             services.AddTransient<IAuthenticationManager, AuthenticationManager>();
+            services.AddTransient<ImageHandlerService>();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton<ISquadManagerService, SquadManagerService>();
             services.AddSingleton<ISteamAuthenticationService, SteamAuthenticationService>();
@@ -120,6 +121,8 @@ namespace TF47_API
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger, DatabaseContext database)
         {
+            Settings.BaseUrl = Configuration["BaseUrl"];
+            
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto

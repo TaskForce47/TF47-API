@@ -192,7 +192,7 @@ namespace TF47_API.Controllers.SquadXml
         public async Task<IActionResult> UploadSquadLogo(long squadId, IFormFile file,
             CancellationToken cancellationToken)
         {
-            if (file.Length == 0 ||file.Length > 1024*1024*3) return BadRequest("Data size does not look right");
+            if (file.Length == 0 || file.Length > 1024*1024*3) return BadRequest("Data size does not look right");
             if (file.ContentType != "image/png") return BadRequest("Only png images are allowed");
             var tempPath = Path.GetTempFileName();
             await using var stream = System.IO.File.Create(tempPath);
