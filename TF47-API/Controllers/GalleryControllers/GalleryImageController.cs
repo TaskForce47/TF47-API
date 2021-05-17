@@ -160,7 +160,7 @@ namespace TF47_API.Controllers.Gallery
 
         [Authorize]
         [HttpPost("{galleryImageId:long}/createComment")]
-        public async Task<IActionResult> CreateComment(long galleryImageId, [FromBody]  CreateGalleryImageCommentRequest request)
+        public async Task<IActionResult> CreateComment(long galleryImageId, [FromBody] CreateGalleryImageCommentRequest request)
         {
             var galleryImage = await _database.GalleryImages
                 .FirstOrDefaultAsync(x => x.GalleryImageId == galleryImageId);
