@@ -42,7 +42,7 @@ namespace TF47_API.Controllers.Gallery
         [Authorize]
         [HttpPut("{galleryImageCommentId:long}", Name = "GetGalleryImageComment")]
         public async Task<IActionResult> UpdateComment(long galleryImageCommentId,
-            UpdateGalleryImageCommentRequest request)
+            [FromBody] UpdateGalleryImageCommentRequest request)
         {
             var galleryImageComment = await _database.GalleryImageComments
                 .FirstOrDefaultAsync(x => x.GalleryImageCommentId == galleryImageCommentId);

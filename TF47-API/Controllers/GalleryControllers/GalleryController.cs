@@ -56,7 +56,7 @@ namespace TF47_API.Controllers.Gallery
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> CreatedGallery(CreateGalleryRequest request)
+        public async Task<IActionResult> CreatedGallery([FromBody] CreateGalleryRequest request)
         {
             var newGallery = new Database.Models.Services.Gallery
             {
@@ -72,7 +72,7 @@ namespace TF47_API.Controllers.Gallery
         }
 
         [HttpPut("{galleryId:long}")]
-        public async Task<IActionResult> UpdateGallery(long galleryId, UpdateGalleryRequest request)
+        public async Task<IActionResult> UpdateGallery(long galleryId, [FromBody] UpdateGalleryRequest request)
         {
             var gallery = await _database.Galleries.FirstOrDefaultAsync(x => x.GalleryId == galleryId);
             if (gallery == null) return BadRequest("GalleryId provided does not exist");
