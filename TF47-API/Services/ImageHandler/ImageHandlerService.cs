@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
+using SixLabors.ImageSharp.Processing;
 using TF47_API.Database;
 using TF47_API.Database.Models.Services;
 using TF47_API.Helper;
@@ -49,6 +50,7 @@ namespace TF47_API.Services
             var stringEncodedHash = builder.ToString();
 
             var imagePath = PathCombiner.Combine(_galleryFolder, $"{stringEncodedHash}.png");
+            var imagePreviewPath = PathCombiner.Combine(_galleryFolder, $"{stringEncodedHash}_preview.png");
             if (File.Exists(imagePath)) return (GalleryUploadStatus.Repost, null);
 
             inputStream.Position = 0;
@@ -65,6 +67,11 @@ namespace TF47_API.Services
                 }
                 
                 await physicalImage.SaveAsPngAsync(imagePath, new PngEncoder(), cancellationToken: cancellationToken);
+                
+                inputStream.Position = 0;
+                physicalImage.Mutate(x => x.Resize(250, 250));
+                await physicalImage.SaveAsPngAsync(imagePreviewPath, new PngEncoder(), cancellationToken);
+                
                 return (GalleryUploadStatus.Success, galleryImage);
             }
             catch (Exception ex)

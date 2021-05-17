@@ -10,8 +10,10 @@ namespace TF47_API.Dto.Mappings
         public static GalleryImageResponse ToGalleryImageResponse(this GalleryImage data)
         {
             var imageAddress = $"{Settings.BaseUrl}/gallery/{data.ImageFileName}.png";
+            var imagePreviewAddress = $"{Settings.BaseUrl}/gallery/{data.ImageFileName}_preview.png";
+            
             return new GalleryImageResponse(data.GalleryImageId, data.Name, data.Description,
-                new UserInfo(data.Uploader?.UserId, data.Uploader?.Username), imageAddress,
+                new UserInfo(data.Uploader?.UserId, data.Uploader?.Username), imageAddress, imagePreviewAddress,
                 data.TimeCreated, data.GalleryImageComments.ToGalleryImageCommentResponseIEnumerable(),
                 data.UpVotes?.Select(x => new UserInfo(x?.UserId, x?.Username)),
                 data.DownVotes?.Select(x => new UserInfo(x?.UserId, x?.Username)));
