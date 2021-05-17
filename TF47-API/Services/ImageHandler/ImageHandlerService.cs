@@ -40,7 +40,8 @@ namespace TF47_API.Services
         
         public async Task<(GalleryUploadStatus, GalleryImage)> UploadImageAsync(Stream inputStream, CancellationToken cancellationToken)
         {
-            using var cryptoProvider = new SHA512CryptoServiceProvider();
+            using var cryptoProvider = SHA256.Create();
+            inputStream.Position = 0;
             var computeHash = await cryptoProvider.ComputeHashAsync(inputStream, cancellationToken);
             var builder = new StringBuilder();  
             foreach (var t in computeHash)
