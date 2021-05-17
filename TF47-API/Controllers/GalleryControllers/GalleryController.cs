@@ -110,6 +110,7 @@ namespace TF47_API.Controllers.Gallery
                 .FirstOrDefaultAsync(x => x.GalleryId == galleryId);
 
             var uploader = await _userProviderService.GetDatabaseUserAsync(HttpContext);
+            _database.Attach(uploader);
             
             if (gallery == null) return BadRequest("GalleryId provided does not exist");
             

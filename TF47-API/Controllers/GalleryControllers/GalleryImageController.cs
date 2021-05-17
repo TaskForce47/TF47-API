@@ -164,6 +164,7 @@ namespace TF47_API.Controllers.Gallery
             if (galleryImage == null) return BadRequest("GalleryImageId provided does not exist");
             
             var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
+            _database.Attach(user);
             var galleryImageComment = new GalleryImageComment
             {
                 Comment = request.Comment,
