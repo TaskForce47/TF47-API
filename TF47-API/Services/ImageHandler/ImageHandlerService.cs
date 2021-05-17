@@ -41,12 +41,12 @@ namespace TF47_API.Services
         {
             using var cryptoProvider = new SHA512CryptoServiceProvider();
             var computeHash = await cryptoProvider.ComputeHashAsync(inputStream, cancellationToken);
-            var builder = new StringBuilder();  
+            /*var builder = new StringBuilder();  
             foreach (var t in computeHash)
             {
                 builder.Append(t.ToString("x2"));
-            }  
-            var stringEncodedHash = builder.ToString();
+            }  */
+            var stringEncodedHash = Convert.ToBase64String(computeHash);//builder.ToString();
 
             var imagePath = PathCombiner.Combine(_galleryFolder, $"{stringEncodedHash}.png");
             if (File.Exists(imagePath)) return (GalleryUploadStatus.Repost, null);
