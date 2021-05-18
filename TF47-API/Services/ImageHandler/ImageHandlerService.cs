@@ -85,11 +85,13 @@ namespace TF47_API.Services
         public async Task<bool> RemoveImageAsync(GalleryImage galleryImage)
         {
             var imagePath = PathCombiner.Combine(_galleryFolder, $"{galleryImage.ImageFileName}.png");
-            if (File.Exists(imagePath))
+            var imagePreviewPath = PathCombiner.Combine(_galleryFolder, $"{galleryImage.ImageFileName}_preview.png");
+            if (File.Exists(imagePath) && File.Exists(imagePreviewPath))
             {
                 try
                 {
                     File.Delete(imagePath);
+                    File.Delete(imagePreviewPath);
                     return true;
                 }
                 catch (Exception ex)
