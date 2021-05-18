@@ -67,11 +67,16 @@ namespace TF47_API.Services
                     return (GalleryUploadStatus.WrongSize, null);
                 }
                 
-                await physicalImage.SaveAsPngAsync(imagePath, new PngEncoder(), cancellationToken: cancellationToken);
-                
+                var pngEncoder = new PngEncoder
+                {
+                    CompressionLevel = PngCompressionLevel.BestCompression
+                };
+                await physicalImage.SaveAsPngAsync(imagePath, pngEncoder, cancellationToken: cancellationToken);
+
                 inputStream.Position = 0;
                 physicalImage.Mutate(x => x.Resize(250, 250));
-                await physicalImage.SaveAsPngAsync(imagePreviewPath, new PngEncoder(), cancellationToken);
+                
+                await physicalImage.SaveAsPngAsync(imagePreviewPath, pngEncoder, cancellationToken);
                 
                 return (GalleryUploadStatus.Success, galleryImage);
             }
