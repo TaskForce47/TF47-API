@@ -119,9 +119,10 @@ namespace TF47_API.Controllers.Gallery
             
             var stream = new MemoryStream();
             await file.CopyToAsync(stream);
-            stream.Close();
-            
+
             var (galleryUploadStatus, newImage) = await _imageHandlerService.UploadImageAsync(stream, CancellationToken.None);
+            
+            stream.Close();
 
             switch (galleryUploadStatus)    
             {
