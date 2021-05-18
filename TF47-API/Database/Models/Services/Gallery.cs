@@ -33,7 +33,7 @@ namespace TF47_API.Database.Models.Services
         public string ImageFileName { get; set; }
         public Gallery Gallery { get; set; }
         public long GalleryId { get; set; }
-        public bool CanVote { get; set; }
+        public bool VotingEnabled { get; set; }
         
         public User Uploader { get; set; }
         public Guid UploaderId { get; set; }

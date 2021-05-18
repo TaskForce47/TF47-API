@@ -8,7 +8,7 @@ namespace TF47_API.Dto.ResponseModels
         IEnumerable<GalleryImageResponse> GalleryImageResponse);
 
     public record GalleryImageResponse(long GalleryImageId, string Name, string Description, UserInfo Uploader,
-        string ImageUrl, string ImagePreviewUrl, DateTime TimeCreated,
+        string ImageUrl, string ImagePreviewUrl, bool VotingEnabled, DateTime TimeCreated,
         IEnumerable<GalleryImageCommentResponse> GalleryImageComments,
         IEnumerable<UserInfo> UpVotes, IEnumerable<UserInfo> DownVotes);
 

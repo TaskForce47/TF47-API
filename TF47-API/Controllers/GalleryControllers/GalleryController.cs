@@ -129,6 +129,7 @@ namespace TF47_API.Controllers.Gallery
                     newImage.Description = request.Description;
                     newImage.TimeCreated = DateTime.Now;
                     newImage.Gallery = gallery;
+                    newImage.VotingEnabled = request.VotingEnabled;
                     newImage.DownVotes = new List<User>();
                     newImage.UpVotes = new List<User>();
                     newImage.GalleryImageComments = new List<GalleryImageComment>();

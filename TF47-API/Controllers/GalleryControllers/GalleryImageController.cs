@@ -116,8 +116,6 @@ namespace TF47_API.Controllers.Gallery
             var galleryImage = await _database.GalleryImages
                 .FirstOrDefaultAsync(x => x.GalleryImageId == galleryImageId);
 
-            var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
-            
             if (galleryImage == null) return BadRequest("GalleryImageId provided does not exist");
 
             if (request.GalleryId.HasValue)
@@ -127,14 +125,16 @@ namespace TF47_API.Controllers.Gallery
                 if (gallery == null)
                     return BadRequest("New GalleryId provided in body does not exist");
                 galleryImage.Gallery = gallery;
-                galleryImage.Uploader = user;
             }
 
+            if (request.VotingEnabled.HasValue)
+                galleryImage.VotingEnabled = request.VotingEnabled.Value;
+            
             if (!string.IsNullOrWhiteSpace(request.Name))
                 galleryImage.Name = request.Name;
             if (!string.IsNullOrWhiteSpace(request.Description))
                 galleryImage.Description = request.Description;
-
+            
             await _database.SaveChangesAsync();
             
             return Ok(galleryImage.ToGalleryImageResponse());
@@ -200,7 +200,8 @@ namespace TF47_API.Controllers.Gallery
                 .FirstOrDefaultAsync(x => x.GalleryImageId == galleryImageId);
 
             if (galleryImage == null) return BadRequest("GalleryImageId provided does not exist");
-
+            if (!galleryImage.VotingEnabled) return BadRequest("Voting for this image is disabled");
+            
             var downVote = galleryImage.DownVotes.FirstOrDefault(x => x.UserId == user.UserId);
             if (downVote != null)
                 galleryImage.DownVotes.Remove(downVote);
@@ -229,7 +230,8 @@ namespace TF47_API.Controllers.Gallery
                 .FirstOrDefaultAsync(x => x.GalleryImageId == galleryImageId);
 
             if (galleryImage == null) return BadRequest("GalleryImageId provided does not exist");
-
+            if (!galleryImage.VotingEnabled) return BadRequest("Voting for this image is disabled");
+            
             var upvote = galleryImage.UpVotes.FirstOrDefault(x => x.UserId == user.UserId);
             if (upvote != null)
                 galleryImage.UpVotes.Remove(upvote);

@@ -14,6 +14,7 @@ namespace TF47_API.Dto.Mappings
             
             return new GalleryImageResponse(data.GalleryImageId, data.Name, data.Description,
                 new UserInfo(data.Uploader?.UserId, data.Uploader?.Username), imageAddress, imagePreviewAddress,
+                data.VotingEnabled,
                 data.TimeCreated, data.GalleryImageComments.ToGalleryImageCommentResponseIEnumerable(),
                 data.UpVotes?.Select(x => new UserInfo(x?.UserId, x?.Username)),
                 data.DownVotes?.Select(x => new UserInfo(x?.UserId, x?.Username)));

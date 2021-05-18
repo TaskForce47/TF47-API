@@ -4,7 +4,7 @@
 
     public record UpdateGalleryRequest(string Name, string Description);
 
-    public record CreateGalleryImageRequest(string Name, string Description);
+    public record CreateGalleryImageRequest(string Name, string Description, bool VotingEnabled);
 
     public record CreateGalleryImageCommentRequest(string Comment);
 
