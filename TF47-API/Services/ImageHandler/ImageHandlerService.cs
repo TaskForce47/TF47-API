@@ -11,6 +11,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using TF47_API.Database;
 using TF47_API.Database.Models.Services;
 using TF47_API.Helper;
@@ -69,7 +70,8 @@ namespace TF47_API.Services
                 
                 var pngEncoder = new PngEncoder
                 {
-                    CompressionLevel = PngCompressionLevel.BestCompression
+                    CompressionLevel = PngCompressionLevel.Level9,
+                    Quantizer = new WebSafePaletteQuantizer()
                 };
                 await physicalImage.SaveAsPngAsync(imagePath, pngEncoder, cancellationToken: cancellationToken);
 
