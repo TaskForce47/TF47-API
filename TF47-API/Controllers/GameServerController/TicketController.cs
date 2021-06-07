@@ -11,6 +11,8 @@ using TF47_API.Dto.RequestModels;
 
 namespace TF47_API.Controllers.GameServerController
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class TicketController : ControllerBase
     {
         private readonly ILogger<TicketController> _logger;
