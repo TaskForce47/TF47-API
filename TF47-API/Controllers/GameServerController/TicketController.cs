@@ -26,7 +26,7 @@ namespace TF47_API.Controllers.GameServerController
             _database = database;
         }
 
-        [HttpPost("")]
+        [HttpPost("{sessionId:int}")]
         public async Task<IActionResult> UpdateTicketCount(long sessionId, [FromBody] UpdateTicketCountRequest request)
         {
             var session = await _database.Sessions
