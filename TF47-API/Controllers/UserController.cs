@@ -100,6 +100,7 @@ namespace TF47_API.Controllers
             if (result == null) return Redirect(_configuration["Redirections:LinkFailed"]);
 
             var user = await _userProviderService.GetDatabaseUserAsync(HttpContext);
+            _database.Attach(user);
             user.DiscordId = result.Id;
             user.Email = result.Email;
 
