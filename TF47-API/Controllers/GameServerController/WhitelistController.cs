@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TF47_API.Database;
+using TF47_API.Database.Models.GameServer;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
@@ -107,7 +108,20 @@ namespace TF47_API.Controllers.GameServerController
 
             if (whitelist.Players.All(x => x.PlayerUid != player.PlayerUid))
                 whitelist.Players.Add(player);
+            
+            var writer = await _userProviderService.GetDatabaseUserAsync(HttpContext);
+            _database.Attach(writer);
 
+            var newNote = new Note
+            {
+                Player = player,
+                Text = $"{writer.Username} added whitelist {whitelist.Name}",
+                TimeCreated = DateTime.Now,
+                Type = "Whitelist added",
+                Writer = writer
+            };
+            await _database.Notes.AddAsync(newNote);
+            
             await _database.SaveChangesAsync();
             
             return Ok();
@@ -134,6 +148,19 @@ namespace TF47_API.Controllers.GameServerController
 
                     if (whitelist.Players.All(x => x.PlayerUid != player.PlayerUid))
                         whitelist.Players.Add(player);
+                    
+                    var writer = await _userProviderService.GetDatabaseUserAsync(HttpContext);
+                    _database.Attach(writer);
+
+                    var newNote = new Note
+                    {
+                        Player = player,
+                        Text = $"{writer.Username} added whitelist {whitelist.Name}",
+                        TimeCreated = DateTime.Now,
+                        Type = "Whitelist added",
+                        Writer = writer
+                    };
+                    await _database.Notes.AddAsync(newNote);
                 }
             }
             catch (Exception ex)
@@ -153,11 +180,23 @@ namespace TF47_API.Controllers.GameServerController
                 .Include(x => x.Players)
                 .FirstOrDefaultAsync(x => x.WhitelistId == request.WhitelistId);
             if (whitelist == null) return BadRequest("Whitelist Id provided does not exist");
-            var user = await _database.Players.FirstOrDefaultAsync(x => x.PlayerUid == request.PlayerUid);
-            if (user == null) return BadRequest("User Uid provided does not exist");
+            var player = await _database.Players.FirstOrDefaultAsync(x => x.PlayerUid == request.PlayerUid);
+            if (player == null) return BadRequest("User Uid provided does not exist");
 
-            whitelist.Players.Remove(user);
+            whitelist.Players.Remove(player);
+            
+            var writer = await _userProviderService.GetDatabaseUserAsync(HttpContext);
+            _database.Attach(writer);
 
+            var newNote = new Note
+            {
+                Player = player,
+                Text = $"{writer.Username} removed whitelist {whitelist.Name}",
+                TimeCreated = DateTime.Now,
+                Type = "Whitelist removed",
+                Writer = writer
+            };
+            
             await _database.SaveChangesAsync();
 
             return Ok();
