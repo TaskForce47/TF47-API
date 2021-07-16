@@ -32,7 +32,7 @@ namespace TF47_API.Services.Authorization
 
             Task.Run(async () =>
             {
-                await Task.Delay(60);
+                await Task.Delay(60*1000);
                 while (true)
                 {
                     await RefreshCache();
