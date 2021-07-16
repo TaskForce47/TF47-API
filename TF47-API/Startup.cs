@@ -101,7 +101,7 @@ namespace TF47_API
                 options.UseNpgsql(builder.ToString());
                 options.UseSnakeCaseNamingConvention();
 
-                options.LogTo(Console.WriteLine);
+                //options.LogTo(Console.WriteLine);
 
                 options.EnableSensitiveDataLogging();
                 options.EnableDetailedErrors();
