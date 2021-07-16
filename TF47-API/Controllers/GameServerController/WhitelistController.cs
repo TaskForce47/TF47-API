@@ -196,6 +196,8 @@ namespace TF47_API.Controllers.GameServerController
                 Type = "Whitelist removed",
                 Writer = writer
             };
+
+            await _database.Notes.AddAsync(newNote);
             
             await _database.SaveChangesAsync();
 
