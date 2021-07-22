@@ -62,6 +62,7 @@ namespace TF47_API.Controllers.GameServerController
                 .Include(x => x.Session)
                 .ThenInclude(x => x.Mission)
                 .Include(x => x.Player)
+                .OrderByDescending(x => x.TimeChanged)
                 .AsSplitQuery()
                 .ToListAsync();
 

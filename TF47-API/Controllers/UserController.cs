@@ -86,6 +86,38 @@ namespace TF47_API.Controllers
             return Ok(userDetails.ToUserResponse());
         }
 
+        [RequirePermission("user:ban")]
+        [HttpPost("{userid:guid}/ban")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> BanUser(Guid userId)
+        {
+            var userDetails = await _database.Users
+                .FirstOrDefaultAsync(x => x.UserId == userId);
+
+            if (userDetails == null) return BadRequest("Requested user details not found");
+            if (userDetails.Banned == true) return BadRequest("Requested user already banned");
+
+            userDetails.Banned = true;
+            await _database.SaveChangesAsync();
+            return Ok();
+        }
+
+        [RequirePermission("user:unban")]
+        [HttpPost("{userid:guid}/unban")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> UnbanUser(Guid userId)
+        {
+            var userDetails = await _database.Users
+                .FirstOrDefaultAsync(x => x.UserId == userId);
+
+            if (userDetails == null) return BadRequest("Requested user details not found");
+            if (userDetails.Banned == false) return BadRequest("Requested user is not banned");
+
+            userDetails.Banned = false;
+            await _database.SaveChangesAsync();
+            return Ok();
+        }
+
         [HttpGet("link/Discord")]
         public IActionResult LinkDiscord()
         {
