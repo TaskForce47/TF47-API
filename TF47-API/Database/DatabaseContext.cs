@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Diagnostics;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using MimeKit.Encodings;
-using Npgsql;
-using TF47_API.Controllers.Gallery;
+﻿using Microsoft.EntityFrameworkCore;
 using TF47_API.Database.Models;
 using TF47_API.Database.Models.GameServer;
 using TF47_API.Database.Models.GameServer.AAR;
@@ -53,6 +40,8 @@ namespace TF47_API.Database
         public virtual DbSet<Gallery> Galleries { get; set; }
         public virtual DbSet<GalleryImage> GalleryImages { get; set; }
         public virtual DbSet<GalleryImageComment> GalleryImageComments { get; set; }
+        public virtual DbSet<Server> Servers { get; set; }
+        public virtual DbSet<ServerConfiguration> ServerConfigurations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -63,6 +52,14 @@ namespace TF47_API.Database
             builder.HasPostgresEnum<Side>();
             builder.HasPostgresEnum<VehicleType>();
             builder.HasPostgresEnum<PermissionType>();
+            builder.HasPostgresEnum<GameServerStatus>();
+            builder.HasPostgresEnum<AdvancedFlightModelSetting>();
+            builder.HasPostgresEnum<DifficultySetting>();
+            builder.HasPostgresEnum<MissionType>();
+            builder.HasPostgresEnum<ModStatus>();
+            builder.HasPostgresEnum<NeverDistanceOrFadeoutSetting>();
+            builder.HasPostgresEnum<NeverFadeOutAlwaysSetting>();
+            builder.HasPostgresEnum<VonCodecSetting>();
 
             builder.Entity<Player>(entity =>
             {
@@ -247,6 +244,7 @@ namespace TF47_API.Database
                     .HasForeignKey(x => x.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+            builder.Entity<Server>(entity => { entity.Property(x => x.ServerID).ValueGeneratedOnAdd(); });
         }
     }
 }
