@@ -42,6 +42,8 @@ namespace TF47_API.Database
         public virtual DbSet<GalleryImageComment> GalleryImageComments { get; set; }
         public virtual DbSet<Server> Servers { get; set; }
         public virtual DbSet<ServerConfiguration> ServerConfigurations { get; set; }
+        public virtual DbSet<Slot> Slots { get; set; }
+        public virtual DbSet<SlotGroup> SlotGroups { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -90,6 +92,7 @@ namespace TF47_API.Database
                 entity.Property(x => x.MissionId).ValueGeneratedOnAdd();
                 entity.HasMany(x => x.Sessions).WithOne(x => x.Mission).HasForeignKey(x => x.MissionId);
                 entity.HasOne(x => x.Campaign).WithMany(x => x.Missions).HasForeignKey(x => x.CampaignId);
+                entity.HasMany(x => x.SlotGroups).WithOne(x => x.Mission).HasForeignKey(x => x.MissionId);
             });
             builder.Entity<Kill>(entity =>
             {
@@ -245,6 +248,15 @@ namespace TF47_API.Database
                     .OnDelete(DeleteBehavior.Cascade);
             });
             builder.Entity<Server>(entity => { entity.Property(x => x.ServerID).ValueGeneratedOnAdd(); });
+            builder.Entity<Slot>(entity => { entity.Property(x => x.SlotId).ValueGeneratedOnAdd(); });
+            builder.Entity<SlotGroup>(entity => 
+            { 
+                entity.Property(x => x.SlotGroupId).ValueGeneratedOnAdd();
+                entity.HasMany(x => x.Slots)
+                      .WithOne(x => x.SlotGroup)
+                      .HasForeignKey(x => x.SlotGroupId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
         }
     }
 }

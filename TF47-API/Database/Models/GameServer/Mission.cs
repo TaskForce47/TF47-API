@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using TF47_API.Database.Models.Services;
 
 namespace TF47_API.Database.Models.GameServer
 {
@@ -21,5 +22,6 @@ namespace TF47_API.Database.Models.GameServer
         public long CampaignId { get; set; }
 
         public ICollection<Session> Sessions { get; set; }
+        public ICollection<SlotGroup> SlotGroups { get; set; }
     }
 }

@@ -148,5 +148,15 @@ namespace TF47_API.Controllers
 
             return Ok();
         }
+
+        [Authorize]
+        [HttpGet("{missionId:int}/slotting")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> GetSlotting(long missionId)
+        {
+            var mission = await _database.Missions.AsNoTracking().Include(x => x.SlotGroups).ThenInclude(x => x.Slots).FirstOrDefaultAsync(x => x.MissionId == missionId);
+
+            return Ok(mission.SlotGroups.ToSlotGroupResponseIEnumerable());
+        }
     }
 }
