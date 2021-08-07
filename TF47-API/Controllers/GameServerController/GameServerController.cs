@@ -8,6 +8,7 @@ using TF47_API.Database.Models.GameServer;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
 using TF47_API.Dto.ResponseModels;
+using TF47_API.Filters;
 
 namespace TF47_API.Controllers.GameServerController
 {
@@ -49,7 +50,8 @@ namespace TF47_API.Controllers.GameServerController
                 .ToListAsync();
             return Ok(servers.ToServerResponseIEnumerable());
         }
-                
+
+        [RequirePermission("server:create")]
         [HttpPost]
         [ProducesResponseType(typeof(ServerResponse), 201)]
         public async Task<IActionResult> CreateServer([FromBody] CreateServerRequest request)
