@@ -49,7 +49,7 @@ namespace TF47_API.Filters
                     Path = context.HttpContext.Request.Path,
                     Message = $"This endpoint requires the {_requiredPermission} permission set."
                 });
-                context.HttpContext.Response.StatusCode = 401;
+                context.HttpContext.Response.StatusCode = 403;
                 await context.HttpContext.Response.WriteAsync(response, Encoding.UTF8, CancellationToken.None);
                 
                 // ReSharper disable once RedundantJumpStatement

@@ -12,7 +12,7 @@ namespace TF47_API.Dto.Mappings
         {
             if (data == null) return null;
 
-            return new SlotResponse(data.SlotId, data.SlotGroupId, data.Title, data.Description, data.OrderNumber, data.Difficulty, data.Reserve, data.Blocked, data.RequiredDLC);
+            return new SlotResponse(data.SlotId, data.SlotGroupId, data.Title, data.Description, data.OrderNumber, data.Difficulty, data.Reserve, data.Blocked, data.RequiredDLC, data.UserId, new UserInfo(data.User?.UserId, data.User?.Username, data.User?.ProfilePicture));
         }
 
         public static IEnumerable<SlotResponse> ToSlotResponseIEnumerable(this IEnumerable<Slot> data)

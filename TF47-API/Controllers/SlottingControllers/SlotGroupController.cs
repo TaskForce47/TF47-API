@@ -111,6 +111,7 @@ namespace TF47_API.Controllers
             var slotGroup = await _database.SlotGroups
                 .AsNoTracking()
                 .Include(x => x.Slots)
+                .ThenInclude(x => x.User)
                 .FirstOrDefaultAsync(x => x.SlotGroupId == slotGroupId);
 
             if (slotGroup == null) return BadRequest("Requested slot group does not exist");
@@ -121,7 +122,7 @@ namespace TF47_API.Controllers
         [RequirePermission("slotgroup:view")]
         [HttpGet("")]
         [ProducesResponseType(typeof(SlotGroupResponse[]), 200)]
-        public async Task<IActionResult> GetSlotGroup()
+        public async Task<IActionResult> GetSlotGroups()
         {
             var slotGroups = await Task.Run(() =>
             {

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TF47_API.Database;
@@ -9,9 +10,10 @@ using TF47_API.Database;
 namespace TF47_API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20210807153307_add_user_to_slot2")]
+    partial class add_user_to_slot2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -123,25 +125,6 @@ namespace TF47_API.Migrations
                         .HasDatabaseName("ix_service_issue_has_tags_issues_issue_id");
 
                     b.ToTable("ServiceIssueHasTags");
-                });
-
-            modelBuilder.Entity("ModModset", b =>
-                {
-                    b.Property<long>("ModesetsModsetId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("modesets_modset_id");
-
-                    b.Property<long>("ModsModId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("mods_mod_id");
-
-                    b.HasKey("ModesetsModsetId", "ModsModId")
-                        .HasName("pk_mod_modset");
-
-                    b.HasIndex("ModsModId")
-                        .HasDatabaseName("ix_mod_modset_mods_mod_id");
-
-                    b.ToTable("mod_modset");
                 });
 
             modelBuilder.Entity("PlayerWhitelist", b =>
@@ -370,119 +353,19 @@ namespace TF47_API.Migrations
                         .HasColumnName("mission_id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<DateTime>("BriefingTime")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("briefing_time");
-
                     b.Property<long>("CampaignId")
                         .HasColumnType("bigint")
                         .HasColumnName("campaign_id");
 
                     b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<string>("DescriptionShort")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("description_short");
-
-                    b.Property<DateTime>("EndTime")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("end_time");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)")
+                        .HasColumnName("description");
 
                     b.Property<int>("MissionType")
                         .HasColumnType("integer")
                         .HasColumnName("mission_type");
-
-                    b.Property<long>("ModsetId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("modset_id");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)")
-                        .HasColumnName("name");
-
-                    b.Property<string[]>("RequiredDLCs")
-                        .HasColumnType("text[]")
-                        .HasColumnName("required_dl_cs");
-
-                    b.Property<DateTime>("SlottingTime")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("slotting_time");
-
-                    b.Property<DateTime>("StartTime")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("start_time");
-
-                    b.HasKey("MissionId")
-                        .HasName("pk_game_server_mission");
-
-                    b.HasIndex("CampaignId")
-                        .HasDatabaseName("ix_game_server_mission_campaign_id");
-
-                    b.HasIndex("ModsetId")
-                        .HasDatabaseName("ix_game_server_mission_modset_id");
-
-                    b.ToTable("GameServerMission");
-                });
-
-            modelBuilder.Entity("TF47_API.Database.Models.GameServer.Mod", b =>
-                {
-                    b.Property<long>("ModId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("mod_id")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
-
-                    b.Property<decimal>("FileSize")
-                        .HasColumnType("numeric(20,0)")
-                        .HasColumnName("file_size");
-
-                    b.Property<bool>("HasKey")
-                        .HasColumnType("boolean")
-                        .HasColumnName("has_key");
-
-                    b.Property<int>("ModStatus")
-                        .HasColumnType("integer")
-                        .HasColumnName("mod_status");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<string>("Slug")
-                        .HasColumnType("text")
-                        .HasColumnName("slug");
-
-                    b.Property<DateTime>("TimeInstalled")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("time_installed");
-
-                    b.Property<DateTime>("TimeLastUpdate")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("time_last_update");
-
-                    b.HasKey("ModId")
-                        .HasName("pk_game_server_mods");
-
-                    b.ToTable("GameServerMods");
-                });
-
-            modelBuilder.Entity("TF47_API.Database.Models.GameServer.Modset", b =>
-                {
-                    b.Property<long>("ModsetId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("modset_id")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("character varying(2000)")
-                        .HasColumnName("description");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -490,10 +373,13 @@ namespace TF47_API.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
-                    b.HasKey("ModsetId")
-                        .HasName("pk_game_server_modsets");
+                    b.HasKey("MissionId")
+                        .HasName("pk_game_server_mission");
 
-                    b.ToTable("GameServerModsets");
+                    b.HasIndex("CampaignId")
+                        .HasDatabaseName("ix_game_server_mission_campaign_id");
+
+                    b.ToTable("GameServerMission");
                 });
 
             modelBuilder.Entity("TF47_API.Database.Models.GameServer.Note", b =>
@@ -647,10 +533,6 @@ namespace TF47_API.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("last_time_started");
 
-                    b.Property<long>("ModsetId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("modset_id");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -662,32 +544,18 @@ namespace TF47_API.Migrations
                         .HasColumnType("text")
                         .HasColumnName("port");
 
-                    b.Property<long>("ServerConfigID")
-                        .HasColumnType("bigint")
-                        .HasColumnName("server_config_id");
-
-                    b.Property<long?>("ServerConfigurationServerConfigId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("server_configuration_server_config_id");
-
                     b.HasKey("ServerID")
                         .HasName("pk_game_server");
-
-                    b.HasIndex("ModsetId")
-                        .HasDatabaseName("ix_game_server_modset_id");
-
-                    b.HasIndex("ServerConfigurationServerConfigId")
-                        .HasDatabaseName("ix_game_server_server_configuration_server_config_id");
 
                     b.ToTable("GameServer");
                 });
 
             modelBuilder.Entity("TF47_API.Database.Models.GameServer.ServerConfiguration", b =>
                 {
-                    b.Property<long>("ServerConfigId")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("server_config_id")
+                        .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
                     b.Property<string>("AdminPassword")
@@ -954,7 +822,7 @@ namespace TF47_API.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("weapon_info");
 
-                    b.HasKey("ServerConfigId")
+                    b.HasKey("Id")
                         .HasName("pk_game_server_config");
 
                     b.ToTable("GameServerConfig");
@@ -1570,7 +1438,7 @@ namespace TF47_API.Migrations
                         .HasColumnType("character varying(250)")
                         .HasColumnName("title");
 
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uuid")
                         .HasColumnName("user_id");
 
@@ -1855,23 +1723,6 @@ namespace TF47_API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ModModset", b =>
-                {
-                    b.HasOne("TF47_API.Database.Models.GameServer.Modset", null)
-                        .WithMany()
-                        .HasForeignKey("ModesetsModsetId")
-                        .HasConstraintName("fk_mod_modset_game_server_modsets_modesets_modset_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TF47_API.Database.Models.GameServer.Mod", null)
-                        .WithMany()
-                        .HasForeignKey("ModsModId")
-                        .HasConstraintName("fk_mod_modset_game_server_mods_mods_mod_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("PlayerWhitelist", b =>
                 {
                     b.HasOne("TF47_API.Database.Models.GameServer.Whitelist", null)
@@ -1955,16 +1806,7 @@ namespace TF47_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TF47_API.Database.Models.GameServer.Modset", "Modset")
-                        .WithMany("Missions")
-                        .HasForeignKey("ModsetId")
-                        .HasConstraintName("fk_game_server_mission_game_server_modsets_modset_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Campaign");
-
-                    b.Navigation("Modset");
                 });
 
             modelBuilder.Entity("TF47_API.Database.Models.GameServer.Note", b =>
@@ -2005,25 +1847,6 @@ namespace TF47_API.Migrations
                     b.Navigation("Player");
 
                     b.Navigation("Session");
-                });
-
-            modelBuilder.Entity("TF47_API.Database.Models.GameServer.Server", b =>
-                {
-                    b.HasOne("TF47_API.Database.Models.GameServer.Modset", "Modset")
-                        .WithMany("Servers")
-                        .HasForeignKey("ModsetId")
-                        .HasConstraintName("fk_game_server_game_server_modsets_modset_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TF47_API.Database.Models.GameServer.ServerConfiguration", "ServerConfiguration")
-                        .WithMany("Servers")
-                        .HasForeignKey("ServerConfigurationServerConfigId")
-                        .HasConstraintName("fk_game_server_game_server_config_server_configuration_server_con");
-
-                    b.Navigation("Modset");
-
-                    b.Navigation("ServerConfiguration");
                 });
 
             modelBuilder.Entity("TF47_API.Database.Models.GameServer.Session", b =>
@@ -2183,7 +2006,9 @@ namespace TF47_API.Migrations
                     b.HasOne("TF47_API.Database.Models.Services.User", "User")
                         .WithMany("Slots")
                         .HasForeignKey("UserId")
-                        .HasConstraintName("fk_service_slot_service_users_user_id");
+                        .HasConstraintName("fk_service_slot_service_users_user_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("SlotGroup");
 
@@ -2235,13 +2060,6 @@ namespace TF47_API.Migrations
                     b.Navigation("SlotGroups");
                 });
 
-            modelBuilder.Entity("TF47_API.Database.Models.GameServer.Modset", b =>
-                {
-                    b.Navigation("Missions");
-
-                    b.Navigation("Servers");
-                });
-
             modelBuilder.Entity("TF47_API.Database.Models.GameServer.Player", b =>
                 {
                     b.Navigation("PlayerChats");
@@ -2253,11 +2071,6 @@ namespace TF47_API.Migrations
                     b.Navigation("PlayerNotes");
 
                     b.Navigation("PlayerPlaytime");
-                });
-
-            modelBuilder.Entity("TF47_API.Database.Models.GameServer.ServerConfiguration", b =>
-                {
-                    b.Navigation("Servers");
                 });
 
             modelBuilder.Entity("TF47_API.Database.Models.GameServer.Session", b =>

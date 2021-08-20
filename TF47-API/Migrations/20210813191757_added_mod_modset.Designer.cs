@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TF47_API.Database;
@@ -9,9 +10,10 @@ using TF47_API.Database;
 namespace TF47_API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20210813191757_added_mod_modset")]
+    partial class added_mod_modset
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -136,12 +138,12 @@ namespace TF47_API.Migrations
                         .HasColumnName("mods_mod_id");
 
                     b.HasKey("ModesetsModsetId", "ModsModId")
-                        .HasName("pk_mod_modset");
+                        .HasName("pk_game_server_modset_mods");
 
                     b.HasIndex("ModsModId")
-                        .HasDatabaseName("ix_mod_modset_mods_mod_id");
+                        .HasDatabaseName("ix_game_server_modset_mods_mods_mod_id");
 
-                    b.ToTable("mod_modset");
+                    b.ToTable("GameServerModsetMods");
                 });
 
             modelBuilder.Entity("PlayerWhitelist", b =>
@@ -666,18 +668,14 @@ namespace TF47_API.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("server_config_id");
 
-                    b.Property<long?>("ServerConfigurationServerConfigId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("server_configuration_server_config_id");
-
                     b.HasKey("ServerID")
                         .HasName("pk_game_server");
 
                     b.HasIndex("ModsetId")
                         .HasDatabaseName("ix_game_server_modset_id");
 
-                    b.HasIndex("ServerConfigurationServerConfigId")
-                        .HasDatabaseName("ix_game_server_server_configuration_server_config_id");
+                    b.HasIndex("ServerConfigID")
+                        .HasDatabaseName("ix_game_server_server_config_id");
 
                     b.ToTable("GameServer");
                 });
@@ -1860,14 +1858,14 @@ namespace TF47_API.Migrations
                     b.HasOne("TF47_API.Database.Models.GameServer.Modset", null)
                         .WithMany()
                         .HasForeignKey("ModesetsModsetId")
-                        .HasConstraintName("fk_mod_modset_game_server_modsets_modesets_modset_id")
+                        .HasConstraintName("fk_game_server_modset_mods_game_server_modsets_modesets_modset_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TF47_API.Database.Models.GameServer.Mod", null)
                         .WithMany()
                         .HasForeignKey("ModsModId")
-                        .HasConstraintName("fk_mod_modset_game_server_mods_mods_mod_id")
+                        .HasConstraintName("fk_game_server_modset_mods_game_server_mods_mods_mod_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -2018,8 +2016,10 @@ namespace TF47_API.Migrations
 
                     b.HasOne("TF47_API.Database.Models.GameServer.ServerConfiguration", "ServerConfiguration")
                         .WithMany("Servers")
-                        .HasForeignKey("ServerConfigurationServerConfigId")
-                        .HasConstraintName("fk_game_server_game_server_config_server_configuration_server_con");
+                        .HasForeignKey("ServerConfigID")
+                        .HasConstraintName("fk_game_server_game_server_config_server_configuration_server_con")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Modset");
 

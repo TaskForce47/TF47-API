@@ -42,5 +42,6 @@ namespace TF47_API.Database.Models.Services
         public ICollection<GalleryImageComment> GalleryComments { get; set; }
         public ICollection<GalleryImage> GalleryImageUpVotes { get; set; }
         public ICollection<GalleryImage> GalleryImageDownVotes { get; set; }
+        public ICollection<Slot> Slots { get; set; }
     }
 }

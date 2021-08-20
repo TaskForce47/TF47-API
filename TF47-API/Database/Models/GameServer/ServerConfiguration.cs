@@ -1,11 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TF47_API.Database.Models.GameServer
 {
     [Table("GameServerConfig")]
     public class ServerConfiguration
     {
-        public uint Id { get; set; }
+        [Key]
+        public uint ServerConfigId { get; set; }
 
 
         //Global Settings
@@ -86,6 +89,8 @@ namespace TF47_API.Database.Models.GameServer
         //parameters 
         public bool EnableHyperthreading { get; set; }
         public uint Port { get; set; }
+
+        public ICollection<Server> Servers { get; set; }
        
     }
 }

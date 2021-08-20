@@ -96,7 +96,7 @@ namespace TF47_API.Controllers
         [RequirePermission("slot:view")]
         [HttpGet("{slotId:int}")]
         [ProducesResponseType(typeof(SlotResponse), 200)]
-        public async Task<IActionResult> GetSlotGroup(long slotId)
+        public async Task<IActionResult> GetSlot(long slotId)
         {
             var slot = await _database.Slots
                 .AsNoTracking()
@@ -127,6 +127,62 @@ namespace TF47_API.Controllers
                     "Could not delete slot from database. Either it is has already been deleted by someone else or data could have been modified",
                     null, 500, "Slot could not be deleted");
             }
+
+            return Ok();
+        }
+
+        [RequirePermission("slot:addUser")]
+        [HttpPut("{slotId:int}/addUser")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> AddUserToSlot(long slotId, [FromBody] UpdateUserSlotRequest request)
+        {
+            if (request.UserId == null) return BadRequest("UserId provided does not match a user");
+
+            var user = await _database.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == request.UserId);
+            if (user == null) return BadRequest("No UserId provided");
+            var slot = await _database.Slots.FirstOrDefaultAsync(x => x.SlotId == slotId);
+            if (slot == null) return BadRequest("Requested slot does not exist");
+            slot.UserId = request.UserId;
+            try
+            {
+                await _database.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Could not update slot {slot}: {message}", slot, ex.Message);
+                return Problem("Could not update slot. Maybe someone else deleted or updated at the same time", null,
+                    500, "Failed to update slot");
+            }
+
+            
+            return Ok();
+        }
+
+
+        [RequirePermission("slot:addUser")]
+        [HttpPut("{slotId:int}/removeUser")]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> RemoveUserFromSlot(long slotId)
+        {
+            var slot = await _database.Slots
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.SlotId == slotId);
+            if (slot == null) return BadRequest("Requested slot does not exist");
+
+            slot.UserId = null;
+            try
+            {
+                await _database.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Could not update slot {slot}: {message}", slot, ex.Message);
+                return Problem("Could not update slot. Maybe someone else deleted or updated at the same time", null,
+                    500, "Failed to update slot");
+            }
+            
 
             return Ok();
         }

@@ -28,8 +28,8 @@ namespace TF47_API.Dto.Mappings
         {
             if (data == null) return null;
 
-            return new MissionResponse(data.MissionId, data.Name, data.Description, data.MissionType, data.CampaignId,
-                data.Campaign.Name);
+            return new MissionResponse(data.MissionId, data.Name, data.DescriptionShort, data.Description, data.MissionType, data.CampaignId,
+                data.Campaign.Name, data.SlottingTime, data.BriefingTime, data.StartTime, data.EndTime, data.RequiredDLCs);
         }
 
         public static IEnumerable<MissionResponse> ToMissionResponsesIEnumerable(this IEnumerable<Mission> data)

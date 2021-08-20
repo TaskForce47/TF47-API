@@ -22,5 +22,7 @@ namespace TF47_API.Database.Models.Services
         public bool Reserve { get; set; }
         public bool Blocked { get; set; }
         public bool RequiredDLC { get; set; }
+        public User User { get; set; }
+        public Guid? UserId { get; set; }
     }
 }

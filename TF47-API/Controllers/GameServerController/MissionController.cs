@@ -65,9 +65,15 @@ namespace TF47_API.Controllers
             {
                 Name = request.Name,
                 Description = request.Description,
+                DescriptionShort = request.DescriptionShort,
                 Campaign = campaign,
                 CampaignId = campaign.CampaignId,
-                MissionType = request.MissionType
+                MissionType = request.MissionType,
+                SlottingTime = request.SlottingTime,
+                BriefingTime = request.BriefingTime,
+                StartTime = request.StartTime,
+                EndTime = request.EndTime,
+                RequiredDLCs = request.RequiredDLCs
             };
 
             try
@@ -98,8 +104,6 @@ namespace TF47_API.Controllers
 
             if (string.IsNullOrWhiteSpace(request.Name))
                 mission.Name = request.Name;
-            if (string.IsNullOrWhiteSpace(request.Description))
-                mission.Description = request.Description;
             if (request.MissionType.HasValue)
                 mission.MissionType = request.MissionType.Value;
             if (request.CampaignId.HasValue && mission.CampaignId != request.CampaignId)
@@ -110,6 +114,13 @@ namespace TF47_API.Controllers
                 mission.Campaign = campaign;
                 mission.CampaignId = campaign.CampaignId;
             }
+
+            mission.DescriptionShort = request.DescriptionShort;
+            mission.SlottingTime = request.SlottingTime;
+            mission.BriefingTime = request.BriefingTime;
+            mission.StartTime = request.StartTime;
+            mission.EndTime = request.EndTime;
+            mission.RequiredDLCs = request.RequiredDLCs;
 
             try
             {
@@ -154,7 +165,7 @@ namespace TF47_API.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> GetSlotting(long missionId)
         {
-            var mission = await _database.Missions.AsNoTracking().Include(x => x.SlotGroups).ThenInclude(x => x.Slots).FirstOrDefaultAsync(x => x.MissionId == missionId);
+            var mission = await _database.Missions.AsNoTracking().Include(x => x.SlotGroups).ThenInclude(x => x.Slots).ThenInclude(x => x.User).FirstOrDefaultAsync(x => x.MissionId == missionId);
 
             return Ok(mission.SlotGroups.ToSlotGroupResponseIEnumerable());
         }

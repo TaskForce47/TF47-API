@@ -24,5 +24,13 @@ namespace TF47_API.Database.Models.GameServer
         public DateTime LastTimeStarted { get; set; }
 
         public GameServerStatus GameServerStatus { get; set; }
+
+        public uint ServerConfigID { get; set; } 
+
+        public ServerConfiguration ServerConfiguration { get; set; }
+
+        public uint ModsetId { get; set; }
+
+        public Modset Modset { get; set; }
     }
 }

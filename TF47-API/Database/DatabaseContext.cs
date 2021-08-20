@@ -44,6 +44,8 @@ namespace TF47_API.Database
         public virtual DbSet<ServerConfiguration> ServerConfigurations { get; set; }
         public virtual DbSet<Slot> Slots { get; set; }
         public virtual DbSet<SlotGroup> SlotGroups { get; set; }
+        public virtual DbSet<Mod> Mods { get; set; }
+        public virtual DbSet<Modset> Modsets { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -93,6 +95,7 @@ namespace TF47_API.Database
                 entity.HasMany(x => x.Sessions).WithOne(x => x.Mission).HasForeignKey(x => x.MissionId);
                 entity.HasOne(x => x.Campaign).WithMany(x => x.Missions).HasForeignKey(x => x.CampaignId);
                 entity.HasMany(x => x.SlotGroups).WithOne(x => x.Mission).HasForeignKey(x => x.MissionId);
+                entity.HasOne(x => x.Modset).WithMany(x => x.Missions).HasForeignKey(x => x.ModsetId);
             });
             builder.Entity<Kill>(entity =>
             {
@@ -142,6 +145,9 @@ namespace TF47_API.Database
                     .WithOne(x => x.Author)
                     .HasForeignKey(x => x.AuthorId);
                 entity.HasMany(x => x.MemberOfSquads)
+                    .WithOne(x => x.User)
+                    .HasForeignKey(x => x.UserId);
+                entity.HasMany(x => x.Slots)
                     .WithOne(x => x.User)
                     .HasForeignKey(x => x.UserId);
             });
@@ -247,15 +253,27 @@ namespace TF47_API.Database
                     .HasForeignKey(x => x.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
-            builder.Entity<Server>(entity => { entity.Property(x => x.ServerID).ValueGeneratedOnAdd(); });
-            builder.Entity<Slot>(entity => { entity.Property(x => x.SlotId).ValueGeneratedOnAdd(); });
+            builder.Entity<Server>(entity => { 
+                entity.Property(x => x.ServerID).ValueGeneratedOnAdd();
+                entity.HasOne(x => x.Modset).WithMany(x => x.Servers).HasForeignKey(x => x.ModsetId);
+            });
+            builder.Entity<Slot>(entity => { entity.Property(x => x.SlotId).ValueGeneratedOnAdd();});
             builder.Entity<SlotGroup>(entity => 
             { 
                 entity.Property(x => x.SlotGroupId).ValueGeneratedOnAdd();
                 entity.HasMany(x => x.Slots)
                       .WithOne(x => x.SlotGroup)
                       .HasForeignKey(x => x.SlotGroupId)
-                      .OnDelete(DeleteBehavior.Restrict);
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+            builder.Entity<Mod>(entity => { entity.Property(x => x.ModId).ValueGeneratedOnAdd(); });
+            builder.Entity<Modset>(entity => { 
+                entity.Property(x => x.ModsetId).ValueGeneratedOnAdd();
+                entity.HasMany(x => x.Mods).WithMany(x => x.Modesets).UsingEntity(y => y.ToTable("GameServerModsetMods"));
+            });
+            builder.Entity<ServerConfiguration>(entity => { 
+                entity.Property(x => x.ServerConfigId).ValueGeneratedOnAdd();
+                entity.HasMany(x => x.Servers).WithOne(x => x.ServerConfiguration).HasForeignKey(x => x.ServerConfigID);
             });
         }
     }

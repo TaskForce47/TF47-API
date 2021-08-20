@@ -13,11 +13,11 @@ namespace TF47_API.Dto.Mappings
             var imagePreviewAddress = $"{Settings.BaseUrl}/gallery/{data.ImageFileName}_preview.png";
             
             return new GalleryImageResponse(data.GalleryImageId, data.Name, data.Description,
-                new UserInfo(data.Uploader?.UserId, data.Uploader?.Username), imageAddress, imagePreviewAddress,
+                new UserInfo(data.Uploader?.UserId, data.Uploader?.Username, data.Uploader?.ProfilePicture), imageAddress, imagePreviewAddress,
                 data.VotingEnabled,
                 data.TimeCreated, data.GalleryImageComments.ToGalleryImageCommentResponseIEnumerable(),
-                data.UpVotes?.Select(x => new UserInfo(x?.UserId, x?.Username)),
-                data.DownVotes?.Select(x => new UserInfo(x?.UserId, x?.Username)));
+                data.UpVotes?.Select(x => new UserInfo(x?.UserId, x?.Username, x?.ProfilePicture)),
+                data.DownVotes?.Select(x => new UserInfo(x?.UserId, x?.Username, x?.ProfilePicture)));
         }
 
         public static IEnumerable<GalleryImageResponse> ToGalleryImageResponseIEnumerable(

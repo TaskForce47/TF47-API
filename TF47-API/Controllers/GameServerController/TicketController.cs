@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,8 @@ using TF47_API.Database;
 using TF47_API.Database.Models.GameServer;
 using TF47_API.Dto.Mappings;
 using TF47_API.Dto.RequestModels;
+using TF47_API.Dto.ResponseModels;
+using TF47_API.Filters;
 
 namespace TF47_API.Controllers.GameServerController
 {
@@ -55,8 +58,9 @@ namespace TF47_API.Controllers.GameServerController
         }
 
         [HttpGet("")]
-        public async Task<IActionResult> GetTickets()
+        public async Task<IActionResult> GetTickets([FromQuery] PaginationFilter filter)
         {
+            var validFilter = new PaginationFilter(filter.PageNumber, filter.PageSize);
             var tickets = await _database.Tickets
                 .AsNoTracking()
                 .Include(x => x.Session)
@@ -64,9 +68,11 @@ namespace TF47_API.Controllers.GameServerController
                 .Include(x => x.Player)
                 .OrderByDescending(x => x.TimeChanged)
                 .AsSplitQuery()
+                .Skip((validFilter.PageNumber - 1) * validFilter.PageSize)
+                .Take(validFilter.PageSize)
                 .ToListAsync();
-
-            return Ok(tickets.ToTicketResponseIEnumerable());
+            var totalRecords = await _database.Tickets.CountAsync();
+            return Ok(new PagedResponse<IEnumerable<TicketResponse>>(tickets.ToTicketResponseIEnumerable(), validFilter.PageNumber, validFilter.PageSize));
         }
 
         [HttpGet("{ticketId:long}")]
